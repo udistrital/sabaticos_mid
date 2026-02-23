@@ -246,10 +246,10 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  1347.0xc00017bb90.false:
+  1347.0xc0002acf90.false:
     title: "false"
     type: object
-  1443.0xc00017bbc0.false:
+  1443.0xc0002acfc0.false:
     title: "false"
     type: object
   models.Profile:
@@ -289,12 +289,12 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/1443.0xc00017bbc0.false'
+        $ref: '#/definitions/1443.0xc0002acfc0.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/1347.0xc00017bb90.false'
+        $ref: '#/definitions/1347.0xc0002acf90.false'
   models.User:
     title: User
     type: object
