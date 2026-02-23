@@ -21,9 +21,8 @@ func init() {
 			),
 		),
 		beego.NSNamespace("/solicitud",
-			beego.NSInclude(
-				&controllers.SolicitudController{},
-			),
+			beego.NSRouter("/", &controllers.SolicitudController{}, "post:Post;get:GetAll"),
+			beego.NSRouter("/:id", &controllers.SolicitudController{}, "get:GetOne;put:Put;delete:Delete"),
 		),
 		beego.NSNamespace("/sabatico",
 			beego.NSInclude(

@@ -2,10 +2,13 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"api_mid_sabaticos/models"
+	"api_mid_sabaticos/service"
+
 	"github.com/astaxie/beego"
-	"github.com/udistrital/utils_oas/request"
 	"github.com/udistrital/utils_oas/requestresponse"
 )
 
@@ -32,8 +35,9 @@ func (c *SolicitudController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *SolicitudController) Post() {
-	var solicitud interface{}
-	var respuesta interface{}
+	var solicitud models.SolicitudRequest
+
+	fmt.Println(c.Ctx.Input.RequestBody)
 
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &solicitud); err != nil {
 		c.Ctx.Output.SetStatus(http.StatusBadRequest)
@@ -42,8 +46,14 @@ func (c *SolicitudController) Post() {
 		return
 	}
 
-	url := beego.AppConfig.String("SabaticosCrudService") + "solicitud"
-	err := request.SendJson(url, "POST", &respuesta, solicitud)
+	if solicitud.TerceroId <= 0 && solicitud.TipoSolicitudId == nil {
+		c.Ctx.Output.SetStatus(http.StatusBadRequest)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, http.StatusBadRequest, nil, "El campo terceroId es requerido")
+		c.ServeJSON()
+		return
+	}
+
+	respuesta, err := service.StoreSolicitud(solicitud)
 
 	if err != nil {
 		c.Ctx.Output.SetStatus(http.StatusBadGateway)
@@ -51,6 +61,9 @@ func (c *SolicitudController) Post() {
 		c.ServeJSON()
 		return
 	}
+
+	c.Data["json"] = respuesta
+	c.ServeJSON()
 }
 
 // GetOne ...
