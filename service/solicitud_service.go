@@ -18,19 +18,16 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, *m
 	}
 
 	// Crear solicitud en CRUD y obtener ID
-	solicitudCreada, err := crearSolicitud(solicitudReq)
+	solicitud, err := crearSolicitud(solicitudReq)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
 	// Crear historial y formulario en paralelo
-	historicoResp, formularioResp, err := crearHistorialYFormulario(solicitudReq, solicitudCreada)
+	historial, formulario, err := crearHistorialYFormulario(solicitudReq, solicitud)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-
-	// Extraer y convertir respuestas
-	solicitud, historial, formulario := extraerRespuestas(solicitudCreada, historicoResp, formularioResp)
 
 	return solicitud, historial, formulario, nil
 }
@@ -45,6 +42,8 @@ func validarTercero(terceroId int) error {
 }
 
 func crearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, error) {
+	var solicitudRes interface{}
+
 	tipoSolicitudId := helpers.InterfaceToInt(solicitudReq.TipoSolicitudId, int(enums.NUEVA))
 	sabaticoId := helpers.InterfaceToIntPtr(solicitudReq.SabaticoId)
 
@@ -55,20 +54,22 @@ func crearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 		Activo:          true,
 	}
 
-	var solicitudRes interface{}
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/solicitud/", "POST", &solicitudRes, solicitud); err != nil {
 		beego.Error("Error POST solicitud:", err)
 		return nil, err
 	}
 
-	var solicitudCreada models.Solicitud
-	helpers.ExtractDataApi(solicitudRes, &solicitudCreada)
-	beego.Info("ID de solicitud creada:", solicitudCreada.Id)
+	var solicitudCreada *models.Solicitud
+	if err := helpers.ExtractDataApi(solicitudRes, &solicitudCreada); err != nil {
+		beego.Error("Error extrayendo datos de solicitud:", err)
+		return nil, err
+	}
 
-	return &solicitudCreada, nil
+	beego.Info("ID de solicitud creada:", solicitudCreada.Id)
+	return solicitudCreada, nil
 }
 
-func crearHistorialYFormulario(solicitudReq models.SolicitudRequest, solicitudCreada *models.Solicitud) (interface{}, interface{}, error) {
+func crearHistorialYFormulario(solicitudReq models.SolicitudRequest, solicitudCreada *models.Solicitud) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
 	historial := models.HistorialSolicitud{
 		TerceroId:         solicitudReq.TerceroId,
 		Justificacion:     "Nueva Solicitud Creada",
@@ -115,15 +116,19 @@ func crearHistorialYFormulario(solicitudReq models.SolicitudRequest, solicitudCr
 		}
 	}
 
-	return historicoResp, formularioResp, nil
-}
+	// Extraer datos directamente
+	var historialFinal *models.HistorialSolicitud
+	var formularioFinal *models.FormularioSolicitud
 
-func extraerRespuestas(solicitudCreada *models.Solicitud, historicoResp interface{}, formularioResp interface{}) (*models.Solicitud, *models.HistorialSolicitud, *models.FormularioSolicitud) {
-	var historial *models.HistorialSolicitud
-	var formulario *models.FormularioSolicitud
+	if err := helpers.ExtractDataApi(historicoResp, &historialFinal); err != nil {
+		beego.Error("Error extrayendo datos de histórico:", err)
+		return nil, nil, err
+	}
 
-	helpers.ExtractDataApi(historicoResp, &historial)
-	helpers.ExtractDataApi(formularioResp, &formulario)
+	if err := helpers.ExtractDataApi(formularioResp, &formularioFinal); err != nil {
+		beego.Error("Error extrayendo datos de formulario:", err)
+		return nil, nil, err
+	}
 
-	return solicitudCreada, historial, formulario
+	return historialFinal, formularioFinal, nil
 }
