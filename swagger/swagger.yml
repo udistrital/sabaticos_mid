@@ -246,12 +246,6 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  1347.0xc0002acf90.false:
-    title: "false"
-    type: object
-  1443.0xc0002acfc0.false:
-    title: "false"
-    type: object
   models.Profile:
     title: Profile
     type: object
@@ -279,22 +273,24 @@ definitions:
     title: Solicitud
     type: object
     properties:
-      Activo:
+      activo:
         type: boolean
-      FechaCreacion:
+      fecha_creacion:
         type: string
-      FechaModificacion:
+      fecha_modificacion:
         type: string
-      Id:
+      id:
         type: integer
         format: int64
-      SabaticoId:
-        $ref: '#/definitions/1443.0xc0002acfc0.false'
-      TerceroId:
+      sabatico_id:
         type: integer
         format: int64
-      TipoSolicitudId:
-        $ref: '#/definitions/1347.0xc0002acf90.false'
+      tercero_id:
+        type: integer
+        format: int64
+      tipo_solicitud_id:
+        type: integer
+        format: int64
   models.User:
     title: User
     type: object

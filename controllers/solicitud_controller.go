@@ -1,15 +1,15 @@
 package controllers
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
+	"api_mid_sabaticos/helpers"
 	"api_mid_sabaticos/models"
 	"api_mid_sabaticos/service"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/utils_oas/requestresponse"
+	"github.com/udistrital/utils_oas/errorhandler"
+	"github.com/udistrital/utils_oas/requestmanager"
 )
 
 // SolicitudController operations for Solicitud
@@ -35,35 +35,29 @@ func (c *SolicitudController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *SolicitudController) Post() {
-	var solicitud models.SolicitudRequest
+	defer errorhandler.HandlePanic(&c.Controller)
 
-	fmt.Println(c.Ctx.Input.RequestBody)
+	var solicitudRequest models.SolicitudRequest
 
-	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &solicitud); err != nil {
-		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Data["json"] = requestresponse.APIResponseDTO(false, http.StatusBadRequest, nil, "Formato de solicitud inválido")
-		c.ServeJSON()
-		return
+	requestmanager.FillRequestWithPanic(&c.Controller, &solicitudRequest)
+
+	if solicitudRequest.TerceroId <= 0 || solicitudRequest.TipoSolicitudId == nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId y tipoSolicitudId son requeridos")
 	}
 
-	if solicitud.TerceroId <= 0 && solicitud.TipoSolicitudId == nil {
-		c.Ctx.Output.SetStatus(http.StatusBadRequest)
-		c.Data["json"] = requestresponse.APIResponseDTO(false, http.StatusBadRequest, nil, "El campo terceroId es requerido")
-		c.ServeJSON()
-		return
-	}
-
-	respuesta, err := service.StoreSolicitud(solicitud)
+	solicitud, historico, formulario, err := service.CrearSolicitud(solicitudRequest)
 
 	if err != nil {
-		c.Ctx.Output.SetStatus(http.StatusBadGateway)
-		c.Data["json"] = requestresponse.APIResponseDTO(false, http.StatusBadGateway, nil, "Error al registrar solicitud en el CRUD")
-		c.ServeJSON()
-		return
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadGateway, nil, "Error al registrar solicitud")
 	}
 
-	c.Data["json"] = respuesta
-	c.ServeJSON()
+	respuesta := models.SolicitudResponse{
+		Solicitud:  solicitud,
+		Historial:  historico,
+		Formulario: formulario,
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusCreated, respuesta, "Solicitud creada exitosamente")
 }
 
 // GetOne ...
