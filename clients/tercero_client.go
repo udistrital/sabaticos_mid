@@ -13,5 +13,6 @@ func ValidarTercero(terceroId int) error {
 		beego.Error("Error GET tercero:", err)
 		return err
 	}
+
 	return nil
 }

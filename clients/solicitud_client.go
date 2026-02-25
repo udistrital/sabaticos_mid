@@ -35,6 +35,5 @@ func RegistrarSolicitud(terceroId int, codigoTipoSolicitud string, sabaticoId *i
 		return nil, err
 	}
 
-	beego.Info("ID de solicitud creada:", solicitudCreada.Id)
 	return solicitudCreada, nil
 }

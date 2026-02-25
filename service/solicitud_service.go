@@ -24,7 +24,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, *m
 	}
 
 	// Crear historial y formulario en paralelo
-	historial, formulario, err := registrarHistorialYFormulario(solicitud.Id, terceroId)
+	historial, formulario, err := registrarHistorialYFormulario(solicitud.Id, terceroId, sabatico)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -32,7 +32,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, *m
 	return solicitud, historial, formulario, nil
 }
 
-func registrarHistorialYFormulario(solicitudId int, terceroId int) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
+func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *int) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
 	type historialResult struct {
 		historial *models.HistorialSolicitud
 		err       error
@@ -54,14 +54,17 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int) (*models.Hist
 		historialChan <- historialResult{historial: historial, err: err}
 	}()
 
-	// Goroutine para crear formulario
-	go func() {
-		formulario, err := clients.RegistrarFormularioSolicitud(solicitudId)
-		if err != nil {
-			beego.Error("Error POST formulario:", err)
-		}
-		formularioChan <- formularioResult{formulario: formulario, err: err}
-	}()
+	// Solo crear formulario si no existe sabáticoId
+	if sabaticoId == nil {
+		// Goroutine para crear formulario
+		go func() {
+			formulario, err := clients.RegistrarFormularioSolicitud(solicitudId)
+			if err != nil {
+				beego.Error("Error POST formulario:", err)
+			}
+			formularioChan <- formularioResult{formulario: formulario, err: err}
+		}()
+	}
 
 	historialRes := <-historialChan
 	if historialRes.err != nil {
@@ -69,10 +72,13 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int) (*models.Hist
 		return nil, nil, historialRes.err
 	}
 
-	formularioRes := <-formularioChan
-	if formularioRes.err != nil {
-		beego.Error("Error en proceso paralelo:", formularioRes.err)
-		return nil, nil, formularioRes.err
+	var formularioRes formularioResult
+	if sabaticoId == nil {
+		formularioRes = <-formularioChan
+		if formularioRes.err != nil {
+			beego.Error("Error en proceso paralelo:", formularioRes.err)
+			return nil, nil, formularioRes.err
+		}
 	}
 
 	return historialRes.historial, formularioRes.formulario, nil
