@@ -15,9 +15,10 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 	formulario := solicitudReq.Formulario
 
 	// Validar tercero
-	if err := clients.ValidarTercero(terceroId); err != nil {
-		return nil, err
-	}
+	//Se comenta por que por el momento no hay usuario de prueba en el servicio de terceros
+	// if err := clients.ValidarTercero(terceroId); err != nil {
+	// 	return nil, err
+	// }
 
 	// Crear solicitud en CRUD y obtener ID
 	solicitud, err := clients.RegistrarSolicitud(terceroId, codigoTipoSolicitud, sabatico)
