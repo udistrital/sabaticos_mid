@@ -8,12 +8,12 @@ import (
 	"github.com/udistrital/utils_oas/request"
 )
 
-func RegistrarFormularioSolicitud(formularioReq models.FormularioSolicitud, solicitudCreada *models.Solicitud) (*models.FormularioSolicitud, error) {
+func RegistrarFormularioSolicitud(solicitudId int) (*models.FormularioSolicitud, error) {
 	var formularioResp interface{}
 
 	formulario := models.FormularioSolicitud{
 		Contenido:   "{}",
-		SolicitudId: solicitudCreada.Id,
+		SolicitudId: solicitudId,
 		Activo:      true,
 	}
 

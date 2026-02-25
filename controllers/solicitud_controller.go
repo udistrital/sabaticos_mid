@@ -41,7 +41,7 @@ func (c *SolicitudController) Post() {
 
 	requestmanager.FillRequestWithPanic(&c.Controller, &solicitudRequest)
 
-	if solicitudRequest.TerceroId <= 0 || solicitudRequest.TipoSolicitudId == nil {
+	if solicitudRequest.TerceroId <= 0 || solicitudRequest.TipoSolicitudId == "" {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId y tipoSolicitudId son requeridos")
 	}
 

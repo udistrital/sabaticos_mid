@@ -1,7 +1,6 @@
 package clients
 
 import (
-	"api_mid_sabaticos/enums"
 	"api_mid_sabaticos/helpers"
 	"api_mid_sabaticos/models"
 
@@ -9,15 +8,18 @@ import (
 	"github.com/udistrital/utils_oas/request"
 )
 
-func RegistrarSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, error) {
+func RegistrarSolicitud(terceroId int, codigoTipoSolicitud string, sabaticoId *int) (*models.Solicitud, error) {
 	var solicitudRes interface{}
+	var solicitudCreada *models.Solicitud
 
-	tipoSolicitudId := helpers.InterfaceToInt(solicitudReq.TipoSolicitudId, int(enums.NUEVA))
-	sabaticoId := helpers.InterfaceToIntPtr(solicitudReq.SabaticoId)
+	tipoSolicitud, err := ConsultarTipoSolicitud(codigoTipoSolicitud)
+	if err != nil {
+		return nil, err
+	}
 
 	solicitud := models.Solicitud{
-		TerceroId:       solicitudReq.TerceroId,
-		TipoSolicitudId: tipoSolicitudId,
+		TerceroId:       terceroId,
+		TipoSolicitudId: tipoSolicitud.Id,
 		SabaticoId:      sabaticoId,
 		Activo:          true,
 	}
@@ -27,7 +29,6 @@ func RegistrarSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud
 		return nil, err
 	}
 
-	var solicitudCreada *models.Solicitud
 	if err := helpers.ExtractDataApi(solicitudRes, &solicitudCreada); err != nil {
 		beego.Error("Error extrayendo datos de solicitud:", err)
 		return nil, err

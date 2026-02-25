@@ -10,15 +10,20 @@ import (
 	"github.com/udistrital/utils_oas/request"
 )
 
-func RegistrarHistorialSolicitud(historialReq models.HistorialSolicitud, solicitudCreada *models.Solicitud, solicitudReq models.SolicitudRequest) (*models.HistorialSolicitud, error) {
+func RegistrarHistorialSolicitud(solicitudId int, terceroId int) (*models.HistorialSolicitud, error) {
 	var historicoResp interface{}
 
+	tipoSolicitud, err := ConsultarEstadoSolicitud(string(enums.ENVIADA))
+	if err != nil {
+		return nil, err
+	}
+
 	historial := models.HistorialSolicitud{
-		TerceroId:         solicitudReq.TerceroId,
+		TerceroId:         terceroId,
 		Justificacion:     "Nueva Solicitud Creada",
 		Activo:            true,
-		EstadoSolicitudId: int(enums.ENVIADA),
-		SolicitudId:       solicitudCreada.Id,
+		EstadoSolicitudId: tipoSolicitud.Id,
+		SolicitudId:       solicitudId,
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {

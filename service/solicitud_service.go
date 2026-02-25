@@ -8,19 +8,23 @@ import (
 )
 
 func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, *models.HistorialSolicitud, *models.FormularioSolicitud, error) {
+	terceroId := solicitudReq.TerceroId
+	codigoTipoSolicitud := solicitudReq.TipoSolicitudId
+	sabatico := solicitudReq.SabaticoId
+
 	// Validar tercero
-	if err := clients.ValidarTercero(solicitudReq.TerceroId); err != nil {
+	if err := clients.ValidarTercero(terceroId); err != nil {
 		return nil, nil, nil, err
 	}
 
 	// Crear solicitud en CRUD y obtener ID
-	solicitud, err := clients.RegistrarSolicitud(solicitudReq)
+	solicitud, err := clients.RegistrarSolicitud(terceroId, codigoTipoSolicitud, sabatico)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
 	// Crear historial y formulario en paralelo
-	historial, formulario, err := crearHistorialYFormulario(solicitudReq, solicitud)
+	historial, formulario, err := registrarHistorialYFormulario(solicitud.Id, terceroId)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -28,7 +32,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, *m
 	return solicitud, historial, formulario, nil
 }
 
-func crearHistorialYFormulario(solicitudReq models.SolicitudRequest, solicitudCreada *models.Solicitud) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
+func registrarHistorialYFormulario(solicitudId int, terceroId int) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
 	type historialResult struct {
 		historial *models.HistorialSolicitud
 		err       error
@@ -43,7 +47,7 @@ func crearHistorialYFormulario(solicitudReq models.SolicitudRequest, solicitudCr
 
 	// Goroutine para crear histórico
 	go func() {
-		historial, err := clients.RegistrarHistorialSolicitud(models.HistorialSolicitud{}, solicitudCreada, solicitudReq)
+		historial, err := clients.RegistrarHistorialSolicitud(solicitudId, terceroId)
 		if err != nil {
 			beego.Error("Error POST histórico:", err)
 		}
@@ -52,7 +56,7 @@ func crearHistorialYFormulario(solicitudReq models.SolicitudRequest, solicitudCr
 
 	// Goroutine para crear formulario
 	go func() {
-		formulario, err := clients.RegistrarFormularioSolicitud(models.FormularioSolicitud{}, solicitudCreada)
+		formulario, err := clients.RegistrarFormularioSolicitud(solicitudId)
 		if err != nil {
 			beego.Error("Error POST formulario:", err)
 		}
