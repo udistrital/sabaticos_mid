@@ -8,29 +8,31 @@ import (
 	"github.com/astaxie/beego"
 )
 
-func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, *models.HistorialSolicitud, *models.FormularioSolicitud, error) {
+func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, error) {
 	terceroId := solicitudReq.TerceroId
 	codigoTipoSolicitud := solicitudReq.TipoSolicitudId
 	sabatico := solicitudReq.SabaticoId
 
 	// Validar tercero
 	if err := clients.ValidarTercero(terceroId); err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// Crear solicitud en CRUD y obtener ID
 	solicitud, err := clients.RegistrarSolicitud(terceroId, codigoTipoSolicitud, sabatico)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 
 	// Crear historial y formulario en paralelo
-	historial, formulario, err := registrarHistorialYFormulario(solicitud.Id, terceroId, sabatico, codigoTipoSolicitud)
+	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, sabatico, codigoTipoSolicitud)
 	if err != nil {
-		return nil, nil, nil, err
+		beego.Error("Error en proceso posterior de solicitud:", err)
+		return nil, err
 	}
 
-	return solicitud, historial, formulario, nil
+	// Solo retornar la solicitud si TODO fue exitoso
+	return solicitud, nil
 }
 
 func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *int, tipoSolicitud string) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {

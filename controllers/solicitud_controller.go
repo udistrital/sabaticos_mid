@@ -45,16 +45,15 @@ func (c *SolicitudController) Post() {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId y tipoSolicitudId son requeridos")
 	}
 
-	solicitud, historico, formulario, err := service.CrearSolicitud(solicitudRequest)
+	solicitud, err := service.CrearSolicitud(solicitudRequest)
 
 	if err != nil {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadGateway, nil, "Error al registrar solicitud")
+		return
 	}
 
 	respuesta := models.SolicitudResponse{
-		Solicitud:  solicitud,
-		Historial:  historico,
-		Formulario: formulario,
+		Solicitud: solicitud,
 	}
 
 	helpers.JSONResponse(&c.Controller, true, http.StatusCreated, respuesta, "Solicitud creada exitosamente")
