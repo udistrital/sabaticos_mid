@@ -8,9 +8,7 @@ lastupdate.tmp
 sabaticos_mid
 main
 *.scannerwork/
-swagger/**
-!swagger/swagger.json
-!swagger/swagger.yml
+swagger/
 
 # Binaries for programs and plugins
 *.exe
