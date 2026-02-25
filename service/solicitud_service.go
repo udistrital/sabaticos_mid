@@ -12,6 +12,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 	terceroId := solicitudReq.TerceroId
 	codigoTipoSolicitud := solicitudReq.TipoSolicitudId
 	sabatico := solicitudReq.SabaticoId
+	formulario := solicitudReq.Formulario
 
 	// Validar tercero
 	if err := clients.ValidarTercero(terceroId); err != nil {
@@ -25,7 +26,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 	}
 
 	// Crear historial y formulario en paralelo
-	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, sabatico, codigoTipoSolicitud)
+	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, sabatico, codigoTipoSolicitud, string(formulario))
 	if err != nil {
 		beego.Error("Error en proceso posterior de solicitud:", err)
 		return nil, err
@@ -35,7 +36,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 	return solicitud, nil
 }
 
-func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *int, tipoSolicitud string) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
+func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *int, tipoSolicitud string, formularioRequest string) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
 	var historial *models.HistorialSolicitud
 	var formulario *models.FormularioSolicitud
 	var historialErr, formularioErr error
@@ -58,7 +59,7 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 	// Solo crear formulario si es solicitud NUEVA (NS) y no existe sabáticoId
 	if esValido && codigoTipoSolicitud == string(enums.NUEVA) && sabaticoId == nil {
 		go func() {
-			formulario, formularioErr = clients.RegistrarFormularioSolicitud(solicitudId)
+			formulario, formularioErr = clients.RegistrarFormularioSolicitud(solicitudId, formularioRequest)
 			if formularioErr != nil {
 				beego.Error("Error registrando formulario de solicitud:", formularioErr)
 			}

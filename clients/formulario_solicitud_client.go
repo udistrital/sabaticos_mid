@@ -8,15 +8,13 @@ import (
 	"github.com/udistrital/utils_oas/request"
 )
 
-func RegistrarFormularioSolicitud(solicitudId int) (*models.FormularioSolicitud, error) {
+func RegistrarFormularioSolicitud(solicitudId int, contenido string) (*models.FormularioSolicitud, error) {
 	var formularioResp interface{}
 
 	formulario := models.FormularioSolicitudCreateRequest{
-		Contenido: "{}",
-		SolicitudId: models.IdReference{
-			Id: solicitudId,
-		},
-		Activo: true,
+		Contenido:   contenido,
+		SolicitudId: models.IdReference{Id: solicitudId},
+		Activo:      true,
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/formulario_solicitud/", "POST", &formularioResp, formulario); err != nil {
