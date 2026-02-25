@@ -18,12 +18,16 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int) (*models.Histor
 		return nil, err
 	}
 
-	historial := models.HistorialSolicitud{
-		TerceroId:         terceroId,
-		Justificacion:     "Nueva Solicitud Creada",
-		Activo:            true,
-		EstadoSolicitudId: tipoSolicitud.Id,
-		SolicitudId:       solicitudId,
+	historial := models.HistorialSolicitudCreateRequest{
+		TerceroId:     terceroId,
+		Justificacion: "Nueva Solicitud Creada",
+		Activo:        true,
+		EstadoSolicitudId: models.IdReference{
+			Id: tipoSolicitud.Id,
+		},
+		SolicitudId: models.IdReference{
+			Id: solicitudId,
+		},
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {

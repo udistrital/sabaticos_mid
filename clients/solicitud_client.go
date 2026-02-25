@@ -17,11 +17,12 @@ func RegistrarSolicitud(terceroId int, codigoTipoSolicitud string, sabaticoId *i
 		return nil, err
 	}
 
-	solicitud := models.Solicitud{
-		TerceroId:       terceroId,
-		TipoSolicitudId: tipoSolicitud.Id,
-		SabaticoId:      sabaticoId,
-		Activo:          true,
+	solicitud := models.SolicitudCreateRequest{
+		TerceroId: terceroId,
+		Activo:    true,
+		TipoSolicitudId: models.IdReference{
+			Id: tipoSolicitud.Id,
+		},
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/solicitud/", "POST", &solicitudRes, solicitud); err != nil {

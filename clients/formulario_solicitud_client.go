@@ -11,10 +11,12 @@ import (
 func RegistrarFormularioSolicitud(solicitudId int) (*models.FormularioSolicitud, error) {
 	var formularioResp interface{}
 
-	formulario := models.FormularioSolicitud{
-		Contenido:   "{}",
-		SolicitudId: solicitudId,
-		Activo:      true,
+	formulario := models.FormularioSolicitudCreateRequest{
+		Contenido: "{}",
+		SolicitudId: models.IdReference{
+			Id: solicitudId,
+		},
+		Activo: true,
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/formulario_solicitud/", "POST", &formularioResp, formulario); err != nil {
