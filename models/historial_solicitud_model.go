@@ -1,10 +1,12 @@
 package models
 
 type HistorialSolicitud struct {
-	Id                int    `orm:"column(id);pk;auto" json:"id,omitempty"`
-	TerceroId         int    `orm:"column(tercero_id)" json:"tercero_id"`
-	Justificacion     string `orm:"column(justificacion);null" json:"justificacion"`
-	Activo            bool   `orm:"column(activo)" json:"activo"`
-	EstadoSolicitudId int    `orm:"column(estado_solicitud_id);rel(fk)" json:"estado_solicitud_id"`
-	SolicitudId       int    `orm:"column(solicitud_id);rel(fk)" json:"solicitud_id"`
+	Id                int         `json:"Id"`
+	TerceroId         int         `json:"TerceroId"`
+	Justificacion     string      `json:"Justificacion"`
+	Activo            bool        `json:"Activo"`
+	FechaCreacion     string      `json:"FechaCreacion,omitempty"`
+	FechaModificacion string      `json:"FechaModificacion,omitempty"`
+	EstadoSolicitudId interface{} `json:"EstadoSolicitudId,omitempty"`
+	SolicitudId       interface{} `json:"SolicitudId,omitempty"`
 }
