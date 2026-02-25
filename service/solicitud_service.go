@@ -2,6 +2,7 @@ package service
 
 import (
 	"api_mid_sabaticos/clients"
+	"api_mid_sabaticos/enums"
 	"api_mid_sabaticos/models"
 
 	"github.com/astaxie/beego"
@@ -24,7 +25,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, *m
 	}
 
 	// Crear historial y formulario en paralelo
-	historial, formulario, err := registrarHistorialYFormulario(solicitud.Id, terceroId, sabatico)
+	historial, formulario, err := registrarHistorialYFormulario(solicitud.Id, terceroId, sabatico, codigoTipoSolicitud)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -32,7 +33,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, *m
 	return solicitud, historial, formulario, nil
 }
 
-func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *int) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
+func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *int, tipoSolicitud string) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
 	var historial *models.HistorialSolicitud
 	var formulario *models.FormularioSolicitud
 	var historialErr, formularioErr error
@@ -49,8 +50,11 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 		done <- true
 	}()
 
-	// Solo crear formulario si no existe sabáticoId
-	if sabaticoId == nil {
+	// Validar si es solicitud NUEVA usando el enum
+	codigoTipoSolicitud, esValido := enums.ObtenerCodigoTipoSolicitud(tipoSolicitud)
+
+	// Solo crear formulario si es solicitud NUEVA (NS) y no existe sabáticoId
+	if esValido && codigoTipoSolicitud == string(enums.NUEVA) && sabaticoId == nil {
 		go func() {
 			formulario, formularioErr = clients.RegistrarFormularioSolicitud(solicitudId)
 			if formularioErr != nil {
