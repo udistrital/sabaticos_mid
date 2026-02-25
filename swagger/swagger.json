@@ -372,11 +372,11 @@
         }
     },
     "definitions": {
-        "2754.0xc0003daf60.false": {
+        "2754.0xc0003cdec0.false": {
             "title": "false",
             "type": "object"
         },
-        "2820.0xc0003daf90.false": {
+        "2820.0xc0003cdef0.false": {
             "title": "false",
             "type": "object"
         },
@@ -432,14 +432,14 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/2820.0xc0003daf90.false"
+                    "$ref": "#/definitions/2820.0xc0003cdef0.false"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/2754.0xc0003daf60.false"
+                    "$ref": "#/definitions/2754.0xc0003cdec0.false"
                 }
             }
         },
