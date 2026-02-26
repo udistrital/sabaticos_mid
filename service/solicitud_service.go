@@ -27,7 +27,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 		return nil, err
 	}
 
-	if err := validarSolicitudPorTipo(tipoSolicitud, sabaticoId); err != nil {
+	if err := validarSolicitudPorTipo(tipoSolicitud.CodigoAbreviacion, sabaticoId); err != nil {
 		return nil, err
 	}
 
@@ -47,15 +47,15 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 	return solicitud, nil
 }
 
-func validarSolicitudPorTipo(tipoSolicitud *models.TipoSolicitud, sabaticoId *int) error {
-	if tipoSolicitud.CodigoAbreviacion == string(enums.NUEVA) {
+func validarSolicitudPorTipo(CodigoAbreviacion string, sabaticoId *int) error {
+	if CodigoAbreviacion == string(enums.NUEVA) {
 		if sabaticoId != nil {
 			return errors.New("No se Puede Crear Una Solicitud NUEVA Con Un Sabático Asociado")
 		}
 		return nil
 	}
 
-	if tipoSolicitud.CodigoAbreviacion != string(enums.SUSPENSION) {
+	if CodigoAbreviacion != string(enums.SUSPENSION) {
 		return nil
 	}
 
