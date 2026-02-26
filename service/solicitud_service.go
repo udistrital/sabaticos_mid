@@ -90,9 +90,11 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 	// Canal para sincronizar goroutines
 	done := make(chan bool, 2)
 
+	justificacion := "Solicitud " + tipoSolicitud + " Creada"
+
 	// Crear historial en goroutine
 	go func() {
-		historial, historialErr = clients.RegistrarHistorialSolicitud(solicitudId, terceroId)
+		historial, historialErr = clients.RegistrarHistorialSolicitud(solicitudId, terceroId, justificacion)
 		if historialErr != nil {
 			beego.Error("Error Registrando Historial de Solicitud:", historialErr)
 		}

@@ -83,7 +83,7 @@ func RegistrarSolicitud(terceroId int, tipoSolicitudId int, sabaticoId *int) (*m
 	return solicitudCreada, nil
 }
 
-func RegistrarHistorialSolicitud(solicitudId int, terceroId int) (*models.HistorialSolicitud, error) {
+func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion string) (*models.HistorialSolicitud, error) {
 	var historicoResp interface{}
 
 	tipoSolicitud, err := ConsultarEstadoSolicitud(string(enums.ENVIADA))
@@ -93,7 +93,7 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int) (*models.Histor
 
 	historial := models.HistorialSolicitudCreateRequest{
 		TerceroId:     terceroId,
-		Justificacion: "Nueva Solicitud Creada",
+		Justificacion: justificacion,
 		Activo:        true,
 		EstadoSolicitudId: models.IdReference{
 			Id: tipoSolicitud.Id,
