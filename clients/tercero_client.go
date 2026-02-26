@@ -21,7 +21,7 @@ func ValidarTercero(terceroId int) error {
 	}
 
 	if terceroTipoTercero == nil {
-		return fmt.Errorf("no se encontro ese tercero con rol de docente")
+		return fmt.Errorf("No Se Encontro ese Tercero con Rol de Docente")
 	}
 
 	fmt.Printf("%+v\n", terceroTipoTercero)
@@ -38,7 +38,7 @@ func ConsultarTipoTercero(codigoAbreviacion enums.TipoTercero) (*models.TipoTerc
 	}
 
 	if len(tipos) == 0 {
-		return nil, fmt.Errorf("tipo tercero no encontrado: %s", string(codigoAbreviacion))
+		return nil, fmt.Errorf("Tipo de Tercero no Encontrado: %s", string(codigoAbreviacion))
 	}
 
 	return &tipos[0], nil

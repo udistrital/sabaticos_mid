@@ -17,7 +17,7 @@ func ConsultarEstadoSolicitud(codigo string) (*models.EstadoSolicitud, error) {
 
 	codigoAbreviacion, ok := enums.ObtenerCodigoEstadoSolicitud(codigo)
 	if !ok {
-		return nil, errors.New("estado de solicitud no válido: " + codigo)
+		return nil, errors.New("Estado de Solicitud no Válido: " + codigo)
 	}
 
 	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/estado_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &estadoSolicitudRes); err != nil {
@@ -28,7 +28,7 @@ func ConsultarEstadoSolicitud(codigo string) (*models.EstadoSolicitud, error) {
 
 	}
 	if len(estadoSolicitud) == 0 {
-		return nil, errors.New("estado de solicitud no encontrado: " + codigo)
+		return nil, errors.New("Estado de Solicitud no Encontrado: " + codigo)
 	}
 
 	return &estadoSolicitud[0], nil
@@ -40,7 +40,7 @@ func ConsultarTipoSolicitud(codigo string) (*models.TipoSolicitud, error) {
 
 	codigoAbreviacion, ok := enums.ObtenerCodigoTipoSolicitud(codigo)
 	if !ok {
-		return nil, errors.New("tipo de solicitud no válido: " + codigo)
+		return nil, errors.New("Tipo de Solicitud no Válido: " + codigo)
 	}
 
 	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/tipo_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &tipoSolicitudRes); err != nil {
@@ -51,37 +51,32 @@ func ConsultarTipoSolicitud(codigo string) (*models.TipoSolicitud, error) {
 
 	}
 	if len(tipoSolicitud) == 0 {
-		return nil, errors.New("tipo de solicitud no encontrado: " + codigo)
+		return nil, errors.New("Tipo de Solicitud no Encontrado: " + codigo)
 	}
 
 	return &tipoSolicitud[0], nil
 }
 
 // Peticiones POST
-func RegistrarSolicitud(terceroId int, codigoTipoSolicitud string, sabaticoId *int) (*models.Solicitud, error) {
+func RegistrarSolicitud(terceroId int, tipoSolicitudId int, sabaticoId *int) (*models.Solicitud, error) {
 	var solicitudRes interface{}
 	var solicitudCreada *models.Solicitud
-
-	tipoSolicitud, err := ConsultarTipoSolicitud(codigoTipoSolicitud)
-	if err != nil {
-		return nil, err
-	}
 
 	solicitud := models.SolicitudCreateRequest{
 		TerceroId: terceroId,
 		Activo:    true,
 		TipoSolicitudId: models.IdReference{
-			Id: tipoSolicitud.Id,
+			Id: tipoSolicitudId,
 		},
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/solicitud/", "POST", &solicitudRes, solicitud); err != nil {
-		beego.Error("Error POST solicitud:", err)
+		beego.Error("Error Solicitud Tercero:", err)
 		return nil, err
 	}
 
 	if err := helpers.ExtractDataApi(solicitudRes, &solicitudCreada); err != nil {
-		beego.Error("Error extrayendo datos de solicitud:", err)
+		beego.Error("Error Extrayendo Datos de Solicitud Tercero:", err)
 		return nil, err
 	}
 
@@ -109,13 +104,13 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int) (*models.Histor
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {
-		beego.Error("Error POST histórico:", err)
+		beego.Error("Error Histórico:", err)
 	}
 
 	var historialFinal *models.HistorialSolicitud
 
 	if err := helpers.ExtractDataApi(historicoResp, &historialFinal); err != nil {
-		beego.Error("Error extrayendo datos de histórico:", err)
+		beego.Error("Error extrayendo Datos de Histórico:", err)
 		return nil, err
 	}
 
@@ -132,13 +127,13 @@ func RegistrarFormularioSolicitud(solicitudId int, contenido string) (*models.Fo
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/formulario_solicitud/", "POST", &formularioResp, formulario); err != nil {
-		beego.Error("Error POST formulario:", err)
+		beego.Error("Error formulario:", err)
 	}
 
 	var formularioFinal *models.FormularioSolicitud
 
 	if err := helpers.ExtractDataApi(formularioResp, &formularioFinal); err != nil {
-		beego.Error("Error extrayendo datos de formulario:", err)
+		beego.Error("Error Extrayendo Datos de Formulario:", err)
 		return nil, err
 	}
 

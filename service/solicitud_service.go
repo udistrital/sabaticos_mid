@@ -4,6 +4,8 @@ import (
 	"api_mid_sabaticos/clients"
 	"api_mid_sabaticos/enums"
 	"api_mid_sabaticos/models"
+	"errors"
+	"time"
 
 	"github.com/astaxie/beego"
 )
@@ -11,7 +13,7 @@ import (
 func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, error) {
 	terceroId := solicitudReq.TerceroId
 	codigoTipoSolicitud := solicitudReq.TipoSolicitudId
-	sabatico := solicitudReq.SabaticoId
+	sabaticoId := solicitudReq.SabaticoId
 	formulario := solicitudReq.Formulario
 
 	// Validar tercero
@@ -20,21 +22,64 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 	// 	return nil, err
 	// }
 
+	tipoSolicitud, err := clients.ConsultarTipoSolicitud(codigoTipoSolicitud)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := validarSolicitudPorTipo(tipoSolicitud, sabaticoId); err != nil {
+		return nil, err
+	}
+
 	// Crear solicitud en CRUD y obtener ID
-	solicitud, err := clients.RegistrarSolicitud(terceroId, codigoTipoSolicitud, sabatico)
+	solicitud, err := clients.RegistrarSolicitud(terceroId, tipoSolicitud.Id, sabaticoId)
 	if err != nil {
 		return nil, err
 	}
 
 	// Crear historial y formulario en paralelo
-	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, sabatico, codigoTipoSolicitud, string(formulario))
+	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, sabaticoId, codigoTipoSolicitud, string(formulario))
 	if err != nil {
-		beego.Error("Error en proceso posterior de solicitud:", err)
 		return nil, err
 	}
 
 	// Solo retornar la solicitud si TODO fue exitoso
 	return solicitud, nil
+}
+
+func validarSolicitudPorTipo(tipoSolicitud *models.TipoSolicitud, sabaticoId *int) error {
+	if tipoSolicitud.CodigoAbreviacion == string(enums.NUEVA) {
+		if sabaticoId != nil {
+			return errors.New("No se Puede Crear Una Solicitud NUEVA Con Un Sabático Asociado")
+		}
+		return nil
+	}
+
+	if tipoSolicitud.CodigoAbreviacion != string(enums.SUSPENSION) {
+		return nil
+	}
+
+	if sabaticoId == nil {
+		return errors.New("Una Solicitud de SUSPENSIÓN debe Tener un Sabático Asociado")
+	}
+
+	// Consultar si el sabático existe
+	sabatico, err := clients.ConsultarSabatico(*sabaticoId)
+	if err != nil {
+		return err
+	}
+
+	// Validar que el sabático tenga máximo 3 meses desde su creación
+	fechaCreacion, err := time.Parse("2006-01-02 15:04:05 -0700 -0700", sabatico.FechaCreacion)
+	if err != nil {
+		return errors.New("Formato Inválido de FechaCreacion del Sabático")
+	}
+	fechaLimite := fechaCreacion.AddDate(0, 3, 0)
+	if time.Now().After(fechaLimite) {
+		return errors.New("No se Puede Crear Una Solicitud de SUSPENSIÓN Sespués de 3 Meses Desde la Creación del Sabático")
+	}
+
+	return nil
 }
 
 func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *int, tipoSolicitud string, formularioRequest string) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
@@ -49,7 +94,7 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 	go func() {
 		historial, historialErr = clients.RegistrarHistorialSolicitud(solicitudId, terceroId)
 		if historialErr != nil {
-			beego.Error("Error registrando historial de solicitud:", historialErr)
+			beego.Error("Error Registrando Historial de Solicitud:", historialErr)
 		}
 		done <- true
 	}()
@@ -62,7 +107,7 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 		go func() {
 			formulario, formularioErr = clients.RegistrarFormularioSolicitud(solicitudId, formularioRequest)
 			if formularioErr != nil {
-				beego.Error("Error registrando formulario de solicitud:", formularioErr)
+				beego.Error("Error Registrando Formulario de Solicitud:", formularioErr)
 			}
 			done <- true
 		}()

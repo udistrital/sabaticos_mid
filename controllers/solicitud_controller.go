@@ -48,7 +48,7 @@ func (c *SolicitudController) Post() {
 	solicitud, err := service.CrearSolicitud(solicitudRequest)
 
 	if err != nil {
-		helpers.JSONResponse(&c.Controller, false, http.StatusBadGateway, nil, "Error al registrar solicitud: "+err.Error())
+		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
 		return
 	}
 
