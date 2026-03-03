@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"encoding/json"
 	"net/http"
 
+	"api_mid_sabaticos/clients"
 	"api_mid_sabaticos/helpers"
 	"api_mid_sabaticos/models"
 	"api_mid_sabaticos/service"
@@ -108,4 +110,39 @@ func (c *SolicitudController) Put() {
 // @router /:id [delete]
 func (c *SolicitudController) Delete() {
 
+}
+
+func (c *SolicitudController) Validar() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	c.Ctx.Input.CopyBody(1 << 20) // Beego v1 [web:30][web:64]
+
+	var req models.ValidarSolicitudRequest
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &req); err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "JSON inválido: "+err.Error())
+		return
+	}
+
+	if req.TerceroId <= 0 || req.SolicitudId <= 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos tercero_id y solicitud_id son requeridos")
+		return
+	}
+
+	// Armar objetos que tu client ya espera (sin romper compatibilidad)
+	solicitudCreada := &models.Solicitud{Id: req.SolicitudId}
+	solicitudReq := models.SolicitudRequest{TerceroId: req.TerceroId}
+
+	// Overrides opcionales: si vienen en el JSON, tu client los toma; si no, usa defaults
+	historialOverride := models.HistorialSolicitud{
+		EstadoSolicitudId: req.EstadoSolicitudId,
+		Justificacion:     req.Justificacion,
+	}
+
+	historialCreado, err := clients.RegistrarHistorialSolicitud(historialOverride, solicitudCreada, solicitudReq)
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadGateway, nil, "Error al registrar historial: "+err.Error())
+		return
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusCreated, historialCreado, "Historial registrado exitosamente")
 }

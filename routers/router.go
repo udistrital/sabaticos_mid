@@ -14,6 +14,9 @@ import (
 )
 
 func init() {
+	if beego.BConfig.RunMode == "dev" {
+		beego.SetStaticPath("/swagger", "swagger")
+	}
 	ns := beego.NewNamespace("/v1",
 		beego.NSNamespace("/user",
 			beego.NSInclude(
@@ -23,6 +26,7 @@ func init() {
 		beego.NSNamespace("/solicitud",
 			beego.NSRouter("/", &controllers.SolicitudController{}, "post:Post;get:GetAll"),
 			beego.NSRouter("/:id", &controllers.SolicitudController{}, "get:GetOne;put:Put;delete:Delete"),
+			beego.NSRouter("/validar", &controllers.SolicitudController{}, "post:Validar"),
 		),
 		beego.NSNamespace("/sabatico",
 			beego.NSInclude(
