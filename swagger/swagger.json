@@ -372,11 +372,15 @@
         }
     },
     "definitions": {
-        "2754.0xc0002f7800.false": {
+        "2211.0xc000375920.false": {
             "title": "false",
             "type": "object"
         },
-        "2820.0xc0002f7830.false": {
+        "3202.0xc000375b00.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "3268.0xc000375b30.false": {
             "title": "false",
             "type": "object"
         },
@@ -403,14 +407,34 @@
             "title": "Sabatico",
             "type": "object",
             "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "EstadoSabaticoId": {
+                    "$ref": "#/definitions/2211.0xc000375920.false"
+                },
+                "FechaCreacion": {
+                    "type": "string"
+                },
+                "FechaFin": {
+                    "type": "string"
+                },
+                "FechaInicio": {
+                    "type": "string"
+                },
+                "FechaModificacion": {
+                    "type": "string"
+                },
                 "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Observaciones": {
                     "type": "string"
                 },
-                "Password": {
-                    "type": "string"
-                },
-                "Username": {
-                    "type": "string"
+                "TerceroId": {
+                    "type": "integer",
+                    "format": "int64"
                 }
             }
         },
@@ -432,14 +456,14 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/2820.0xc0002f7830.false"
+                    "$ref": "#/definitions/3268.0xc000375b30.false"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/2754.0xc0002f7800.false"
+                    "$ref": "#/definitions/3202.0xc000375b00.false"
                 }
             }
         },
