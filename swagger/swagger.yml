@@ -246,10 +246,13 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  2754.0xc0002f7800.false:
+  3572.0xc0004249f0.false:
     title: "false"
     type: object
-  2820.0xc0002f7830.false:
+  4563.0xc000424bd0.false:
+    title: "false"
+    type: object
+  4629.0xc000424c00.false:
     title: "false"
     type: object
   models.Profile:
@@ -269,12 +272,26 @@ definitions:
     title: Sabatico
     type: object
     properties:
+      Activo:
+        type: boolean
+      EstadoSabaticoId:
+        $ref: '#/definitions/3572.0xc0004249f0.false'
+      FechaCreacion:
+        type: string
+      FechaFin:
+        type: string
+      FechaInicio:
+        type: string
+      FechaModificacion:
+        type: string
       Id:
+        type: integer
+        format: int64
+      Observaciones:
         type: string
-      Password:
-        type: string
-      Username:
-        type: string
+      TerceroId:
+        type: integer
+        format: int64
   models.Solicitud:
     title: Solicitud
     type: object
@@ -289,12 +306,15 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/2820.0xc0002f7830.false'
+        $ref: '#/definitions/4629.0xc000424c00.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/2754.0xc0002f7800.false'
+        $ref: '#/definitions/4563.0xc000424bd0.false'
+  models.Soportesolicitud:
+    title: Soportesolicitud
+    type: object
   models.User:
     title: User
     type: object

@@ -33,14 +33,27 @@ func (c *SoporteSolicitudController) Post() {
 	// Obtener datos de form-data
 	soporteSolicitudRequest.TerceroId, _ = c.GetInt("tercero_id")
 	soporteSolicitudRequest.SolicitudId, _ = c.GetInt("solicitud_id")
-	soporteSolicitudRequest.EstadoSolicitud = c.GetString("estado_solicitud")
-	soporteSolicitudRequest.RolTercero = c.GetString("rol_tercero")
+	soporteSolicitudRequest.RolUsuario = c.GetString("rol_usuario")
+	soporteSolicitudRequest.EstadoSoporteSolicitud = c.GetString("estado_soporte_solicitud")
+
+	// Validar campos requeridos
+	if soporteSolicitudRequest.TerceroId == 0 || soporteSolicitudRequest.SolicitudId == 0 ||
+		soporteSolicitudRequest.RolUsuario == "" || soporteSolicitudRequest.EstadoSoporteSolicitud == "" {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "los campos terceroId, solicitudId, estadoSoporteSolicitud y rolUsuario son requeridos")
+		return
+	}
 
 	// Obtener archivos
 	files, _ := c.GetFiles("documentos")
 
+	if len(files) == 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "se debe enviar al menos un archivo")
+		return
+	}
+
 	// Llamar al servicio para procesar la solicitud
 	respuesta, err := service.CrearSoporteSolicitud(soporteSolicitudRequest, files)
+
 	if err != nil {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, err.Error())
 		return

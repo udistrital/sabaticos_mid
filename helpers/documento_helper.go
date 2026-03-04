@@ -1,54 +1,53 @@
 package helpers
 
 import (
+	"encoding/base64"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"mime/multipart"
-	"os"
-	"path/filepath"
-	"time"
 )
 
-// GuardarDocumentos guarda múltiples archivos en el sistema de archivos
-// Retorna las rutas de los archivos guardados y un error si ocurre
-func GuardarDocumentos(files []*multipart.FileHeader, directorio string) ([]string, error) {
-	var documentosGuardados []string
+// ArchivoBase64 estructura que contiene el nombre y contenido en base64 del archivo
+type ArchivoBase64 struct {
+	Nombre    string `json:"nombre"`
+	Contenido string `json:"contenido"`
+}
 
-	// Crear directorio si no existe
-	uploadDir := filepath.Join("uploads", directorio)
-	if err := os.MkdirAll(uploadDir, 0o755); err != nil {
-		return nil, fmt.Errorf("error creando carpeta de carga: %v", err)
+// ConvertirArchivoABase64 convierte un archivo multipart a base64 con su nombre
+func ConvertirArchivoABase64(fileHeader *multipart.FileHeader) (*ArchivoBase64, error) {
+	// Abrir el archivo
+	file, err := fileHeader.Open()
+	if err != nil {
+		return nil, fmt.Errorf("error abriendo archivo: %v", err)
+	}
+	defer file.Close()
+
+	// Leer todo el contenido del archivo
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, fmt.Errorf("error leyendo archivo: %v", err)
 	}
 
-	// Procesar cada archivo
-	for _, header := range files {
-		file, err := header.Open()
+	// Codificar a base64
+	base64String := base64.StdEncoding.EncodeToString(fileBytes)
+
+	return &ArchivoBase64{
+		Nombre:    fileHeader.Filename,
+		Contenido: base64String,
+	}, nil
+}
+
+// ConvertirArchivosABase64 convierte múltiples archivos a base64
+func ConvertirArchivosABase64(files []*multipart.FileHeader) ([]ArchivoBase64, error) {
+	var archivosBase64 []ArchivoBase64
+
+	for _, fileHeader := range files {
+		archivo, err := ConvertirArchivoABase64(fileHeader)
 		if err != nil {
-			return nil, fmt.Errorf("error abriendo archivo %s: %v", header.Filename, err)
+			return nil, err
 		}
-
-		// Generar nombre único para el archivo
-		fileName := fmt.Sprintf("%d_%s", time.Now().UnixNano(), filepath.Base(header.Filename))
-		filePath := filepath.Join(uploadDir, fileName)
-
-		// Crear archivo destino
-		dst, err := os.Create(filePath)
-		if err != nil {
-			file.Close()
-			return nil, fmt.Errorf("error creando archivo destino: %v", err)
-		}
-
-		// Copiar contenido
-		_, err = io.Copy(dst, file)
-		file.Close()
-		dst.Close()
-
-		if err != nil {
-			return nil, fmt.Errorf("error guardando archivo %s: %v", header.Filename, err)
-		}
-
-		documentosGuardados = append(documentosGuardados, filePath)
+		archivosBase64 = append(archivosBase64, *archivo)
 	}
 
-	return documentosGuardados, nil
+	return archivosBase64, nil
 }
