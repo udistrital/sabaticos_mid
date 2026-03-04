@@ -372,15 +372,15 @@
         }
     },
     "definitions": {
-        "2211.0xc000375920.false": {
+        "3572.0xc0004249f0.false": {
             "title": "false",
             "type": "object"
         },
-        "3202.0xc000375b00.false": {
+        "4563.0xc000424bd0.false": {
             "title": "false",
             "type": "object"
         },
-        "3268.0xc000375b30.false": {
+        "4629.0xc000424c00.false": {
             "title": "false",
             "type": "object"
         },
@@ -411,7 +411,7 @@
                     "type": "boolean"
                 },
                 "EstadoSabaticoId": {
-                    "$ref": "#/definitions/2211.0xc000375920.false"
+                    "$ref": "#/definitions/3572.0xc0004249f0.false"
                 },
                 "FechaCreacion": {
                     "type": "string"
@@ -456,16 +456,20 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/3268.0xc000375b30.false"
+                    "$ref": "#/definitions/4629.0xc000424c00.false"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/3202.0xc000375b00.false"
+                    "$ref": "#/definitions/4563.0xc000424bd0.false"
                 }
             }
+        },
+        "models.Soportesolicitud": {
+            "title": "Soportesolicitud",
+            "type": "object"
         },
         "models.User": {
             "title": "User",

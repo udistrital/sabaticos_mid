@@ -5,6 +5,7 @@ import (
 	"api_mid_sabaticos/helpers"
 	"api_mid_sabaticos/models"
 	"errors"
+	"fmt"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/utils_oas/request"
@@ -23,10 +24,12 @@ func ConsultarEstadoSolicitud(codigo string) (*models.EstadoSolicitud, error) {
 	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/estado_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &estadoSolicitudRes); err != nil {
 		return nil, err
 	}
+
 	if err := helpers.ExtractDataApi(estadoSolicitudRes, &estadoSolicitud); err != nil {
 		return nil, err
 
 	}
+
 	if len(estadoSolicitud) == 0 {
 		return nil, errors.New("Estado de Solicitud no Encontrado: " + codigo)
 	}
@@ -55,6 +58,30 @@ func ConsultarTipoSolicitud(codigo string) (*models.TipoSolicitud, error) {
 	}
 
 	return &tipoSolicitud[0], nil
+}
+
+func ConsultarEstadoSoporteSolicitud(codigo string) (*models.EstadoSoporteSolicitud, error) {
+	var estadoSoporteSolicitudRes interface{}
+	var estadoSoporteSolicitud []models.EstadoSoporteSolicitud
+
+	codigoAbreviacion, ok := enums.ObtenerCodigoEstadoSoporteSolicitud(codigo)
+
+	if !ok {
+		return nil, errors.New("Estado de Soporte de Solicitud no Válido: " + codigo)
+	}
+
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/estado_soporte_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &estadoSoporteSolicitudRes); err != nil {
+		return nil, err
+	}
+	if err := helpers.ExtractDataApi(estadoSoporteSolicitudRes, &estadoSoporteSolicitud); err != nil {
+		return nil, err
+
+	}
+	if len(estadoSoporteSolicitud) == 0 {
+		return nil, errors.New("Estado de Soporte de Solicitud no Encontrado: " + codigo)
+	}
+
+	return &estadoSoporteSolicitud[0], nil
 }
 
 // Peticiones POST
@@ -138,5 +165,35 @@ func RegistrarFormularioSolicitud(solicitudId int, contenido string) (*models.Fo
 	}
 
 	return formularioFinal, nil
+
+}
+
+func RegistrarSoporteSolicitud(documentoId int, terceroId int, solicitudId int, estadoSoporteSolicitudId int, rolUsuario string) (*models.SoporteSolicitud, error) {
+	var soporteSolicitudRes interface{}
+	var soporteSolicitudFinal *models.SoporteSolicitud
+
+	soporteSolicitud := models.SoporteSolicitudCreateRequest{
+		DocumentoId:              documentoId,
+		TerceroId:                terceroId,
+		Activo:                   true,
+		SolicitudId:              models.IdReference{Id: solicitudId},
+		EstadoSoporteSolicitudId: models.IdReference{Id: estadoSoporteSolicitudId},
+		RolUsuario:               rolUsuario,
+	}
+
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/soporte_solicitud", "POST", &soporteSolicitudRes, soporteSolicitud); err != nil {
+		return nil, fmt.Errorf("falló creación en sabaticosService /soporte_solicitud: %w", err)
+	}
+
+	if err := helpers.ValidateServiceResponse(soporteSolicitudRes); err != nil {
+		return nil, fmt.Errorf("sabaticosService /soporte_solicitud devolvió error: %w", err)
+	}
+
+	if err := helpers.ExtractDataApi(soporteSolicitudRes, &soporteSolicitudFinal); err != nil {
+		beego.Error("Error extrayendo Datos de Soporte Solicitud:", err)
+		return nil, err
+	}
+
+	return soporteSolicitudFinal, nil
 
 }
