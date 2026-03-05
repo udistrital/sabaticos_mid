@@ -48,8 +48,6 @@ func ConsultarTipoDocumento(codigoAbreviacion string) (*models.TipoDocumento, er
 	var tipoDocumentoRes interface{}
 	var tipoDocumento []models.TipoDocumento
 
-	fmt.Println(beego.AppConfig.String("documentosService") + "tipo_documento?query=CodigoAbreviacion:" + codigoAbreviacion)
-
 	if err := request.GetJson(beego.AppConfig.String("documentosService")+"tipo_documento?query=CodigoAbreviacion:"+codigoAbreviacion, &tipoDocumentoRes); err != nil {
 		return nil, err
 	}
