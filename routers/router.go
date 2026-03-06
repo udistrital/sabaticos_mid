@@ -22,9 +22,15 @@ func init() {
 		),
 
 		beego.NSNamespace("/solicitud",
+<<<<<<< HEAD
 			beego.NSInclude(
 				&controllers.SolicitudController{},
 			),	
+=======
+			beego.NSRouter("/", &controllers.SolicitudController{}, "post:Post;get:GetAll"),
+			beego.NSRouter("/:id", &controllers.SolicitudController{}, "get:GetOne;put:Put;delete:Delete"),
+			beego.NSRouter("/radicar/:id", &controllers.SolicitudController{}, "post:Radicar"),
+>>>>>>> c3011a4 (funcionalidad para radicar solicitudes)
 		),
 
 		beego.NSNamespace("/soporte_solicitud",
