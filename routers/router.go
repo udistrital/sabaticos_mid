@@ -23,6 +23,7 @@ func init() {
 		beego.NSNamespace("/solicitud",
 			beego.NSRouter("/", &controllers.SolicitudController{}, "post:Post;get:GetAll"),
 			beego.NSRouter("/:id", &controllers.SolicitudController{}, "get:GetOne;put:Put;delete:Delete"),
+			beego.NSRouter("/radicar/:id", &controllers.SolicitudController{}, "post:Radicar"),
 		),
 		beego.NSNamespace("/soporte_solicitud",
 			beego.NSRouter("/", &controllers.SoporteSolicitudController{}, "post:Post;get:GetAll"),

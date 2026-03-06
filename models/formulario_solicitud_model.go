@@ -6,5 +6,5 @@ type FormularioSolicitud struct {
 	Activo            bool        `json:"Activo"`
 	FechaCreacion     string      `json:"FechaCreacion,omitempty"`
 	FechaModificacion string      `json:"FechaModificacion,omitempty"`
-	SolicitudId       interface{} `json:"SolicitudId,omitempty"`
+	SolicitudId       IdReference `json:"SolicitudId,omitempty"`
 }

@@ -21,7 +21,7 @@ func CrearSoporteSolicitud(soporteSolicitudReq models.SoporteSolicitudRequest, f
 	}
 
 	//consultar tipo de documento para soporte de solicitud
-	tipoDocumento, err := clients.ConsultarTipoDocumento(string(enums.FORMACION_ACADEMICA))
+	tipoDocumento, err := clients.ConsultarTipoDocumento(string(enums.SOLCITUD_SABATICO))
 	if err != nil {
 		return nil, fmt.Errorf("error consultando tipo de documento: %w", err)
 	}

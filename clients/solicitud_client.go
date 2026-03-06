@@ -12,6 +12,26 @@ import (
 )
 
 // Peticiones GET
+func ConsultarSolicitud(id int) (*models.Solicitud, error) {
+	var solicitudRes interface{}
+	var solicitud models.Solicitud
+
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/solicitud/"+fmt.Sprint(id), &solicitudRes); err != nil {
+		return nil, err
+	}
+
+	if err := helpers.ExtractDataApi(solicitudRes, &solicitud); err != nil {
+		return nil, err
+
+	}
+
+	if solicitud.Id == 0 {
+		return nil, errors.New("Solicitud no Encontrada: " + fmt.Sprint(id))
+	}
+
+	return &solicitud, nil
+}
+
 func ConsultarEstadoSolicitud(codigo string) (*models.EstadoSolicitud, error) {
 	var estadoSolicitudRes interface{}
 	var estadoSolicitud []models.EstadoSolicitud
@@ -84,6 +104,46 @@ func ConsultarEstadoSoporteSolicitud(codigo string) (*models.EstadoSoporteSolici
 	return &estadoSoporteSolicitud[0], nil
 }
 
+func ConsultarFormulario(id int) (*models.FormularioSolicitud, error) {
+	var formularioRes interface{}
+	var formulario models.FormularioSolicitud
+
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/formulario_solicitud/"+fmt.Sprint(id), &formularioRes); err != nil {
+		return nil, err
+	}
+
+	if err := helpers.ExtractDataApi(formularioRes, &formulario); err != nil {
+		return nil, err
+
+	}
+
+	if formulario.Id == 0 {
+		return nil, errors.New("Formulario de Solicitud no Encontrado: " + fmt.Sprint(id))
+	}
+
+	return &formulario, nil
+}
+
+func ConsultarSoporteSolicitud(id int) (*models.SoporteSolicitud, error) {
+	var soporteSolicitudRes interface{}
+	var soporteSolicitud models.SoporteSolicitud
+
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/soporte_solicitud/"+fmt.Sprint(id), &soporteSolicitudRes); err != nil {
+		return nil, err
+	}
+
+	if err := helpers.ExtractDataApi(soporteSolicitudRes, &soporteSolicitud); err != nil {
+		return nil, err
+
+	}
+
+	if soporteSolicitud.Id == 0 {
+		return nil, errors.New("Soporte de Solicitud no Encontrado: " + fmt.Sprint(id))
+	}
+
+	return &soporteSolicitud, nil
+}
+
 // Peticiones POST
 func RegistrarSolicitud(terceroId int, tipoSolicitudId int, sabaticoId *int) (*models.Solicitud, error) {
 	var solicitudRes interface{}
@@ -110,10 +170,10 @@ func RegistrarSolicitud(terceroId int, tipoSolicitudId int, sabaticoId *int) (*m
 	return solicitudCreada, nil
 }
 
-func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion string) (*models.HistorialSolicitud, error) {
+func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion string, codigoEstadoSolicitud string) (*models.HistorialSolicitud, error) {
 	var historicoResp interface{}
 
-	tipoSolicitud, err := ConsultarEstadoSolicitud(string(enums.ENVIADA))
+	estadoSolicitud, err := ConsultarEstadoSolicitud(codigoEstadoSolicitud)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +183,7 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion s
 		Justificacion: justificacion,
 		Activo:        true,
 		EstadoSolicitudId: models.IdReference{
-			Id: tipoSolicitud.Id,
+			Id: estadoSolicitud.Id,
 		},
 		SolicitudId: models.IdReference{
 			Id: solicitudId,
@@ -195,5 +255,84 @@ func RegistrarSoporteSolicitud(documentoId int, terceroId int, solicitudId int, 
 	}
 
 	return soporteSolicitudFinal, nil
+}
 
+// peticiones PUT
+func ActualizarFormularioSolicitud(solicitudId int, formularioId int, contenido string) (*models.FormularioSolicitud, error) {
+	var formularioResp interface{}
+	var formularioFinal *models.FormularioSolicitud
+
+	formularioExistente, err := ConsultarFormulario(formularioId)
+	if err != nil {
+		return nil, err
+	}
+
+	formulario := models.FormularioSolicitudCreateRequest{
+		Contenido:     contenido,
+		Activo:        true,
+		FechaCreacion: formularioExistente.FechaCreacion,
+		SolicitudId:   models.IdReference{Id: solicitudId},
+	}
+
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/formulario_solicitud/"+fmt.Sprint(formularioId), "PUT", &formularioResp, formulario); err != nil {
+		beego.Error("Error Actualizando Formulario:", err)
+		return nil, err
+	}
+
+	if err := helpers.ValidateServiceResponse(formularioResp); err != nil {
+		return nil, fmt.Errorf("sabaticosService /formulario_solicitud/%d devolvió error: %w", formularioId, err)
+	}
+
+	if err := helpers.ExtractDataApi(formularioResp, &formularioFinal); err != nil {
+		beego.Error("Error Extrayendo Datos de Formulario:", err)
+		return nil, err
+	}
+
+	return formularioFinal, nil
+}
+
+func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEstadoSoporteSolicitud string) (*models.SoporteSolicitud, error) {
+	var soporteSolicitudRes interface{}
+	var soporteSolicitudFinal *models.SoporteSolicitud
+
+	estadoSoporteSolicitud, err := ConsultarEstadoSoporteSolicitud(ObtenerCodigoEstadoSoporteSolicitud)
+	if err != nil {
+		return nil, err
+	}
+
+	// Primero obtener el soporte existente
+	soporteExistente, err := ConsultarSoporteSolicitud(soporteId)
+	if err != nil {
+		return nil, fmt.Errorf("no se pudo consultar soporte_solicitud/%d: %w", soporteId, err)
+	}
+
+	if soporteExistente.DocumentoId <= 0 {
+		return nil, fmt.Errorf("soporte_solicitud/%d no tiene DocumentoId válido", soporteId)
+	}
+
+	// Actualizar con los nuevos valores
+	soporteSolicitud := models.SoporteSolicitudCreateRequest{
+		DocumentoId:              soporteExistente.DocumentoId,
+		TerceroId:                soporteExistente.TerceroId,
+		Activo:                   true,
+		FechaCreacion:            soporteExistente.FechaCreacion,
+		SolicitudId:              models.IdReference{Id: solicitudId},
+		EstadoSoporteSolicitudId: models.IdReference{Id: estadoSoporteSolicitud.Id},
+		RolUsuario:               soporteExistente.RolUsuario,
+	}
+
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/soporte_solicitud/"+fmt.Sprint(soporteId), "PUT", &soporteSolicitudRes, soporteSolicitud); err != nil {
+		return nil, fmt.Errorf("falló actualización en sabaticosService /soporte_solicitud/%d: %w", soporteId, err)
+	}
+
+	if err := helpers.ValidateServiceResponse(soporteSolicitudRes); err != nil {
+		return nil, fmt.Errorf("sabaticosService /soporte_solicitud/%d devolvió error: %w", soporteId, err)
+	}
+
+	if err := helpers.ExtractDataApi(soporteSolicitudRes, &soporteSolicitudFinal); err != nil {
+		beego.Error("Error extrayendo Datos de Soporte Solicitud:", err)
+		return nil, err
+	}
+
+	return soporteSolicitudFinal, nil
 }

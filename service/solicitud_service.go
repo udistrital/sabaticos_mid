@@ -37,8 +37,11 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 		return nil, err
 	}
 
+	// Determinar si debe crear formulario según el tipo de solicitud
+	debeCrearFormulario := tipoSolicitud.CodigoAbreviacion == string(enums.NUEVA)
+
 	// Crear historial y formulario en paralelo
-	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, sabaticoId, codigoTipoSolicitud, string(formulario))
+	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, string(formulario), string(enums.ENVIADA), debeCrearFormulario)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +77,7 @@ func validarSolicitudPorTipo(CodigoAbreviacion string, sabaticoId *int) error {
 	if err != nil {
 		return errors.New("Formato Inválido de FechaCreacion del Sabático")
 	}
+
 	fechaLimite := fechaCreacion.AddDate(0, 3, 0)
 	if time.Now().After(fechaLimite) {
 		return errors.New("No se Puede Crear Una Solicitud de SUSPENSIÓN Sespués de 3 Meses Desde la Creación del Sabático")
@@ -82,7 +86,7 @@ func validarSolicitudPorTipo(CodigoAbreviacion string, sabaticoId *int) error {
 	return nil
 }
 
-func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *int, tipoSolicitud string, formularioRequest string) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
+func registrarHistorialYFormulario(solicitudId int, terceroId int, formularioRequest string, codigoEstadoSolicitud string, crearFormulario bool) (*models.HistorialSolicitud, *models.FormularioSolicitud, error) {
 	var historial *models.HistorialSolicitud
 	var formulario *models.FormularioSolicitud
 	var historialErr, formularioErr error
@@ -90,22 +94,20 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 	// Canal para sincronizar goroutines
 	done := make(chan bool, 2)
 
-	justificacion := "Solicitud " + tipoSolicitud + " Creada"
+	justificacion := "Creación de solicitud con estado " + codigoEstadoSolicitud
 
 	// Crear historial en goroutine
 	go func() {
-		historial, historialErr = clients.RegistrarHistorialSolicitud(solicitudId, terceroId, justificacion)
+		historial, historialErr = clients.RegistrarHistorialSolicitud(solicitudId, terceroId, justificacion, codigoEstadoSolicitud)
 		if historialErr != nil {
 			beego.Error("Error Registrando Historial de Solicitud:", historialErr)
 		}
 		done <- true
 	}()
 
-	// Validar si es solicitud NUEVA usando el enum
-	codigoTipoSolicitud, esValido := enums.ObtenerCodigoTipoSolicitud(tipoSolicitud)
-
-	// Solo crear formulario si es solicitud NUEVA (NS) y no existe sabáticoId
-	if esValido && codigoTipoSolicitud == string(enums.NUEVA) && sabaticoId == nil {
+	// Solo crear formulario si el flag está habilitado
+	// La validación de tipo de solicitud ya fue realizada en validarSolicitudPorTipo
+	if crearFormulario {
 		go func() {
 			formulario, formularioErr = clients.RegistrarFormularioSolicitud(solicitudId, formularioRequest)
 			if formularioErr != nil {
@@ -131,4 +133,42 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 	}
 
 	return historial, formulario, nil
+}
+
+func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (map[string]interface{}, error) {
+
+	solicitud, err := clients.ConsultarSolicitud(RadicarSolicitudRequest.SolicitudId)
+	if err != nil {
+		return nil, err
+	}
+
+	justificacion := "Radicación de solicitud"
+
+	historialSolicitud, err := clients.RegistrarHistorialSolicitud(solicitud.Id, solicitud.TerceroId, justificacion, string(enums.RADICADA))
+	if err != nil {
+		beego.Error("Error Registrando Historial de Solicitud:", err)
+	}
+
+	formularioActtualizado, err := clients.ActualizarFormularioSolicitud(solicitud.Id, RadicarSolicitudRequest.FormularioId, string(RadicarSolicitudRequest.Formulario))
+	if err != nil {
+		return nil, err
+	}
+
+	var soportes []*models.SoporteSolicitud
+	for _, soporteId := range RadicarSolicitudRequest.DocumentosId {
+		soporte, err := clients.ActualizarSoporteSolicitud(soporteId, solicitud.Id, string(enums.RADICADA))
+		if err != nil {
+			return nil, err
+		}
+		soportes = append(soportes, soporte)
+	}
+
+	response := map[string]interface{}{
+		"solicitud":  solicitud,
+		"historial":  historialSolicitud,
+		"formulario": formularioActtualizado,
+		"soportes":   soportes,
+	}
+
+	return response, nil
 }
