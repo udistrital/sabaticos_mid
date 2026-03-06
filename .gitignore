@@ -8,7 +8,9 @@ lastupdate.tmp
 sabaticos_mid
 main
 *.scannerwork/
-swagger/
+swagger/**
+!swagger/swagger.json
+!swagger/swagger.yml
 
 # Binaries for programs and plugins
 *.exe
@@ -32,6 +34,8 @@ profile.cov
 # Go workspace file
 go.work
 go.work.sum
+go.mod
+go.sum
 
 # env file
 .env

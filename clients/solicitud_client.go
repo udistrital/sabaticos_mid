@@ -1,11 +1,11 @@
 package clients
 
 import (
-	"api_mid_sabaticos/enums"
-	"api_mid_sabaticos/helpers"
-	"api_mid_sabaticos/models"
 	"errors"
 	"fmt"
+	"github.com/udistrital/sabaticos_mid/enums"
+	"github.com/udistrital/sabaticos_mid/helpers"
+	"github.com/udistrital/sabaticos_mid/models"
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/utils_oas/request"

@@ -1,10 +1,10 @@
 package service
 
 import (
-	"api_mid_sabaticos/clients"
-	"api_mid_sabaticos/enums"
-	"api_mid_sabaticos/models"
 	"errors"
+	"github.com/udistrital/sabaticos_mid/clients"
+	"github.com/udistrital/sabaticos_mid/enums"
+	"github.com/udistrital/sabaticos_mid/models"
 	"time"
 
 	"github.com/astaxie/beego"

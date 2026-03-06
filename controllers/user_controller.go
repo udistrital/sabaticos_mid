@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"api_mid_sabaticos/models"
 	"encoding/json"
+	"github.com/udistrital/sabaticos_mid/models"
 
 	"github.com/astaxie/beego"
 )
@@ -116,4 +116,3 @@ func (u *UserController) Logout() {
 	u.Data["json"] = "logout success"
 	u.ServeJSON()
 }
-

@@ -127,6 +127,224 @@ paths:
           description: '{string} delete success!'
         "403":
           description: id is empty
+  /solicitud/:
+    get:
+      tags:
+      - solicitud
+      description: get Solicitud
+      operationId: SolicitudController.GetAll
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Solicitud'
+        "403":
+          description: ""
+    post:
+      tags:
+      - solicitud
+      description: create Solicitud
+      operationId: SolicitudController.Create
+      parameters:
+      - in: body
+        name: body
+        description: body for Solicitud content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Solicitud'
+      responses:
+        "201":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Solicitud'
+        "403":
+          description: body is empty
+  /solicitud/{id}:
+    get:
+      tags:
+      - solicitud
+      description: get Solicitud by id
+      operationId: SolicitudController.GetOne
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Solicitud'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - solicitud
+      description: update the Solicitud
+      operationId: SolicitudController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for Solicitud content
+        required: true
+        schema:
+          $ref: '#/definitions/models.Solicitud'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.Solicitud'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - solicitud
+      description: delete the Solicitud
+      operationId: SolicitudController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
+  /soporte_solicitud/:
+    get:
+      tags:
+      - soporte_solicitud
+      description: get SoporteSolicitud
+      operationId: SoporteSolicitudController.GetAll
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.SoporteSolicitud'
+        "403":
+          description: ""
+    post:
+      tags:
+      - soporte_solicitud
+      description: create SoporteSolicitud con múltiples documentos
+      operationId: SoporteSolicitudController.Create
+  /soporte_solicitud/{id}:
+    get:
+      tags:
+      - soporte_solicitud
+      description: get SoporteSolicitud by id
+      operationId: SoporteSolicitudController.GetOne
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.SoporteSolicitud'
+        "403":
+          description: :id is empty
+    put:
+      tags:
+      - soporte_solicitud
+      description: update the SoporteSolicitud
+      operationId: SoporteSolicitudController.Put
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body for SoporteSolicitud content
+        required: true
+        schema:
+          $ref: '#/definitions/models.SoporteSolicitud'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.SoporteSolicitud'
+        "403":
+          description: :id is not int
+    delete:
+      tags:
+      - soporte_solicitud
+      description: delete the SoporteSolicitud
+      operationId: SoporteSolicitudController.Delete
+      parameters:
+      - in: path
+        name: id
+        description: The id you want to delete
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{string} delete success!'
+        "403":
+          description: id is empty
   /user/:
     get:
       tags:
@@ -246,13 +464,19 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  3572.0xc0004249f0.false:
+  3668.0xc0003d7ec0.false:
     title: "false"
     type: object
-  4563.0xc000424bd0.false:
+  4411.0xc0003ee030.false:
     title: "false"
     type: object
-  4629.0xc000424c00.false:
+  4478.0xc0003ee060.false:
+    title: "false"
+    type: object
+  5847.0xc0003ee3c0.false:
+    title: "false"
+    type: object
+  5917.0xc0003ee3f0.false:
     title: "false"
     type: object
   models.Profile:
@@ -275,7 +499,7 @@ definitions:
       Activo:
         type: boolean
       EstadoSabaticoId:
-        $ref: '#/definitions/3572.0xc0004249f0.false'
+        $ref: '#/definitions/3668.0xc0003d7ec0.false'
       FechaCreacion:
         type: string
       FechaFin:
@@ -306,15 +530,37 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/4629.0xc000424c00.false'
+        $ref: '#/definitions/4478.0xc0003ee060.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/4563.0xc000424bd0.false'
-  models.Soportesolicitud:
-    title: Soportesolicitud
+        $ref: '#/definitions/4411.0xc0003ee030.false'
+  models.SoporteSolicitud:
+    title: SoporteSolicitud
     type: object
+    properties:
+      Activo:
+        type: boolean
+      DocumentoId:
+        type: integer
+        format: int64
+      EstadoSoporteSolicitudId:
+        $ref: '#/definitions/5917.0xc0003ee3f0.false'
+      FechaCreacion:
+        type: string
+      FechaModificacion:
+        type: string
+      Id:
+        type: integer
+        format: int64
+      RolUsuario:
+        type: string
+      SolicitudId:
+        $ref: '#/definitions/5847.0xc0003ee3c0.false'
+      TerceroId:
+        type: integer
+        format: int64
   models.User:
     title: User
     type: object
@@ -331,6 +577,13 @@ tags:
 - name: user
   description: |
     Operations about Users
+- name: solicitud
+  description: |
+    SolicitudController operations for Solicitud
+    @Tag Solicitud
+- name: soporte_solicitud
+  description: |
+    SoporteSolicitudController operations for SoporteSolicitud
 - name: sabatico
   description: |
     SabaticoController operations for Sabatico

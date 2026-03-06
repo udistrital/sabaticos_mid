@@ -1,39 +1,44 @@
 package main
 
 import (
-	_ "api_mid_sabaticos/routers"
-
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/context"
-	"github.com/udistrital/utils_oas/errorhandler"
+	"github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/plugins/cors"
+	_ "github.com/udistrital/sabaticos_mid/routers"
+	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
+	"github.com/udistrital/utils_oas/auditoria"
+	"github.com/udistrital/utils_oas/security"
 	"github.com/udistrital/utils_oas/xray"
 )
 
-// CORS middleware
-var CORS = func(ctx *context.Context) {
-	ctx.Output.Header("Access-Control-Allow-Origin", "*")
-	ctx.Output.Header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
-	ctx.Output.Header("Access-Control-Allow-Headers", "Content-Type,Authorization,Accept,X-Requested-With")
-	ctx.Output.Header("Access-Control-Allow-Credentials", "true")
-
-	if ctx.Input.Method() == "OPTIONS" {
-		ctx.Output.SetStatus(200)
-		return
-	}
-}
-
 func main() {
-	xray.InitXRay()
 
-	// Insertar filtro CORS
-	beego.InsertFilter("*", beego.BeforeRouter, CORS)
-
-	if beego.BConfig.RunMode == "dev" {
+	allowedOrigins := []string{"*.udistrital.edu.co"}
+	if beego.BConfig.RunMode == beego.DEV {
+		allowedOrigins = []string{"*"}
 		beego.BConfig.WebConfig.DirectoryIndex = true
 		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	}
 
-	beego.ErrorController(&errorhandler.ErrorHandlerController{})
+	beego.InsertFilter("*", beego.BeforeRouter, cors.Allow(&cors.Options{
+		AllowOrigins: allowedOrigins,
+		AllowMethods: []string{"DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"}, // ajustar según los métodos usados en el api
+		AllowHeaders: []string{
+			"Accept",
+			"Authorization",
+			"Content-Type",
+			"User-Agent",
+			"X-Amzn-Trace-Id"},
+		ExposeHeaders:    []string{"Content-Length"}, // agregar otros headers según sea el caso
+		AllowCredentials: true,
+	}))
 
+	err := xray.InitXRay()
+	if err != nil {
+		logs.Error("error configurando AWS XRay: %v", err)
+	}
+	apistatus.Init()
+	auditoria.InitMiddleware()
+	security.SetSecurityHeaders()
 	beego.Run()
 }

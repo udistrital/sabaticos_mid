@@ -1,15 +1,15 @@
 package controllers
 
 import (
-	"api_mid_sabaticos/helpers"
-	"api_mid_sabaticos/models"
-	"api_mid_sabaticos/service"
+	"github.com/udistrital/sabaticos_mid/helpers"
+	"github.com/udistrital/sabaticos_mid/models"
+	"github.com/udistrital/sabaticos_mid/service"
 	"net/http"
 
 	"github.com/astaxie/beego"
 )
 
-// SoportesolicitudController operations for Soportesolicitud
+// SoporteSolicitudController operations for SoporteSolicitud
 type SoporteSolicitudController struct {
 	beego.Controller
 }
@@ -25,7 +25,7 @@ func (c *SoporteSolicitudController) URLMapping() {
 
 // Post ...
 // @Title Create
-// @Description create Soportesolicitud con múltiples documentos
+// @Description create SoporteSolicitud con múltiples documentos
 // @router / [post]
 func (c *SoporteSolicitudController) Post() {
 	var soporteSolicitudRequest models.SoporteSolicitudRequest
@@ -64,9 +64,9 @@ func (c *SoporteSolicitudController) Post() {
 
 // GetOne ...
 // @Title GetOne
-// @Description get Soportesolicitud by id
+// @Description get SoporteSolicitud by id
 // @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Soportesolicitud
+// @Success 200 {object} models.SoporteSolicitud
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *SoporteSolicitudController) GetOne() {
@@ -75,14 +75,14 @@ func (c *SoporteSolicitudController) GetOne() {
 
 // GetAll ...
 // @Title GetAll
-// @Description get Soportesolicitud
+// @Description get SoporteSolicitud
 // @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
 // @Param	fields	query	string	false	"Fields returned. e.g. col1,col2 ..."
 // @Param	sortby	query	string	false	"Sorted-by fields. e.g. col1,col2 ..."
 // @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
 // @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
 // @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} models.Soportesolicitud
+// @Success 200 {object} models.SoporteSolicitud
 // @Failure 403
 // @router / [get]
 func (c *SoporteSolicitudController) GetAll() {
@@ -91,10 +91,10 @@ func (c *SoporteSolicitudController) GetAll() {
 
 // Put ...
 // @Title Put
-// @Description update the Soportesolicitud
+// @Description update the SoporteSolicitud
 // @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.Soportesolicitud	true		"body for Soportesolicitud content"
-// @Success 200 {object} models.Soportesolicitud
+// @Param	body		body 	models.SoporteSolicitud	true		"body for SoporteSolicitud content"
+// @Success 200 {object} models.SoporteSolicitud
 // @Failure 403 :id is not int
 // @router /:id [put]
 func (c *SoporteSolicitudController) Put() {
@@ -103,7 +103,7 @@ func (c *SoporteSolicitudController) Put() {
 
 // Delete ...
 // @Title Delete
-// @Description delete the Soportesolicitud
+// @Description delete the SoporteSolicitud
 // @Param	id		path 	string	true		"The id you want to delete"
 // @Success 200 {string} delete success!
 // @Failure 403 id is empty

@@ -8,7 +8,7 @@
 package routers
 
 import (
-	"api_mid_sabaticos/controllers"
+	"github.com/udistrital/sabaticos_mid/controllers"
 
 	"github.com/astaxie/beego"
 )

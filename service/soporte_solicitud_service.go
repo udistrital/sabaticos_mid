@@ -1,11 +1,11 @@
 package service
 
 import (
-	"api_mid_sabaticos/clients"
-	"api_mid_sabaticos/enums"
-	"api_mid_sabaticos/helpers"
-	"api_mid_sabaticos/models"
 	"fmt"
+	"github.com/udistrital/sabaticos_mid/clients"
+	"github.com/udistrital/sabaticos_mid/enums"
+	"github.com/udistrital/sabaticos_mid/helpers"
+	"github.com/udistrital/sabaticos_mid/models"
 	"mime/multipart"
 	"strconv"
 )

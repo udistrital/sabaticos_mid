@@ -3,10 +3,11 @@ package controllers
 import (
 	"net/http"
 
-	"api_mid_sabaticos/helpers"
-	"api_mid_sabaticos/models"
-	"api_mid_sabaticos/service"
+	"github.com/udistrital/sabaticos_mid/helpers"
+	"github.com/udistrital/sabaticos_mid/models"
+	"github.com/udistrital/sabaticos_mid/service"
 
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/requestmanager"
@@ -83,6 +84,7 @@ func (c *SolicitudController) GetOne() {
 // @Failure 403
 // @router / [get]
 func (c *SolicitudController) GetAll() {
+	fmt.Println("ASD")
 
 }
 
