@@ -20,13 +20,17 @@ func init() {
 				&controllers.UserController{},
 			),
 		),
+
 		beego.NSNamespace("/solicitud",
-			beego.NSRouter("/", &controllers.SolicitudController{}, "post:Post;get:GetAll"),
-			beego.NSRouter("/:id", &controllers.SolicitudController{}, "get:GetOne;put:Put;delete:Delete"),
+			beego.NSInclude(
+				&controllers.SolicitudController{},
+			),	
 		),
+
 		beego.NSNamespace("/soporte_solicitud",
-			beego.NSRouter("/", &controllers.SoporteSolicitudController{}, "post:Post;get:GetAll"),
-			beego.NSRouter("/:id", &controllers.SoporteSolicitudController{}, "get:GetOne;put:Put;delete:Delete"),
+			beego.NSInclude(
+				&controllers.SoporteSolicitudController{},
+			),
 		),
 		beego.NSNamespace("/sabatico",
 			beego.NSInclude(
