@@ -24,7 +24,7 @@ func init() {
 		beego.NSNamespace("/solicitud",
 			beego.NSInclude(
 				&controllers.SolicitudController{},
-			),	
+			),
 		),
 
 		beego.NSNamespace("/soporte_solicitud",
