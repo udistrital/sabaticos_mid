@@ -25,6 +25,7 @@ func init() {
 			beego.NSInclude(
 				&controllers.SolicitudController{},
 			),
+			beego.NSRouter("/radicar/:id", &controllers.SolicitudController{}, "post:Radicar"),
 		),
 
 		beego.NSNamespace("/soporte_solicitud",

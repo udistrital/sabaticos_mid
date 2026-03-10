@@ -6,14 +6,14 @@ import "strings"
 type TipoDocumento string
 
 const (
-	FORMACION_ACADEMICA TipoDocumento = "FA"
+	SOLCITUD_SABATICO TipoDocumento = "SOL_SAB"
 )
 
 func ObtenerCodigoTipoDocumento(nombre string) (string, bool) {
 	name := strings.ToUpper(strings.TrimSpace(nombre))
 	switch name {
-	case "FORMACION_ACADEMICA", string(FORMACION_ACADEMICA):
-		return string(FORMACION_ACADEMICA), true
+	case "SOLICITUD_SABATICO", string(SOLCITUD_SABATICO):
+		return string(SOLCITUD_SABATICO), true
 	default:
 		return "", false
 	}

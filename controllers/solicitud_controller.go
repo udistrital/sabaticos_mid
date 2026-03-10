@@ -26,6 +26,7 @@ func (c *SolicitudController) URLMapping() {
 	c.Mapping("GetAll", c.GetAll)
 	c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
+	c.Mapping("Radicar", c.Radicar)
 }
 
 // Post ...
@@ -109,4 +110,48 @@ func (c *SolicitudController) Put() {
 // @router /:id [delete]
 func (c *SolicitudController) Delete() {
 
+}
+
+// Radicar ...
+// @Title Radicar
+// @Description Radicar una solicitud (cambiar estado y crear registros)
+// @Param	id		path 	int	true		"The id of the Solicitud to radicar"
+// @Param	body		body 	models.SolicitudRequest	false	"body for additional data if needed"
+// @Success 200 {object} models.SolicitudResponse
+// @Failure 400 Bad request
+// @Failure 404 Solicitud not found
+// @router /radicar/:id [post]
+func (c *SolicitudController) Radicar() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	id := c.GetString(":id")
+	var RadicarSolicitudRequest models.RadicarSolicitudRequest
+
+	requestmanager.FillRequestWithPanic(&c.Controller, &RadicarSolicitudRequest)
+
+	// Validar que el ID de la solicitud esté presente
+	if id == "" {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "El id de la solicitud es requerido")
+		return
+	}
+
+	//Validar RadicarSolicitudRequest si es necesario, por ejemplo:
+	if RadicarSolicitudRequest.SolicitudId == 0 || RadicarSolicitudRequest.FormularioId == 0 || RadicarSolicitudRequest.Formulario == nil || RadicarSolicitudRequest.DocumentosId == nil || len(RadicarSolicitudRequest.DocumentosId) == 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos SolicitudId, FormularioId, Formulario y DocumentosId son requeridos en el cuerpo de la solicitud")
+		return
+	}
+
+	// Llamar al servicio para radicar
+	solicitud, err := service.RadicarSolicitud(RadicarSolicitudRequest)
+
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Error al radicar solicitud: "+err.Error())
+		return
+	}
+
+	respuesta := models.SolicitudResponse{
+		Solicitud: solicitud,
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud radicada exitosamente")
 }
