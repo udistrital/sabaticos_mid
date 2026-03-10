@@ -15,17 +15,10 @@ import (
 
 func init() {
 	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/user",
-			beego.NSInclude(
-				&controllers.UserController{},
-			),
-		),
-
 		beego.NSNamespace("/solicitud",
 			beego.NSInclude(
 				&controllers.SolicitudController{},
 			),
-			beego.NSRouter("/radicar/:id", &controllers.SolicitudController{}, "post:Radicar"),
 		),
 
 		beego.NSNamespace("/soporte_solicitud",

@@ -2,6 +2,7 @@ package clients
 
 import (
 	"fmt"
+
 	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/models"
 
@@ -21,7 +22,7 @@ func ValidarTercero(terceroId int) error {
 	}
 
 	if terceroTipoTercero == nil {
-		return fmt.Errorf("No Se Encontro ese Tercero con Rol de Docente")
+		return fmt.Errorf("third party with teacher role not found")
 	}
 
 	fmt.Printf("%+v\n", terceroTipoTercero)
@@ -38,7 +39,7 @@ func ConsultarTipoTercero(codigoAbreviacion enums.TipoTercero) (*models.TipoTerc
 	}
 
 	if len(tipos) == 0 {
-		return nil, fmt.Errorf("Tipo de Tercero no Encontrado: %s", string(codigoAbreviacion))
+		return nil, fmt.Errorf("third party type not found: %s", string(codigoAbreviacion))
 	}
 
 	return &tipos[0], nil
