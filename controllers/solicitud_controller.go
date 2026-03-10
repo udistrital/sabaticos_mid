@@ -21,11 +21,8 @@ type SolicitudController struct {
 
 // URLMapping ...
 func (c *SolicitudController) URLMapping() {
-	c.Mapping("Post", c.Post)
-	c.Mapping("Put", c.Put)
-	c.Mapping("Delete", c.Delete)
-	c.Mapping("Aprobar", c.Aprobar)
-	c.Mapping("Rechazar", c.Rechazar)
+	c.Mapping("aprobar", c.Aprobar)
+	c.Mapping("rechazar", c.Rechazar)
 }
 
 // Post ...
@@ -60,15 +57,22 @@ func (c *SolicitudController) Post() {
 	helpers.JSONResponse(&c.Controller, true, http.StatusCreated, respuesta, "Solicitud creada exitosamente")
 }
 
+// Aprobar ...
+// @Title Aprobar
+// @Description Aprueba una solicitud creando un registro en el historial
+// @Param   body  body  interface{}  true  "body para aprobar solicitud"
+// @Success 200 {object} interface{}
+// @Failure 400 the request contains incorrect syntax
+// @router /aprobar [post]
 func (c *SolicitudController) Aprobar() {
 	defer errorhandler.HandlePanic(&c.Controller)
-
+	fmt.Println("ENTRA A AL AFUNCION DE APROBAR")
 	var SolicitudAprobarRechazarRequest models.SolicitudAprobarRechazarRequest
 
 	requestmanager.FillRequestWithPanic(&c.Controller, &SolicitudAprobarRechazarRequest)
 
-	if SolicitudAprobarRechazarRequest.TerceroId <= 0 || SolicitudAprobarRechazarRequest.SolicitudId <= 0 || SolicitudAprobarRechazarRequest.EstadoSolicitud <= 0 {
-		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId, solicitudId y estadoSolicitud son requeridos")
+	if SolicitudAprobarRechazarRequest.TerceroId <= 0 || SolicitudAprobarRechazarRequest.SolicitudId <= 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId, solicitudId")
 	}
 
 	HistorialSolicitud, err := service.Aprobar(SolicitudAprobarRechazarRequest)
@@ -79,10 +83,8 @@ func (c *SolicitudController) Aprobar() {
 	}
 
 	respuesta := models.SolicitudAprobarRechazarResponse{
-		SolicitudId: SolicitudAprobarRechazarRequest.SolicitudId,
-		EstadoSolicitud: &models.EstadoSolicitud{
-			Id: SolicitudAprobarRechazarRequest.EstadoSolicitud,
-		},
+		SolicitudId:     SolicitudAprobarRechazarRequest.SolicitudId,
+		EstadoSolicitud: 3,
 	}
 
 	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
