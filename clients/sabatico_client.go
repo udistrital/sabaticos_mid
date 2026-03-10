@@ -2,6 +2,7 @@ package clients
 
 import (
 	"fmt"
+
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
 
@@ -22,7 +23,7 @@ func ConsultarSabatico(sabaticoId int) (*models.Sabatico, error) {
 	}
 
 	if sabatico.Id == 0 {
-		return nil, fmt.Errorf("Sábatico no Encontrado: %d", sabaticoId)
+		return nil, fmt.Errorf("sabatico not found: %d", sabaticoId)
 	}
 
 	return &sabatico, nil
