@@ -101,9 +101,10 @@ func (c *SolicitudController) Aprobar() {
 	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
 }
 
-
 func (c *SolicitudController) Rechazar() {
 	fmt.Println("Rechazar solicitud - Endpoint pendiente desarrollo")
+}
+
 // Radicar ...
 // @Title Radicar
 // @Description Radicar una solicitud (cambiar estado y crear registros)

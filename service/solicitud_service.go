@@ -148,8 +148,8 @@ func Aprobar(SolicitudAprobarRequest models.SolicitudAprobarRechazarRequest) (*m
 
 func Rechazar(SolicitudRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
 	return nil, nil
-  
-  
+}
+
 func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (map[string]interface{}, error) {
 
 	solicitud, err := clients.ConsultarSolicitud(RadicarSolicitudRequest.SolicitudId)
