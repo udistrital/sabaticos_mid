@@ -7,28 +7,28 @@ import (
 	"mime/multipart"
 )
 
-// ArchivoBase64 estructura que contiene el nombre y contenido en base64 del archivo
+// ArchivoBase64 structure that contains the file name and base64-encoded content
 type ArchivoBase64 struct {
 	Nombre    string `json:"nombre"`
 	Contenido string `json:"contenido"`
 }
 
-// ConvertirArchivoABase64 convierte un archivo multipart a base64 con su nombre
+// ConvertirArchivoABase64 converts a multipart file to base64 with its name
 func ConvertirArchivoABase64(fileHeader *multipart.FileHeader) (*ArchivoBase64, error) {
-	// Abrir el archivo
+	// Open the file
 	file, err := fileHeader.Open()
 	if err != nil {
-		return nil, fmt.Errorf("error abriendo archivo: %v", err)
+		return nil, fmt.Errorf("error opening file: %v", err)
 	}
 	defer file.Close()
 
-	// Leer todo el contenido del archivo
+	// Read the entire file content
 	fileBytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, fmt.Errorf("error leyendo archivo: %v", err)
+		return nil, fmt.Errorf("error reading file: %v", err)
 	}
 
-	// Codificar a base64
+	// Encode to base64
 	base64String := base64.StdEncoding.EncodeToString(fileBytes)
 
 	return &ArchivoBase64{
@@ -37,7 +37,7 @@ func ConvertirArchivoABase64(fileHeader *multipart.FileHeader) (*ArchivoBase64, 
 	}, nil
 }
 
-// ConvertirArchivosABase64 convierte múltiples archivos a base64
+// ConvertirArchivosABase64 converts multiple files to base64
 func ConvertirArchivosABase64(files []*multipart.FileHeader) ([]ArchivoBase64, error) {
 	var archivosBase64 []ArchivoBase64
 

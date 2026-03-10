@@ -2,6 +2,7 @@ package clients
 
 import (
 	"fmt"
+
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
 
@@ -25,11 +26,11 @@ func RegistrarGestorDocumental(idTipoDocumento int, nombre string, descripcion s
 	payload := []models.GestorDocumentalCreateRequest{gestorDocumental}
 
 	if err := request.SendJson(beego.AppConfig.String("gestorDocumentalService")+"/document/uploadAnyFormat", "POST", &gestorDocumentalRes, payload); err != nil {
-		return nil, fmt.Errorf("falló uploadAnyFormat en gestor documental: %w", err)
+		return nil, fmt.Errorf("uploadAnyFormat failed in gestor documental: %w", err)
 	}
 
 	if err := helpers.ValidateServiceResponse(gestorDocumentalRes); err != nil {
-		return nil, fmt.Errorf("gestor documental devolvió error: %w", err)
+		return nil, fmt.Errorf("gestor documental returned error: %w", err)
 	}
 
 	if err := helpers.ExtractDataApi(gestorDocumentalRes, &gestorDocumentalFinalList); err == nil && len(gestorDocumentalFinalList) > 0 {
@@ -56,7 +57,7 @@ func ConsultarTipoDocumento(codigoAbreviacion string) (*models.TipoDocumento, er
 	}
 
 	if len(tipoDocumento) == 0 {
-		return nil, fmt.Errorf("Tipo de Documento no Encontrado: %s", codigoAbreviacion)
+		return nil, fmt.Errorf("document type not found: %s", codigoAbreviacion)
 	}
 
 	return &tipoDocumento[0], nil
