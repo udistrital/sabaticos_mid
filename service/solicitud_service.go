@@ -42,7 +42,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 	debeCrearFormulario := tipoSolicitud.CodigoAbreviacion == string(enums.NUEVA)
 
 	// Crear historial y formulario en paralelo
-	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, string(formulario), string(enums.ENVIADA), debeCrearFormulario)
+	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, string(formulario), string(enums.BORRADOR), debeCrearFormulario)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,7 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 
 	justificacion := "Radicación de solicitud"
 
-	historialSolicitud, err := clients.RegistrarHistorialSolicitud(solicitud.Id, solicitud.TerceroId, justificacion, string(enums.RADICADA))
+	historialSolicitud, err := clients.RegistrarHistorialSolicitud(solicitud.Id, solicitud.TerceroId, justificacion, string(enums.RADICADA_ENVIADA_SA_RADICADA))
 	if err != nil {
 		beego.Error("error registering request history:", err)
 	}
@@ -157,7 +157,7 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 
 	var soportes []*models.SoporteSolicitud
 	for _, soporteId := range RadicarSolicitudRequest.DocumentosId {
-		soporte, err := clients.ActualizarSoporteSolicitud(soporteId, solicitud.Id, string(enums.RADICADA))
+		soporte, err := clients.ActualizarSoporteSolicitud(soporteId, solicitud.Id, string(enums.RADICADO))
 		if err != nil {
 			return nil, err
 		}
