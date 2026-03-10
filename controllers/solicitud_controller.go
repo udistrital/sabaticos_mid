@@ -4,11 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/astaxie/beego"
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
 	"github.com/udistrital/sabaticos_mid/service"
-
-	"github.com/astaxie/beego"
 	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/requestmanager"
 )
@@ -66,16 +65,20 @@ func (c *SolicitudController) Post() {
 // @router /aprobar [post]
 func (c *SolicitudController) Aprobar() {
 	defer errorhandler.HandlePanic(&c.Controller)
-	fmt.Println("ENTRA A AL AFUNCION DE APROBAR")
-	var SolicitudAprobarRechazarRequest models.SolicitudAprobarRechazarRequest
 
-	requestmanager.FillRequestWithPanic(&c.Controller, &SolicitudAprobarRechazarRequest)
-
-	if SolicitudAprobarRechazarRequest.TerceroId <= 0 || SolicitudAprobarRechazarRequest.SolicitudId <= 0 {
+	//requestmanager.FillRequestWithPanic(&c.Controller, &SolicitudAprobarRechazarRequest)
+	jsonEntrada := models.SolicitudAprobarRechazarRequest{
+		TerceroId:       101,
+		SolicitudId:     1,
+		Justificacion:   "Documento de prueba",
+		EstadoSolicitud: 3,
+	}
+	fmt.Println(jsonEntrada)
+	if jsonEntrada.TerceroId <= 0 || jsonEntrada.SolicitudId <= 0 {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId, solicitudId")
 	}
 
-	HistorialSolicitud, err := service.Aprobar(SolicitudAprobarRechazarRequest)
+	HistorialSolicitud, err := service.Aprobar(jsonEntrada)
 
 	if err != nil {
 		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
@@ -83,7 +86,7 @@ func (c *SolicitudController) Aprobar() {
 	}
 
 	respuesta := models.SolicitudAprobarRechazarResponse{
-		SolicitudId:     SolicitudAprobarRechazarRequest.SolicitudId,
+		SolicitudId:     jsonEntrada.SolicitudId,
 		EstadoSolicitud: 3,
 	}
 

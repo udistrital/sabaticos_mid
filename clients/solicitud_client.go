@@ -147,7 +147,7 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion s
 
 func RegistrarHistorialSolicitudEstado(solicitudId int, terceroId int, justificacion string, estadoSolicitudId int) (*models.HistorialSolicitud, error) {
 	var historicoResp interface{}
-
+	fmt.Println("ENTRA A CREAR EL HISTORICO")
 	historial := models.HistorialSolicitudCreateRequest{
 		TerceroId:     terceroId,
 		Justificacion: justificacion,
