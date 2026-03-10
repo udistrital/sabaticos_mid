@@ -2,10 +2,11 @@ package service
 
 import (
 	"errors"
+	"time"
+
 	"github.com/udistrital/sabaticos_mid/clients"
 	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/models"
-	"time"
 
 	"github.com/astaxie/beego"
 )
@@ -131,4 +132,14 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 	}
 
 	return historial, formulario, nil
+}
+
+func Aprobar(SolicitudAprobarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
+	clients.RegistrarHistorialSolicitudEstado(SolicitudAprobarRequest.SolicitudId, SolicitudAprobarRequest.TerceroId, SolicitudAprobarRequest.Justificacion, 3)
+	// olicitudId int, terceroId int, justificacion string, estadoSolicitudId int
+	return nil, nil
+}
+
+func Rechazar(SolicitudRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
+	return nil, nil
 }

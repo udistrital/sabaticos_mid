@@ -71,7 +71,7 @@ func (c *SolicitudController) Aprobar() {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId, solicitudId y estadoSolicitud son requeridos")
 	}
 
-	HistorialSolicitud, err := service.AprobarRechazarSolicitud(SolicitudAprobarRechazarRequest)
+	HistorialSolicitud, err := service.Aprobar(SolicitudAprobarRechazarRequest)
 
 	if err != nil {
 		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
@@ -79,8 +79,13 @@ func (c *SolicitudController) Aprobar() {
 	}
 
 	respuesta := models.SolicitudAprobarRechazarResponse{
-		HistorialSolicitud: HistorialSolicitud,
+		SolicitudId: SolicitudAprobarRechazarRequest.SolicitudId,
+		EstadoSolicitud: &models.EstadoSolicitud{
+			Id: SolicitudAprobarRechazarRequest.EstadoSolicitud,
+		},
 	}
+
+	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
 
 	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
 }
