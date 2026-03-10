@@ -1,6 +1,6 @@
 module github.com/udistrital/sabaticos_mid
 
-go 1.25.0
+go 1.25.5
 
 require (
 	github.com/astaxie/beego v1.12.3

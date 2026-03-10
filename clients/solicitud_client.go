@@ -205,6 +205,39 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion s
 	return historialFinal, nil
 }
 
+func RegistrarHistorialSolicitudEstado(solicitudId int, terceroId int, justificacion string, estadoSolicitudIdEntrante int) (*models.HistorialSolicitud, error) {
+
+	var historicoResp interface{}
+
+	historial := models.HistorialSolicitudCreateRequest{
+		TerceroId:     terceroId,
+		Justificacion: justificacion,
+		Activo:        true,
+		EstadoSolicitudId: models.IdReference{
+			Id: estadoSolicitudIdEntrante,
+		},
+		SolicitudId: models.IdReference{
+			Id: solicitudId,
+		},
+	}
+
+	fmt.Println("HISTORIAL A CREAR: ", historial)
+
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {
+		beego.Error("Error Histórico:", err)
+		fmt.Println("Error Histórico:", err)
+	}
+
+	var historialFinal *models.HistorialSolicitud
+
+	if err := helpers.ExtractDataApi(historicoResp, &historialFinal); err != nil {
+		beego.Error("Error extrayendo Datos de Histórico:", err)
+		return nil, err
+	}
+
+	return historialFinal, nil
+}
+
 func RegistrarFormularioSolicitud(solicitudId int, contenido string) (*models.FormularioSolicitud, error) {
 	var formularioResp interface{}
 

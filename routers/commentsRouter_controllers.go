@@ -23,6 +23,15 @@ func init() {
 			MethodParams:     param.Make(),
 			Filters:          nil,
 			Params:           nil})
+  
+  beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SolicitudController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SolicitudController"],
+		beego.ControllerComments{
+			Method:           "Aprobar",
+			Router:           "/aprobar",
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
 
 	beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SoporteSolicitudController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SoporteSolicitudController"],
 		beego.ControllerComments{
