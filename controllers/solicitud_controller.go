@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
 	"github.com/udistrital/sabaticos_mid/service"
 
-	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/requestmanager"
@@ -22,10 +22,10 @@ type SolicitudController struct {
 // URLMapping ...
 func (c *SolicitudController) URLMapping() {
 	c.Mapping("Post", c.Post)
-	c.Mapping("GetOne", c.GetOne)
-	c.Mapping("GetAll", c.GetAll)
 	c.Mapping("Put", c.Put)
 	c.Mapping("Delete", c.Delete)
+	c.Mapping("Aprobar", c.Aprobar)
+	c.Mapping("Rechazar", c.Rechazar)
 }
 
 // Post ...
@@ -60,53 +60,31 @@ func (c *SolicitudController) Post() {
 	helpers.JSONResponse(&c.Controller, true, http.StatusCreated, respuesta, "Solicitud creada exitosamente")
 }
 
-// GetOne ...
-// @Title GetOne
-// @Description get Solicitud by id
-// @Param	id		path 	string	true		"The key for staticblock"
-// @Success 200 {object} models.Solicitud
-// @Failure 403 :id is empty
-// @router /:id [get]
-func (c *SolicitudController) GetOne() {
+func (c *SolicitudController) Aprobar() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
+	var SolicitudAprobarRechazarRequest models.SolicitudAprobarRechazarRequest
+
+	requestmanager.FillRequestWithPanic(&c.Controller, &SolicitudAprobarRechazarRequest)
+
+	if SolicitudAprobarRechazarRequest.TerceroId <= 0 || SolicitudAprobarRechazarRequest.SolicitudId <= 0 || SolicitudAprobarRechazarRequest.EstadoSolicitud <= 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId, solicitudId y estadoSolicitud son requeridos")
+	}
+
+	HistorialSolicitud, err := service.AprobarRechazarSolicitud(SolicitudAprobarRechazarRequest)
+
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
+		return
+	}
+
+	respuesta := models.SolicitudAprobarRechazarResponse{
+		HistorialSolicitud: HistorialSolicitud,
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
 }
 
-// GetAll ...
-// @Title GetAll
-// @Description get Solicitud
-// @Param	query	query	string	false	"Filter. e.g. col1:v1,col2:v2 ..."
-// @Param	fields	query	string	false	"Fields returned. e.g. col1,col2 ..."
-// @Param	sortby	query	string	false	"Sorted-by fields. e.g. col1,col2 ..."
-// @Param	order	query	string	false	"Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ..."
-// @Param	limit	query	string	false	"Limit the size of result set. Must be an integer"
-// @Param	offset	query	string	false	"Start position of result set. Must be an integer"
-// @Success 200 {object} models.Solicitud
-// @Failure 403
-// @router / [get]
-func (c *SolicitudController) GetAll() {
-	fmt.Println("ASD")
-
-}
-
-// Put ...
-// @Title Put
-// @Description update the Solicitud
-// @Param	id		path 	string	true		"The id you want to update"
-// @Param	body		body 	models.Solicitud	true		"body for Solicitud content"
-// @Success 200 {object} models.Solicitud
-// @Failure 403 :id is not int
-// @router /:id [put]
-func (c *SolicitudController) Put() {
-
-}
-
-// Delete ...
-// @Title Delete
-// @Description delete the Solicitud
-// @Param	id		path 	string	true		"The id you want to delete"
-// @Success 200 {string} delete success!
-// @Failure 403 id is empty
-// @router /:id [delete]
-func (c *SolicitudController) Delete() {
-
+func (c *SolicitudController) Rechazar() {
+	fmt.Println("Rechazar solicitud - Endpoint en desarrollo")
 }

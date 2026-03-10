@@ -3,6 +3,7 @@ package clients
 import (
 	"errors"
 	"fmt"
+
 	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
@@ -124,6 +125,35 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion s
 		Activo:        true,
 		EstadoSolicitudId: models.IdReference{
 			Id: tipoSolicitud.Id,
+		},
+		SolicitudId: models.IdReference{
+			Id: solicitudId,
+		},
+	}
+
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {
+		beego.Error("Error Histórico:", err)
+	}
+
+	var historialFinal *models.HistorialSolicitud
+
+	if err := helpers.ExtractDataApi(historicoResp, &historialFinal); err != nil {
+		beego.Error("Error extrayendo Datos de Histórico:", err)
+		return nil, err
+	}
+
+	return historialFinal, nil
+}
+
+func RegistrarHistorialSolicitudEstado(solicitudId int, terceroId int, justificacion string, estadoSolicitudId int) (*models.HistorialSolicitud, error) {
+	var historicoResp interface{}
+
+	historial := models.HistorialSolicitudCreateRequest{
+		TerceroId:     terceroId,
+		Justificacion: justificacion,
+		Activo:        true,
+		EstadoSolicitudId: models.IdReference{
+			Id: estadoSolicitudId,
 		},
 		SolicitudId: models.IdReference{
 			Id: solicitudId,

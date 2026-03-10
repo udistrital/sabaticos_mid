@@ -464,19 +464,19 @@ paths:
         "200":
           description: '{string} logout success'
 definitions:
-  3668.0xc0003d7ec0.false:
+  3572.0xc000315a10.false:
     title: "false"
     type: object
-  4411.0xc0003ee030.false:
+  4298.0xc000315b00.false:
     title: "false"
     type: object
-  4478.0xc0003ee060.false:
+  4364.0xc000315b30.false:
     title: "false"
     type: object
-  5847.0xc0003ee3c0.false:
+  5696.0xc000315e90.false:
     title: "false"
     type: object
-  5917.0xc0003ee3f0.false:
+  5765.0xc000315ec0.false:
     title: "false"
     type: object
   models.Profile:
@@ -499,7 +499,7 @@ definitions:
       Activo:
         type: boolean
       EstadoSabaticoId:
-        $ref: '#/definitions/3668.0xc0003d7ec0.false'
+        $ref: '#/definitions/3572.0xc000315a10.false'
       FechaCreacion:
         type: string
       FechaFin:
@@ -530,12 +530,12 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/4478.0xc0003ee060.false'
+        $ref: '#/definitions/4364.0xc000315b30.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/4411.0xc0003ee030.false'
+        $ref: '#/definitions/4298.0xc000315b00.false'
   models.SoporteSolicitud:
     title: SoporteSolicitud
     type: object
@@ -546,7 +546,7 @@ definitions:
         type: integer
         format: int64
       EstadoSoporteSolicitudId:
-        $ref: '#/definitions/5917.0xc0003ee3f0.false'
+        $ref: '#/definitions/5765.0xc000315ec0.false'
       FechaCreacion:
         type: string
       FechaModificacion:
@@ -557,7 +557,7 @@ definitions:
       RolUsuario:
         type: string
       SolicitudId:
-        $ref: '#/definitions/5847.0xc0003ee3c0.false'
+        $ref: '#/definitions/5696.0xc000315e90.false'
       TerceroId:
         type: integer
         format: int64
