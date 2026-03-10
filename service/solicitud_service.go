@@ -2,10 +2,11 @@ package service
 
 import (
 	"errors"
+	"time"
+
 	"github.com/udistrital/sabaticos_mid/clients"
 	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/models"
-	"time"
 
 	"github.com/astaxie/beego"
 )
@@ -53,7 +54,7 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 func validarSolicitudPorTipo(CodigoAbreviacion string, sabaticoId *int) error {
 	if CodigoAbreviacion == string(enums.NUEVA) {
 		if sabaticoId != nil {
-			return errors.New("No se Puede Crear Una Solicitud NUEVA Con Un Sabático Asociado")
+			return errors.New("a NEW request cannot be created with an associated Sabbatical")
 		}
 		return nil
 	}
@@ -63,7 +64,7 @@ func validarSolicitudPorTipo(CodigoAbreviacion string, sabaticoId *int) error {
 	}
 
 	if sabaticoId == nil {
-		return errors.New("Una Solicitud de SUSPENSIÓN debe Tener un Sabático Asociado")
+		return errors.New("a SUSPENSION request must have an associated Sabbatical")
 	}
 
 	// Consultar si el sabático existe
@@ -75,12 +76,12 @@ func validarSolicitudPorTipo(CodigoAbreviacion string, sabaticoId *int) error {
 	// Validar que el sabático tenga máximo 3 meses desde su creación
 	fechaCreacion, err := time.Parse("2006-01-02 15:04:05 -0700 -0700", sabatico.FechaCreacion)
 	if err != nil {
-		return errors.New("Formato Inválido de FechaCreacion del Sabático")
+		return errors.New("invalid FechaCreacion format for the Sabbatical")
 	}
 
 	fechaLimite := fechaCreacion.AddDate(0, 3, 0)
 	if time.Now().After(fechaLimite) {
-		return errors.New("No se Puede Crear Una Solicitud de SUSPENSIÓN Sespués de 3 Meses Desde la Creación del Sabático")
+		return errors.New("a SUSPENSION request cannot be created after 3 months from the Sabbatical creation date")
 	}
 
 	return nil
@@ -100,7 +101,7 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, formularioReq
 	go func() {
 		historial, historialErr = clients.RegistrarHistorialSolicitud(solicitudId, terceroId, justificacion, codigoEstadoSolicitud)
 		if historialErr != nil {
-			beego.Error("Error Registrando Historial de Solicitud:", historialErr)
+			beego.Error("error registering request history:", historialErr)
 		}
 		done <- true
 	}()
@@ -111,7 +112,7 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, formularioReq
 		go func() {
 			formulario, formularioErr = clients.RegistrarFormularioSolicitud(solicitudId, formularioRequest)
 			if formularioErr != nil {
-				beego.Error("Error Registrando Formulario de Solicitud:", formularioErr)
+				beego.Error("error registering request form:", formularioErr)
 			}
 			done <- true
 		}()
@@ -146,7 +147,7 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 
 	historialSolicitud, err := clients.RegistrarHistorialSolicitud(solicitud.Id, solicitud.TerceroId, justificacion, string(enums.RADICADA))
 	if err != nil {
-		beego.Error("Error Registrando Historial de Solicitud:", err)
+		beego.Error("error registering request history:", err)
 	}
 
 	formularioActtualizado, err := clients.ActualizarFormularioSolicitud(solicitud.Id, RadicarSolicitudRequest.FormularioId, string(RadicarSolicitudRequest.Formulario))

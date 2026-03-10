@@ -54,7 +54,7 @@ func ValidateServiceResponse(response interface{}) error {
 				msg, _ = respMap["Status"].(string)
 			}
 			if msg == "" {
-				msg = "respuesta del servicio con Success=false"
+				msg = "service response with Success=false"
 			}
 			return errors.New(msg)
 		}
@@ -74,10 +74,10 @@ func ValidateServiceResponse(response interface{}) error {
 			detail = status
 		}
 		if detail == "" {
-			detail = "error no especificado"
+			detail = "unspecified error"
 		}
 
-		return fmt.Errorf("código %d: %s", code, detail)
+		return fmt.Errorf("code %d: %s", code, detail)
 	}
 
 	return nil
@@ -112,7 +112,7 @@ func toInt(value interface{}) int {
 		if err == nil {
 			return n
 		}
-		// Soporta formatos como "500 Internal Server Error"
+		// Supports formats like "500 Internal Server Error"
 		for i := 0; i < len(v); i++ {
 			if v[i] < '0' || v[i] > '9' {
 				if i > 0 {
@@ -136,9 +136,9 @@ func JSONResponse(
 	data interface{},
 	message string,
 ) {
-	data = ExtractData(data) // Limpia datos tipo OAS si es necesario
+	data = ExtractData(data) // Cleans OAS-type data if necessary
 
-	// Configurar respuesta JSON estándar
+	// Set standard JSON response
 	c.Ctx.Output.SetStatus(status)
 	c.Data["json"] = requestresponse.APIResponseDTO(
 		success,
