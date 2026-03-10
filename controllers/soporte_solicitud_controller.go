@@ -36,7 +36,7 @@ func (c *SoporteSolicitudController) Post() {
 	// Validar campos requeridos
 	if soporteSolicitudRequest.TerceroId == 0 || soporteSolicitudRequest.SolicitudId == 0 ||
 		soporteSolicitudRequest.RolUsuario == "" || soporteSolicitudRequest.EstadoSoporteSolicitud == "" {
-		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "los campos terceroId, solicitudId, estadoSoporteSolicitud y rolUsuario son requeridos")
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "fields terceroId, solicitudId, estadoSoporteSolicitud and rolUsuario are required")
 		return
 	}
 
@@ -44,7 +44,7 @@ func (c *SoporteSolicitudController) Post() {
 	files, _ := c.GetFiles("documentos")
 
 	if len(files) == 0 {
-		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "se debe enviar al menos un archivo")
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "at least one file must be provided")
 		return
 	}
 
