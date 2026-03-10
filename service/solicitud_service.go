@@ -137,10 +137,11 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, sabaticoId *i
 
 func Aprobar(SolicitudAprobarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
 	fmt.Println("ENTRA A APROBAR")
-	fmt.Println(SolicitudAprobarRequest.SolicitudId)
-	clients.RegistrarHistorialSolicitudEstado(SolicitudAprobarRequest.SolicitudId, SolicitudAprobarRequest.TerceroId, SolicitudAprobarRequest.Justificacion, 3)
+	fmt.Println("SolicitudId: ", SolicitudAprobarRequest.SolicitudId)
+	HistorialSolicitudEstado, err := clients.RegistrarHistorialSolicitudEstado(SolicitudAprobarRequest.SolicitudId, SolicitudAprobarRequest.TerceroId, SolicitudAprobarRequest.Justificacion, 3)
+	fmt.Println("Sale de Registrar Historial: ", HistorialSolicitudEstado)
 	// olicitudId int, terceroId int, justificacion string, estadoSolicitudId int
-	return nil, nil
+	return HistorialSolicitudEstado, err
 }
 
 func Rechazar(SolicitudRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {

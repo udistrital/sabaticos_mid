@@ -145,23 +145,27 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion s
 	return historialFinal, nil
 }
 
-func RegistrarHistorialSolicitudEstado(solicitudId int, terceroId int, justificacion string, estadoSolicitudId int) (*models.HistorialSolicitud, error) {
+func RegistrarHistorialSolicitudEstado(solicitudId int, terceroId int, justificacion string, estadoSolicitudIdEntrante int) (*models.HistorialSolicitud, error) {
+
 	var historicoResp interface{}
-	fmt.Println("ENTRA A CREAR EL HISTORICO")
+
 	historial := models.HistorialSolicitudCreateRequest{
 		TerceroId:     terceroId,
 		Justificacion: justificacion,
 		Activo:        true,
 		EstadoSolicitudId: models.IdReference{
-			Id: estadoSolicitudId,
+			Id: estadoSolicitudIdEntrante,
 		},
 		SolicitudId: models.IdReference{
 			Id: solicitudId,
 		},
 	}
 
+	fmt.Println("HISTORIAL A CREAR: ", historial)
+
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {
 		beego.Error("Error Histórico:", err)
+		fmt.Println("Error Histórico:", err)
 	}
 
 	var historialFinal *models.HistorialSolicitud

@@ -66,19 +66,23 @@ func (c *SolicitudController) Post() {
 func (c *SolicitudController) Aprobar() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
-	//requestmanager.FillRequestWithPanic(&c.Controller, &SolicitudAprobarRechazarRequest)
-	jsonEntrada := models.SolicitudAprobarRechazarRequest{
+	var AprobarRequest models.SolicitudAprobarRechazarRequest
+
+	requestmanager.FillRequestWithPanic(&c.Controller, &AprobarRequest)
+
+	/*jsonEntrada := models.SolicitudAprobarRechazarRequest{
 		TerceroId:       101,
 		SolicitudId:     1,
 		Justificacion:   "Documento de prueba",
 		EstadoSolicitud: 3,
 	}
-	fmt.Println(jsonEntrada)
-	if jsonEntrada.TerceroId <= 0 || jsonEntrada.SolicitudId <= 0 {
-		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "Los campos terceroId, solicitudId")
+	*/
+
+	if AprobarRequest.TerceroId <= 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "El campos terceroId es necesario")
 	}
 
-	HistorialSolicitud, err := service.Aprobar(jsonEntrada)
+	HistorialSolicitud, err := service.Aprobar(AprobarRequest)
 
 	if err != nil {
 		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
@@ -86,7 +90,7 @@ func (c *SolicitudController) Aprobar() {
 	}
 
 	respuesta := models.SolicitudAprobarRechazarResponse{
-		SolicitudId:     jsonEntrada.SolicitudId,
+		SolicitudId:     AprobarRequest.SolicitudId,
 		EstadoSolicitud: 3,
 	}
 
@@ -96,5 +100,5 @@ func (c *SolicitudController) Aprobar() {
 }
 
 func (c *SolicitudController) Rechazar() {
-	fmt.Println("Rechazar solicitud - Endpoint en desarrollo")
+	fmt.Println("Rechazar solicitud - Endpoint pendiente desarrollo")
 }
