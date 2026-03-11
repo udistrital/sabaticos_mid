@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/astaxie/beego"
+	"github.com/udistrital/sabaticos_mid/clients"
+	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
 	"github.com/udistrital/sabaticos_mid/service"
@@ -21,7 +23,7 @@ type SolicitudController struct {
 // URLMapping ...
 func (c *SolicitudController) URLMapping() {
 	c.Mapping("aprobar", c.Aprobar)
-	c.Mapping("rechazar", c.Rechazar)
+	c.Mapping("aprobar-rechazar", c.Aprobar_Rechazar)
 	c.Mapping("Post", c.Post)
 	c.Mapping("Radicar", c.Radicar)
 }
@@ -84,7 +86,7 @@ func (c *SolicitudController) Aprobar() {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "El campos terceroId es necesario")
 	}
 
-	HistorialSolicitud, err := service.Aprobar(AprobarRequest)
+	HistorialSolicitud, err := service.CambiarEstado(AprobarRequest)
 
 	if err != nil {
 		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
@@ -95,14 +97,70 @@ func (c *SolicitudController) Aprobar() {
 		SolicitudId:     AprobarRequest.SolicitudId,
 		EstadoSolicitud: 3,
 	}
+	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
+}
+
+// Aprobar_Rechazar ...
+// @Title Aprobar_Rechazar
+// @Description Aprueba o rechaza una solicitud creando un registro en el historial
+// @Param   body  body  interface{}  true  "body para aprobar o rechazar solicitud"
+// @Success 200 {object} interface{}
+// @Failure 400 the request contains incorrect syntax
+// @router /Aprobar_Rechazar [post]
+func (c *SolicitudController) Aprobar_Rechazar() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	var ValidarRequest models.SolicitudAprobarRechazarRequest
+
+	requestmanager.FillRequestWithPanic(&c.Controller, &ValidarRequest)
+
+	/*jsonEntrada := models.SolicitudAprobarRechazarRequest{
+		TerceroId:       101,
+		SolicitudId:     1,
+		Justificacion:   "Documento de prueba",
+		EstadoSolicitud: "DEBERIA LLEGAR ALGO ASI",    				<-- debe cambiarse a string
+	}
+	*/
+
+	// Validación de ejemplo
+	if ValidarRequest.TerceroId <= 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "El campos terceroId es necesario")
+	}
+
+	HistorialSolicitud, err := service.CambiarEstado(ValidarRequest)
+
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
+		return
+	}
+
+	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
+
+	estado_nuevo, err_num := enums.ObtenerCodigoEstadoSolicitud(ValidarRequest.EstadoSolicitud)
+
+	fmt.Printf("Tipo: %T\n", estado_nuevo)
+	fmt.Printf("Valor: %s\n", estado_nuevo)
+
+	if err_num != true {
+		fmt.Printf("EstadoSolicitud no reconocido: %t\n", err_num)
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "EstadoSolicitud no reconocido: "+ValidarRequest.EstadoSolicitud)
+		return
+	}
+
+	estado_actualizar, err_estado := clients.ConsultarEstadoSolicitud(ValidarRequest.EstadoSolicitud)
+
+	if err_estado != nil {
+		fmt.Printf("Error consultando estado de solicitud: %v\n", err_estado)
+	}
+	respuesta := models.SolicitudAprobarRechazarResponse{
+		SolicitudId:     ValidarRequest.SolicitudId,
+		EstadoSolicitud: estado_actualizar.Id,
+	}
 
 	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
 
 	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
-}
-
-func (c *SolicitudController) Rechazar() {
-	fmt.Println("Rechazar solicitud - Endpoint pendiente desarrollo")
 }
 
 // Radicar ...

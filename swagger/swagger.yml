@@ -31,6 +31,46 @@ paths:
             $ref: '#/definitions/models.Solicitud'
         "403":
           description: body is empty
+  /solicitud/Aprobar_Rechazar:
+    post:
+      tags:
+      - solicitud
+      description: Aprueba una solicitud creando un registro en el historial
+      operationId: SolicitudController.Aprobar
+      parameters:
+      - in: body
+        name: body
+        description: body para aprobar solicitud
+        required: true
+        schema:
+          $ref: '#/definitions/interface{}'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/interface{}'
+        "400":
+          description: the request contains incorrect syntax
+  /solicitud/aprobar:
+    post:
+      tags:
+      - solicitud
+      description: Aprueba una solicitud creando un registro en el historial
+      operationId: SolicitudController.Aprobar
+      parameters:
+      - in: body
+        name: body
+        description: body para aprobar solicitud
+        required: true
+        schema:
+          $ref: '#/definitions/interface{}'
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/interface{}'
+        "400":
+          description: the request contains incorrect syntax
   /solicitud/radicar/{id}:
     post:
       tags:
@@ -65,14 +105,17 @@ paths:
       description: create SoporteSolicitud con múltiples documentos
       operationId: SoporteSolicitudController.Create
 definitions:
-  4680.0xc0003f7230.false:
+  5229.0xc0003c8ff0.false:
     title: "false"
     type: object
-  4746.0xc0003f7260.false:
+  5295.0xc0003c9020.false:
     title: "false"
     type: object
-  5601.0xc0003f7560.false:
+  6150.0xc0003c9290.false:
     title: "false"
+    type: object
+  interface{}:
+    title: interface{}
     type: object
   models.Solicitud:
     title: Solicitud
@@ -88,12 +131,12 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/4746.0xc0003f7260.false'
+        $ref: '#/definitions/5295.0xc0003c9020.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/4680.0xc0003f7230.false'
+        $ref: '#/definitions/5229.0xc0003c8ff0.false'
   models.SolicitudRequest:
     title: SolicitudRequest
     type: object
@@ -116,7 +159,7 @@ definitions:
     type: object
     properties:
       Solicitud:
-        $ref: '#/definitions/5601.0xc0003f7560.false'
+        $ref: '#/definitions/6150.0xc0003c9290.false'
 tags:
 - name: solicitud
   description: |
