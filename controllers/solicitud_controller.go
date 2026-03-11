@@ -1,13 +1,13 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/astaxie/beego"
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
 	"github.com/udistrital/sabaticos_mid/service"
-
-	"github.com/astaxie/beego"
 	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/requestmanager"
 )
@@ -20,6 +20,8 @@ type SolicitudController struct {
 
 // URLMapping ...
 func (c *SolicitudController) URLMapping() {
+	c.Mapping("aprobar", c.Aprobar)
+	c.Mapping("rechazar", c.Rechazar)
 	c.Mapping("Post", c.Post)
 	c.Mapping("Radicar", c.Radicar)
 }
@@ -54,6 +56,53 @@ func (c *SolicitudController) Post() {
 	}
 
 	helpers.JSONResponse(&c.Controller, true, http.StatusCreated, respuesta, "request created successfully")
+}
+
+// Aprobar ...
+// @Title Aprobar
+// @Description Aprueba una solicitud creando un registro en el historial
+// @Param   body  body  interface{}  true  "body para aprobar solicitud"
+// @Success 200 {object} interface{}
+// @Failure 400 the request contains incorrect syntax
+// @router /aprobar [post]
+func (c *SolicitudController) Aprobar() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	var AprobarRequest models.SolicitudAprobarRechazarRequest
+
+	requestmanager.FillRequestWithPanic(&c.Controller, &AprobarRequest)
+
+	/*jsonEntrada := models.SolicitudAprobarRechazarRequest{
+		TerceroId:       101,
+		SolicitudId:     1,
+		Justificacion:   "Documento de prueba",
+		EstadoSolicitud: 3,
+	}
+	*/
+
+	if AprobarRequest.TerceroId <= 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "El campos terceroId es necesario")
+	}
+
+	HistorialSolicitud, err := service.Aprobar(AprobarRequest)
+
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
+		return
+	}
+
+	respuesta := models.SolicitudAprobarRechazarResponse{
+		SolicitudId:     AprobarRequest.SolicitudId,
+		EstadoSolicitud: 3,
+	}
+
+	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
+}
+
+func (c *SolicitudController) Rechazar() {
+	fmt.Println("Rechazar solicitud - Endpoint pendiente desarrollo")
 }
 
 // Radicar ...

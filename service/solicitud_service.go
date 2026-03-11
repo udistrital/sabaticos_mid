@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/udistrital/sabaticos_mid/clients"
@@ -134,6 +135,19 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, formularioReq
 	}
 
 	return historial, formulario, nil
+}
+
+func Aprobar(SolicitudAprobarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
+	fmt.Println("ENTRA A APROBAR")
+	fmt.Println("SolicitudId: ", SolicitudAprobarRequest.SolicitudId)
+	HistorialSolicitudEstado, err := clients.RegistrarHistorialSolicitudEstado(SolicitudAprobarRequest.SolicitudId, SolicitudAprobarRequest.TerceroId, SolicitudAprobarRequest.Justificacion, 3)
+	fmt.Println("Sale de Registrar Historial: ", HistorialSolicitudEstado)
+	// olicitudId int, terceroId int, justificacion string, estadoSolicitudId int
+	return HistorialSolicitudEstado, err
+}
+
+func Rechazar(SolicitudRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
+	return nil, nil
 }
 
 func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (map[string]interface{}, error) {
