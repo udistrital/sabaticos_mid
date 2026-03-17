@@ -22,8 +22,7 @@ type SolicitudController struct {
 
 // URLMapping ...
 func (c *SolicitudController) URLMapping() {
-	c.Mapping("aprobar", c.Aprobar)
-	c.Mapping("aprobar-rechazar", c.Aprobar_Rechazar)
+	c.Mapping("aprobar-rechazar", c.Aprobar_Rechazar_solicitud)
 	c.Mapping("Post", c.Post)
 	c.Mapping("Radicar", c.Radicar)
 }
@@ -60,70 +59,20 @@ func (c *SolicitudController) Post() {
 	helpers.JSONResponse(&c.Controller, true, http.StatusCreated, respuesta, "request created successfully")
 }
 
-// Aprobar ...
-// @Title Aprobar
-// @Description Aprueba una solicitud creando un registro en el historial
-// @Param   body  body  interface{}  true  "body para aprobar solicitud"
-// @Success 200 {object} interface{}
-// @Failure 400 the request contains incorrect syntax
-// @router /aprobar [post]
-func (c *SolicitudController) Aprobar() {
-	defer errorhandler.HandlePanic(&c.Controller)
-
-	var AprobarRequest models.SolicitudAprobarRechazarRequest
-
-	requestmanager.FillRequestWithPanic(&c.Controller, &AprobarRequest)
-
-	/*jsonEntrada := models.SolicitudAprobarRechazarRequest{
-		TerceroId:       101,
-		SolicitudId:     1,
-		Justificacion:   "Documento de prueba",
-		EstadoSolicitud: 3,
-	}
-	*/
-
-	if AprobarRequest.TerceroId <= 0 {
-		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "El campos terceroId es necesario")
-	}
-
-	HistorialSolicitud, err := service.CambiarEstado(AprobarRequest)
-
-	if err != nil {
-		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
-		return
-	}
-
-	respuesta := models.SolicitudAprobarRechazarResponse{
-		SolicitudId:     AprobarRequest.SolicitudId,
-		EstadoSolicitud: 3,
-	}
-	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
-	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
-}
-
 // Aprobar_Rechazar ...
 // @Title Aprobar_Rechazar
 // @Description Aprueba o rechaza una solicitud creando un registro en el historial
 // @Param   body  body  interface{}  true  "body para aprobar o rechazar solicitud"
 // @Success 200 {object} interface{}
 // @Failure 400 the request contains incorrect syntax
-// @router /Aprobar_Rechazar [post]
-func (c *SolicitudController) Aprobar_Rechazar() {
+// @router /Aprobar_Rechazar_solicitud [post]
+func (c *SolicitudController) Aprobar_Rechazar_solicitud() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	var ValidarRequest models.SolicitudAprobarRechazarRequest
 
 	requestmanager.FillRequestWithPanic(&c.Controller, &ValidarRequest)
 
-	/*jsonEntrada := models.SolicitudAprobarRechazarRequest{
-		TerceroId:       101,
-		SolicitudId:     1,
-		Justificacion:   "Documento de prueba",
-		EstadoSolicitud: "DEBERIA LLEGAR ALGO ASI",    				<-- debe cambiarse a string
-	}
-	*/
-
-	// Validación de ejemplo
 	if ValidarRequest.TerceroId <= 0 {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "El campos terceroId es necesario")
 	}
@@ -135,14 +84,9 @@ func (c *SolicitudController) Aprobar_Rechazar() {
 		return
 	}
 
-	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
-
 	estado_nuevo, err_num := enums.ObtenerCodigoEstadoSolicitud(ValidarRequest.EstadoSolicitud)
 
-	fmt.Printf("Tipo: %T\n", estado_nuevo)
-	fmt.Printf("Valor: %s\n", estado_nuevo)
-
-	if err_num != true {
+	if err_num != true && estado_nuevo != "" {
 		fmt.Printf("EstadoSolicitud no reconocido: %t\n", err_num)
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "EstadoSolicitud no reconocido: "+ValidarRequest.EstadoSolicitud)
 		return
