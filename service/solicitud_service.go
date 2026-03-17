@@ -137,13 +137,27 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, formularioReq
 	return historial, formulario, nil
 }
 
-func Aprobar(SolicitudAprobarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
-	fmt.Println("ENTRA A APROBAR")
-	fmt.Println("SolicitudId: ", SolicitudAprobarRequest.SolicitudId)
-	HistorialSolicitudEstado, err := clients.RegistrarHistorialSolicitudEstado(SolicitudAprobarRequest.SolicitudId, SolicitudAprobarRequest.TerceroId, SolicitudAprobarRequest.Justificacion, 3)
-	fmt.Println("Sale de Registrar Historial: ", HistorialSolicitudEstado)
-	// olicitudId int, terceroId int, justificacion string, estadoSolicitudId int
-	return HistorialSolicitudEstado, err
+func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
+
+	fmt.Println("SolicitudId:", SolicitudAprobarRechazarRequest.EstadoSolicitud)
+
+	IdEstado, err := clients.ConsultarEstadoSolicitud(SolicitudAprobarRechazarRequest.EstadoSolicitud)
+	if err != nil {
+		fmt.Printf("Error consultando tipo de solicitud: %v\n", err)
+		return nil, err
+	}
+
+	HistorialSolicitudEstado, err := clients.RegistrarHistorialSolicitudEstado(
+		SolicitudAprobarRechazarRequest.SolicitudId,
+		SolicitudAprobarRechazarRequest.TerceroId,
+		SolicitudAprobarRechazarRequest.Justificacion,
+		IdEstado.Id,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return HistorialSolicitudEstado, nil
 }
 
 func Rechazar(SolicitudRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
