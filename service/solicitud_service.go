@@ -157,7 +157,7 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 		for _, idHistorial := range idsHistorial {
 			_, err := clients.DesactivarHistorialSolicitud(idHistorial)
 			if err != nil {
-				fmt.Println("error desactivando historial:", err)
+				fmt.Println("error desactivando historial:", idHistorial, err)
 				return nil, err
 			}
 		}

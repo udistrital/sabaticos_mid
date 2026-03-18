@@ -41,7 +41,8 @@ func ConsultarIdsHistorialSolicitud(idSolicitud int) ([]int, error) {
 	var historialSolicitudRes interface{}
 	var historialSolicitud []models.HistorialSolicitud
 
-	url := "https://pruebasapi.intranetoas.udistrital.edu.co/sabaticos_crud/v1/historial_solicitud?query=Activo:true,SolicitudId:" +
+	url := beego.AppConfig.String("sabaticosService") +
+		"/historial_solicitud?query=Activo:true,SolicitudId:" +
 		fmt.Sprint(idSolicitud) +
 		"&sortby=FechaCreacion&order=desc&limit=0"
 
@@ -70,13 +71,19 @@ func ConsultarEstadoSolicitud(codigo string) (*models.EstadoSolicitud, error) {
 		return nil, errors.New("request status not valid: " + codigo)
 	}
 
-	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/estado_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &estadoSolicitudRes); err != nil {
+	baseURL := beego.AppConfig.String("sabaticosService")
+	if baseURL == "" {
+		return nil, errors.New("config sabaticosService is empty")
+	}
+
+	url := baseURL + "/estado_solicitud?query=CodigoAbreviacion:" + codigoAbreviacion
+
+	if err := request.GetJson(url, &estadoSolicitudRes); err != nil {
 		return nil, err
 	}
 
 	if err := helpers.ExtractDataApi(estadoSolicitudRes, &estadoSolicitud); err != nil {
 		return nil, err
-
 	}
 
 	if len(estadoSolicitud) == 0 {
@@ -90,7 +97,8 @@ func ConsultarHistorialSolicitud(idHistorialSolicitud int) (*models.HistorialSol
 	var historialRes interface{}
 	var historial models.HistorialSolicitud
 
-	url := "https://pruebasapi.intranetoas.udistrital.edu.co/sabaticos_crud/v1/historial_solicitud/" + fmt.Sprint(idHistorialSolicitud)
+	url := beego.AppConfig.String("sabaticosService") +
+		"/historial_solicitud/" + fmt.Sprint(idHistorialSolicitud)
 
 	if err := request.GetJson(url, &historialRes); err != nil {
 		return nil, err
@@ -443,7 +451,8 @@ func DesactivarHistorialSolicitud(idHistorialSolicitud int) (bool, error) {
 		SolicitudId:       historialActual.SolicitudId,
 	}
 
-	url := "https://pruebasapi.intranetoas.udistrital.edu.co/sabaticos_crud/v1/historial_solicitud/" + fmt.Sprint(idHistorialSolicitud)
+	url := beego.AppConfig.String("sabaticosService") +
+		"/historial_solicitud/" + fmt.Sprint(idHistorialSolicitud)
 
 	if err := request.SendJson(url, "PUT", &historialResp, historial); err != nil {
 		beego.Error("error updating historial_solicitud:", err)
