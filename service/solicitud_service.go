@@ -139,12 +139,28 @@ func registrarHistorialYFormulario(solicitudId int, terceroId int, formularioReq
 
 func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
 
-	fmt.Println("SolicitudId:", SolicitudAprobarRechazarRequest.EstadoSolicitud)
-
 	IdEstado, err := clients.ConsultarEstadoSolicitud(SolicitudAprobarRechazarRequest.EstadoSolicitud)
 	if err != nil {
 		fmt.Printf("Error consultando tipo de solicitud: %v\n", err)
 		return nil, err
+	}
+
+	/* Se consultan los ids de la tabla historial asociados a la solicitud. */
+	idsHistorial, err := clients.ConsultarIdsHistorialSolicitud(SolicitudAprobarRechazarRequest.SolicitudId)
+	if err != nil {
+		fmt.Println("error:", err)
+		return nil, err
+	}
+
+	if len(idsHistorial) > 0 {
+		/* Se desactivan los historiales asociados */
+		for _, idHistorial := range idsHistorial {
+			_, err := clients.DesactivarHistorialSolicitud(idHistorial)
+			if err != nil {
+				fmt.Println("error desactivando historial:", idHistorial, err)
+				return nil, err
+			}
+		}
 	}
 
 	HistorialSolicitudEstado, err := clients.RegistrarHistorialSolicitudEstado(
