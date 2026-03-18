@@ -34,7 +34,7 @@ func ConsultarSolicitud(id int) (*models.Solicitud, error) {
 }
 
 /*
-ConsultarEstadoActualSolicitud() tiene como objetivo consultar el estado actual de una solicitud;
+ConsultarEstadoActualSolicitud tiene como objetivo consultar el estado actual de una solicitud;
 consume el crud para traer el historial más reciente activo de esa solicitud.
 */
 func ConsultarIdsHistorialSolicitud(idSolicitud int) ([]int, error) {
@@ -419,7 +419,7 @@ func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEst
 }
 
 /*
-Esta función tiene el Objetivo de dado in id de historial solicitud,
+Esta función tiene el Objetivo de dado un id de historial solicitud,
 Actualizar el registro de historial solicitud en su valor de activo a false
 */
 func DesactivarHistorialSolicitud(idHistorialSolicitud int) (bool, error) {
