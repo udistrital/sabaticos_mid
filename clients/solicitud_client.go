@@ -33,6 +33,34 @@ func ConsultarSolicitud(id int) (*models.Solicitud, error) {
 	return &solicitud, nil
 }
 
+/*
+ConsultarEstadoActualSolicitud() tiene como objetivo consultar el estado actual de una solicitud;
+consume el crud para traer el historial más reciente activo de esa solicitud.
+*/
+func ConsultarIdsHistorialSolicitud(idSolicitud int) ([]int, error) {
+	var historialSolicitudRes interface{}
+	var historialSolicitud []models.HistorialSolicitud
+
+	url := "https://pruebasapi.intranetoas.udistrital.edu.co/sabaticos_crud/v1/historial_solicitud?query=Activo:true,SolicitudId:" +
+		fmt.Sprint(idSolicitud) +
+		"&sortby=FechaCreacion&order=desc&limit=0"
+
+	if err := request.GetJson(url, &historialSolicitudRes); err != nil {
+		return nil, err
+	}
+
+	if err := helpers.ExtractDataApi(historialSolicitudRes, &historialSolicitud); err != nil {
+		return nil, err
+	}
+
+	ids := make([]int, 0, len(historialSolicitud))
+	for _, hs := range historialSolicitud {
+		ids = append(ids, hs.Id)
+	}
+
+	return ids, nil
+}
+
 func ConsultarEstadoSolicitud(codigo string) (*models.EstadoSolicitud, error) {
 	var estadoSolicitudRes interface{}
 	var estadoSolicitud []models.EstadoSolicitud
@@ -56,6 +84,27 @@ func ConsultarEstadoSolicitud(codigo string) (*models.EstadoSolicitud, error) {
 	}
 
 	return &estadoSolicitud[0], nil
+}
+
+func ConsultarHistorialSolicitud(idHistorialSolicitud int) (*models.HistorialSolicitud, error) {
+	var historialRes interface{}
+	var historial models.HistorialSolicitud
+
+	url := "https://pruebasapi.intranetoas.udistrital.edu.co/sabaticos_crud/v1/historial_solicitud/" + fmt.Sprint(idHistorialSolicitud)
+
+	if err := request.GetJson(url, &historialRes); err != nil {
+		return nil, err
+	}
+
+	if err := helpers.ExtractDataApi(historialRes, &historial); err != nil {
+		return nil, err
+	}
+
+	if historial.Id == 0 {
+		return nil, errors.New("historial_solicitud not found: " + fmt.Sprint(idHistorialSolicitud))
+	}
+
+	return &historial, nil
 }
 
 func ConsultarTipoSolicitud(codigo string) (*models.TipoSolicitud, error) {
@@ -221,8 +270,6 @@ func RegistrarHistorialSolicitudEstado(solicitudId int, terceroId int, justifica
 		},
 	}
 
-	fmt.Println("HISTORIAL A CREAR: ", historial)
-
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {
 		beego.Error("Error Histórico:", err)
 		fmt.Println("Error Histórico:", err)
@@ -369,4 +416,52 @@ func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEst
 	}
 
 	return soporteSolicitudFinal, nil
+}
+
+/*
+Esta función tiene el Objetivo de dado in id de historial solicitud,
+Actualizar el registro de historial solicitud en su valor de activo a false
+*/
+func DesactivarHistorialSolicitud(idHistorialSolicitud int) (bool, error) {
+	var historialResp interface{}
+	var historialActual *models.HistorialSolicitud
+	var historialFinal *models.HistorialSolicitud
+
+	historialActual, err := ConsultarHistorialSolicitud(idHistorialSolicitud)
+	if err != nil {
+		return false, err
+	}
+
+	historial := models.HistorialSolicitud{
+		Id:                historialActual.Id,
+		TerceroId:         historialActual.TerceroId,
+		Justificacion:     historialActual.Justificacion,
+		Activo:            false,
+		FechaCreacion:     historialActual.FechaCreacion,
+		FechaModificacion: historialActual.FechaModificacion,
+		EstadoSolicitudId: historialActual.EstadoSolicitudId,
+		SolicitudId:       historialActual.SolicitudId,
+	}
+
+	url := "https://pruebasapi.intranetoas.udistrital.edu.co/sabaticos_crud/v1/historial_solicitud/" + fmt.Sprint(idHistorialSolicitud)
+
+	if err := request.SendJson(url, "PUT", &historialResp, historial); err != nil {
+		beego.Error("error updating historial_solicitud:", err)
+		return false, err
+	}
+
+	if err := helpers.ValidateServiceResponse(historialResp); err != nil {
+		return false, fmt.Errorf("sabaticosCrudService /historial_solicitud/%d returned error: %w", idHistorialSolicitud, err)
+	}
+
+	if err := helpers.ExtractDataApi(historialResp, &historialFinal); err != nil {
+		beego.Error("error extracting historial_solicitud data:", err)
+		return false, err
+	}
+
+	if historialFinal == nil || historialFinal.Id == 0 || historialFinal.Activo {
+		return false, errors.New("historial_solicitud was not deactivated: " + fmt.Sprint(idHistorialSolicitud))
+	}
+
+	return true, nil
 }

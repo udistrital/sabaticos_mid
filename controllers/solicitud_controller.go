@@ -79,7 +79,7 @@ func (c *SolicitudController) Aprobar_Rechazar_solicitud() {
 
 	HistorialSolicitud, err := service.CambiarEstado(ValidarRequest)
 
-	if err != nil {
+	if err != nil && HistorialSolicitud != nil {
 		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
 		return
 	}
@@ -101,8 +101,6 @@ func (c *SolicitudController) Aprobar_Rechazar_solicitud() {
 		SolicitudId:     ValidarRequest.SolicitudId,
 		EstadoSolicitud: estado_actualizar.Id,
 	}
-
-	fmt.Printf("HistorialSolicitud: %+v\n", HistorialSolicitud)
 
 	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
 }
