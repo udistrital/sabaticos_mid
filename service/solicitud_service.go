@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/udistrital/sabaticos_mid/clients"
@@ -10,6 +9,7 @@ import (
 	"github.com/udistrital/sabaticos_mid/models"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
 )
 
 func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, error) {
@@ -141,14 +141,12 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 
 	IdEstado, err := clients.ConsultarEstadoSolicitud(SolicitudAprobarRechazarRequest.EstadoSolicitud)
 	if err != nil {
-		fmt.Printf("Error consultando tipo de solicitud: %v\n", err)
 		return nil, err
 	}
 
 	/* Se consultan los ids de la tabla historial asociados a la solicitud. */
 	idsHistorial, err := clients.ConsultarIdsHistorialSolicitud(SolicitudAprobarRechazarRequest.SolicitudId)
 	if err != nil {
-		fmt.Println("error:", err)
 		return nil, err
 	}
 
@@ -157,8 +155,42 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 		for _, idHistorial := range idsHistorial {
 			_, err := clients.DesactivarHistorialSolicitud(idHistorial)
 			if err != nil {
-				fmt.Println("error desactivando historial:", idHistorial, err)
 				return nil, err
+			}
+		}
+	}
+
+	/*
+		Si la solicitud es aprobar y enviar la solicitud,
+		se aprueban todos los documentos asociados
+	*/
+
+	aa1, aa2 := enums.ObtenerCodigoEstadoSolicitud("FINALIZADA_APROBADA_RESOLUCION")
+	if SolicitudAprobarRechazarRequest.EstadoSolicitud == aa1 && aa2 == true {
+
+		// Obtener soportes asociados a la solicitud
+		soportes, err := clients.ConsultarSoportesSolicitud(SolicitudAprobarRechazarRequest.SolicitudId)
+		if err != nil {
+			logs.Error("Error consultando soportes:", err)
+			return nil, err
+		}
+
+		// Validar si hay soportes
+		if len(soportes) == 0 {
+			logs.Warn("No hay soportes asociados a la solicitud")
+		} else {
+			for _, soporte := range soportes {
+
+				_, err := clients.ActualizarSoporteSolicitud(
+					soporte.Id,
+					SolicitudAprobarRechazarRequest.SolicitudId,
+					"APROB",
+				)
+
+				if err != nil {
+					logs.Error("Error actualizando soporte:", soporte.Id, err)
+					continue
+				}
 			}
 		}
 	}

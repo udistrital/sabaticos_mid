@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/astaxie/beego"
@@ -86,16 +85,22 @@ func (c *SolicitudController) Aprobar_Rechazar_solicitud() {
 
 	estado_nuevo, err_num := enums.ObtenerCodigoEstadoSolicitud(ValidarRequest.EstadoSolicitud)
 
-	if err_num != true && estado_nuevo != "" {
-		fmt.Printf("EstadoSolicitud no reconocido: %t\n", err_num)
-		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "EstadoSolicitud no reconocido: "+ValidarRequest.EstadoSolicitud)
+	if !err_num || estado_nuevo == "" {
+		helpers.JSONResponse(
+			&c.Controller,
+			false,
+			http.StatusBadRequest,
+			nil,
+			"EstadoSolicitud no reconocido: "+ValidarRequest.EstadoSolicitud,
+		)
 		return
 	}
 
 	estado_actualizar, err_estado := clients.ConsultarEstadoSolicitud(ValidarRequest.EstadoSolicitud)
 
 	if err_estado != nil {
-		fmt.Printf("Error consultando estado de solicitud: %v\n", err_estado)
+		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Error consultando estado de solicitud: "+err_estado.Error())
+		return
 	}
 	respuesta := models.SolicitudAprobarRechazarResponse{
 		SolicitudId:     ValidarRequest.SolicitudId,
