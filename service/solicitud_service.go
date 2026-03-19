@@ -165,8 +165,7 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 		se aprueban todos los documentos asociados
 	*/
 
-	aa1, aa2 := enums.ObtenerCodigoEstadoSolicitud("FINALIZADA_APROBADA_RESOLUCION")
-	if SolicitudAprobarRechazarRequest.EstadoSolicitud == aa1 && aa2 == true {
+	if SolicitudAprobarRechazarRequest.EstadoSolicitud != "" {
 
 		// Obtener soportes asociados a la solicitud
 		soportes, err := clients.ConsultarSoportesSolicitud(SolicitudAprobarRechazarRequest.SolicitudId)
@@ -184,7 +183,7 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 				_, err := clients.ActualizarSoporteSolicitud(
 					soporte.Id,
 					SolicitudAprobarRechazarRequest.SolicitudId,
-					"APROB",
+					SolicitudAprobarRechazarRequest.EstadoSoporte,
 				)
 
 				if err != nil {
