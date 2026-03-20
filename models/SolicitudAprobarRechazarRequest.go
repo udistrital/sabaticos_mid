@@ -5,4 +5,5 @@ type SolicitudAprobarRechazarRequest struct {
 	SolicitudId     int    `json:"SolicitudId"`
 	Justificacion   string `json:"Justificacion"`
 	EstadoSolicitud string `json:"EstadoSolicitud"`
+	EstadoSoporte   string
 }

@@ -202,6 +202,40 @@ func ConsultarSoporteSolicitud(id int) (*models.SoporteSolicitud, error) {
 	return &soporteSolicitud, nil
 }
 
+/*
+	 Consultar Soporte Solicitud Tiene el Objetivo dar un arreglo
+		con todos los soporte asociados a una solicitud
+*/
+func ConsultarSoportesSolicitud(id int) ([]models.SoporteSolicitud, error) {
+
+	var res interface{}
+	var soportes []models.SoporteSolicitud
+
+	// Construcción de la URL usando variable de entorno
+	url := fmt.Sprintf(
+		"%s/soporte_solicitud?query=Activo:true,SolicitudId:%d&limit=0",
+		beego.AppConfig.String("sabaticosService"),
+		id,
+	)
+
+	// Consumo del servicio
+	if err := request.GetJson(url, &res); err != nil {
+		return nil, err
+	}
+
+	// Extracción del data (formato estándar OAS)
+	if err := helpers.ExtractDataApi(res, &soportes); err != nil {
+		return nil, err
+	}
+
+	// Validación: si no hay resultados, retornar slice vacío (no error)
+	if len(soportes) == 0 {
+		return []models.SoporteSolicitud{}, nil
+	}
+
+	return soportes, nil
+}
+
 // Peticiones POST
 func RegistrarSolicitud(terceroId int, tipoSolicitudId int, sabaticoId *int) (*models.Solicitud, error) {
 	var solicitudRes interface{}
@@ -280,7 +314,6 @@ func RegistrarHistorialSolicitudEstado(solicitudId int, terceroId int, justifica
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {
 		beego.Error("Error Histórico:", err)
-		fmt.Println("Error Histórico:", err)
 	}
 
 	var historialFinal *models.HistorialSolicitud
