@@ -162,55 +162,48 @@ func ConsultarEstadoSoporteSolicitud(codigo string) (*models.EstadoSoporteSolici
 	return &estadoSoporteSolicitud[0], nil
 }
 
-// func ConsultarTodosHistorialSolicitud(estadosSolicitud []string) ([]models.FormularioSolicitud, error) {
+func ConsultarHistorialSolicitudIdEstadoId(historialId int, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
+	var historialRes interface{}
+	var historial []models.HistorialSolicitud
 
-// 	baseURL := beego.AppConfig.String("sabaticosService") +
-// 		"/soporte_solicitud?query=Activo:true"
-// 	suffix := "&sortby=FechaCreacion&order=desc&limit=0"
+	estadosId := make([]string, 0, len(estadosSolicitud))
 
-// 	if len(estadosSolicitud) == 0 {
-// 		var formulariosRes interface{}
-// 		var formularios []models.FormularioSolicitud
+	for _, estado := range estadosSolicitud {
+		codigoAbreviacion, err := enums.ObtenerCodigoEstadoSolicitud(estado)
+		if !err || codigoAbreviacion == "" {
+			return nil, fmt.Errorf("invalid request status code: %s", estado)
+		}
 
-// 		if err := request.GetJson(baseURL+suffix, &formulariosRes); err != nil {
-// 			return nil, err
-// 		}
+		estadoSolicitud, errConsult := ConsultarEstadoSolicitud(codigoAbreviacion)
+		if errConsult != nil {
+			return nil, fmt.Errorf("error consulting request status for code %s: %w", estado, errConsult)
+		}
 
-// 		if err := helpers.ExtractDataApi(formulariosRes, &formularios); err != nil {
-// 			return nil, err
-// 		}
+		estadosId = append(estadosId, fmt.Sprint(estadoSolicitud.Id))
+	}
 
-// 		return formularios, nil
-// 	}
+	url := beego.AppConfig.String("sabaticosService") +
+		"/historial_solicitud?query=Activo:true,Id:" + fmt.Sprint(historialId) + ",EstadoSolicitudId.Id:in(" + helpers.JoinStrings(estadosId, ",") + ")"
 
-// 	formulariosMap := make(map[int]models.FormularioSolicitud)
+	fmt.Println(url)
 
-// 	for _, estadoSolicitud := range estadosSolicitud {
-// 		var formulariosRes interface{}
-// 		var formulariosEstado []models.FormularioSolicitud
+	if err := request.GetJson(url, &historialRes); err != nil {
+		return nil, err
+	}
 
-// 		url := baseURL + ",EstadoSolicitudId.CodigoAbreviacion:" + estadoSolicitud + suffix
+	if err := helpers.ExtractDataApi(historialRes, &historial); err != nil {
+		var historialUnico models.HistorialSolicitud
+		if errUnico := helpers.ExtractDataApi(historialRes, &historialUnico); errUnico != nil {
+			return nil, err
+		}
 
-// 		if err := request.GetJson(url, &formulariosRes); err != nil {
-// 			return nil, err
-// 		}
+		if historialUnico.Id != 0 {
+			historial = append(historial, historialUnico)
+		}
+	}
 
-// 		if err := helpers.ExtractDataApi(formulariosRes, &formulariosEstado); err != nil {
-// 			return nil, err
-// 		}
-
-// 		for _, formulario := range formulariosEstado {
-// 			formulariosMap[formulario.Id] = formulario
-// 		}
-// 	}
-
-// 	formularios := make([]models.FormularioSolicitud, 0, len(formulariosMap))
-// 	for _, formulario := range formulariosMap {
-// 		formularios = append(formularios, formulario)
-// 	}
-
-// 	return formularios, nil
-// }
+	return historial, nil
+}
 
 func ConsultarTodosFormulariosSolicitud() ([]models.FormularioSolicitud, error) {
 	var formulariosRes interface{}

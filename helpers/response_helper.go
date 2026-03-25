@@ -148,3 +148,15 @@ func JSONResponse(
 	)
 	c.ServeJSON()
 }
+
+// JoinStrings joins a slice of strings with a separator
+func JoinStrings(strings []string, sep string) string {
+	result := ""
+	for i, s := range strings {
+		if i > 0 {
+			result += sep
+		}
+		result += s
+	}
+	return result
+}

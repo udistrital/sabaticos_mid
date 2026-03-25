@@ -219,7 +219,6 @@ func GetFormulariosByDocumentoId(documentoId string, estadosSolicitud []string) 
 	if err != nil {
 		return nil, err
 	}
-	_ = estadosSolicitud
 
 	formularios, err := clients.ConsultarTodosFormulariosSolicitud()
 	if err != nil {
@@ -261,12 +260,12 @@ func GetFormulariosByDocumentoId(documentoId string, estadosSolicitud []string) 
 			}
 
 			for _, idHistorial := range idsHistorial {
-				historial, err := clients.ConsultarHistorialSolicitud(idHistorial)
+				historial, err := clients.ConsultarHistorialSolicitudIdEstadoId(idHistorial, estadosSolicitud)
 				if err != nil {
 					return nil, err
 				}
 
-				historialSolicitud = append(historialSolicitud, *historial)
+				historialSolicitud = append(historialSolicitud, historial...)
 			}
 
 		}

@@ -167,15 +167,15 @@
         }
     },
     "definitions": {
-        "5708.0xc00043b680.false": {
+        "5708.0xc0004164e0.false": {
             "title": "false",
             "type": "object"
         },
-        "5774.0xc00043b6b0.false": {
+        "5774.0xc000416510.false": {
             "title": "false",
             "type": "object"
         },
-        "6629.0xc00043b9b0.false": {
+        "6629.0xc000416810.false": {
             "title": "false",
             "type": "object"
         },
@@ -201,14 +201,14 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/5774.0xc00043b6b0.false"
+                    "$ref": "#/definitions/5774.0xc000416510.false"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/5708.0xc00043b680.false"
+                    "$ref": "#/definitions/5708.0xc0004164e0.false"
                 }
             }
         },
@@ -241,7 +241,7 @@
             "type": "object",
             "properties": {
                 "Solicitud": {
-                    "$ref": "#/definitions/6629.0xc00043b9b0.false"
+                    "$ref": "#/definitions/6629.0xc000416810.false"
                 }
             }
         }
