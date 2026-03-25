@@ -162,6 +162,73 @@ func ConsultarEstadoSoporteSolicitud(codigo string) (*models.EstadoSoporteSolici
 	return &estadoSoporteSolicitud[0], nil
 }
 
+// func ConsultarTodosHistorialSolicitud(estadosSolicitud []string) ([]models.FormularioSolicitud, error) {
+
+// 	baseURL := beego.AppConfig.String("sabaticosService") +
+// 		"/soporte_solicitud?query=Activo:true"
+// 	suffix := "&sortby=FechaCreacion&order=desc&limit=0"
+
+// 	if len(estadosSolicitud) == 0 {
+// 		var formulariosRes interface{}
+// 		var formularios []models.FormularioSolicitud
+
+// 		if err := request.GetJson(baseURL+suffix, &formulariosRes); err != nil {
+// 			return nil, err
+// 		}
+
+// 		if err := helpers.ExtractDataApi(formulariosRes, &formularios); err != nil {
+// 			return nil, err
+// 		}
+
+// 		return formularios, nil
+// 	}
+
+// 	formulariosMap := make(map[int]models.FormularioSolicitud)
+
+// 	for _, estadoSolicitud := range estadosSolicitud {
+// 		var formulariosRes interface{}
+// 		var formulariosEstado []models.FormularioSolicitud
+
+// 		url := baseURL + ",EstadoSolicitudId.CodigoAbreviacion:" + estadoSolicitud + suffix
+
+// 		if err := request.GetJson(url, &formulariosRes); err != nil {
+// 			return nil, err
+// 		}
+
+// 		if err := helpers.ExtractDataApi(formulariosRes, &formulariosEstado); err != nil {
+// 			return nil, err
+// 		}
+
+// 		for _, formulario := range formulariosEstado {
+// 			formulariosMap[formulario.Id] = formulario
+// 		}
+// 	}
+
+// 	formularios := make([]models.FormularioSolicitud, 0, len(formulariosMap))
+// 	for _, formulario := range formulariosMap {
+// 		formularios = append(formularios, formulario)
+// 	}
+
+// 	return formularios, nil
+// }
+
+func ConsultarTodosFormulariosSolicitud() ([]models.FormularioSolicitud, error) {
+	var formulariosRes interface{}
+	var formularios []models.FormularioSolicitud
+
+	url := beego.AppConfig.String("sabaticosService") + "/formulario_solicitud?query=Activo:true&sortby=FechaCreacion&order=desc&limit=0"
+
+	if err := request.GetJson(url, &formulariosRes); err != nil {
+		return nil, err
+	}
+
+	if err := helpers.ExtractDataApi(formulariosRes, &formularios); err != nil {
+		return nil, err
+	}
+
+	return formularios, nil
+}
+
 func ConsultarFormulario(id int) (*models.FormularioSolicitud, error) {
 	var formularioRes interface{}
 	var formulario models.FormularioSolicitud
