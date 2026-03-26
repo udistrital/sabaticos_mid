@@ -220,7 +220,7 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 
 	justificacion := "Radicación de solicitud"
 
-	historialSolicitud, err := clients.RegistrarHistorialSolicitud(solicitud.Id, solicitud.TerceroId, justificacion, string(enums.RADICADA_ENVIADA_SA_RADICADA))
+	historialSolicitud, err := clients.RegistrarHistorialSolicitud(solicitud.Id, solicitud.TerceroId, justificacion, string(enums.RADICADA_ENVIADA_SA))
 	if err != nil {
 		beego.Error("error registering request history:", err)
 	}
@@ -232,7 +232,7 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 
 	var soportes []*models.SoporteSolicitud
 	for _, soporteId := range RadicarSolicitudRequest.DocumentosId {
-		soporte, err := clients.ActualizarSoporteSolicitud(soporteId, solicitud.Id, string(enums.RADICADO))
+		soporte, err := clients.ActualizarSoporteSolicitud(soporteId, solicitud.Id, string(enums.SA_RECIBIDO_SA)) // Validar que sea ese por el cambio de radicado
 		if err != nil {
 			return nil, err
 		}
