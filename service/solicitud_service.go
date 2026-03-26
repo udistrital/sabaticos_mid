@@ -295,7 +295,7 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 
 	var soportes []*models.SoporteSolicitud
 	for _, soporteId := range RadicarSolicitudRequest.DocumentosId {
-		soporte, err := clients.ActualizarSoporteSolicitud(soporteId, solicitud.Id, string(enums.SA_RECIBIDO_SA)) // Validar que sea ese por el cambio de radicado
+		soporte, err := clients.ActualizarSoporteSolicitud(soporteId, solicitud.Id, string(enums.SA_PENDIENTE_REVISION_SA)) // Validar que sea ese por el cambio de radicado
 		if err != nil {
 			return nil, err
 		}
