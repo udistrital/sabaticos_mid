@@ -163,14 +163,42 @@ func ConsultarEstadoSoporteSolicitud(codigo string) (*models.EstadoSoporteSolici
 }
 
 func ConsultarHistorialSolicitudIdEstadoId(historialId int, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
-	var historialRes interface{}
 	var historial []models.HistorialSolicitud
 
-	estadosId := make([]string, 0, len(estadosSolicitud))
+	decodeHistorial := func(res interface{}) ([]models.HistorialSolicitud, error) {
+		var items []models.HistorialSolicitud
+		if err := helpers.ExtractDataApi(res, &items); err == nil {
+			return items, nil
+		}
+
+		var item models.HistorialSolicitud
+		if err := helpers.ExtractDataApi(res, &item); err != nil {
+			return nil, err
+		}
+
+		if item.Id == 0 {
+			return []models.HistorialSolicitud{}, nil
+		}
+
+		return []models.HistorialSolicitud{item}, nil
+	}
+
+	baseURL := beego.AppConfig.String("sabaticosService") +
+		"/historial_solicitud?query=Activo:true,Id:" + fmt.Sprint(historialId)
+
+	if len(estadosSolicitud) == 0 {
+		var historialRes interface{}
+		if err := request.GetJson(baseURL, &historialRes); err != nil {
+			return nil, err
+		}
+		return decodeHistorial(historialRes)
+	}
+
+	vistos := make(map[int]bool)
 
 	for _, estado := range estadosSolicitud {
-		codigoAbreviacion, err := enums.ObtenerCodigoEstadoSolicitud(estado)
-		if !err || codigoAbreviacion == "" {
+		codigoAbreviacion, ok := enums.ObtenerCodigoEstadoSolicitud(estado)
+		if !ok || codigoAbreviacion == "" {
 			return nil, fmt.Errorf("invalid request status code: %s", estado)
 		}
 
@@ -179,26 +207,22 @@ func ConsultarHistorialSolicitudIdEstadoId(historialId int, estadosSolicitud []s
 			return nil, fmt.Errorf("error consulting request status for code %s: %w", estado, errConsult)
 		}
 
-		estadosId = append(estadosId, fmt.Sprint(estadoSolicitud.Id))
-	}
-
-	url := beego.AppConfig.String("sabaticosService") +
-		"/historial_solicitud?query=Activo:true,Id:" + fmt.Sprint(historialId) + ",EstadoSolicitudId.Id:in(" + helpers.JoinStrings(estadosId, ",") + ")"
-
-	fmt.Println(url)
-
-	if err := request.GetJson(url, &historialRes); err != nil {
-		return nil, err
-	}
-
-	if err := helpers.ExtractDataApi(historialRes, &historial); err != nil {
-		var historialUnico models.HistorialSolicitud
-		if errUnico := helpers.ExtractDataApi(historialRes, &historialUnico); errUnico != nil {
+		url := baseURL + ",EstadoSolicitudId.Id:" + fmt.Sprint(estadoSolicitud.Id)
+		var historialRes interface{}
+		if err := request.GetJson(url, &historialRes); err != nil {
 			return nil, err
 		}
 
-		if historialUnico.Id != 0 {
-			historial = append(historial, historialUnico)
+		items, err := decodeHistorial(historialRes)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range items {
+			if !vistos[item.Id] {
+				historial = append(historial, item)
+				vistos[item.Id] = true
+			}
 		}
 	}
 
