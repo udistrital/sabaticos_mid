@@ -41,7 +41,7 @@ func ObtenerCodigoEstadoSolicitud(nombre string) (string, bool) {
 	switch name {
 	case "BORRADOR", string(BORRADOR):
 		return string(BORRADOR), true
-	case "RADICADA_ENVIADA_SA", string(RADICADA_ENVIADA_SA_RADICADA):
+	case "RADICADA_ENVIADA_SA_RADICADA", string(RADICADA_ENVIADA_SA_RADICADA):
 		return string(RADICADA_ENVIADA_SA_RADICADA), true
 	case "RECEPCIONADA_SA", string(RECEPCIONADA_SA):
 		return string(RECEPCIONADA_SA), true

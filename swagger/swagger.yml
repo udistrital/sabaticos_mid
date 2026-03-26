@@ -51,6 +51,31 @@ paths:
             $ref: '#/definitions/interface{}'
         "400":
           description: the request contains incorrect syntax
+  /solicitud/formularios/{documentoId}:
+    get:
+      tags:
+      - solicitud
+      description: Obtener formularios por documentoId
+      operationId: SolicitudController.GetFormulariosByDocumentoId
+      parameters:
+      - in: path
+        name: documentoId
+        description: Identificador del usuario en front
+        required: true
+        type: string
+      - in: query
+        name: estadoSolicitud
+        description: Estados de la solicitud (repetible)
+        type: array
+        items:
+          type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/interface{}'
+        "400":
+          description: bad request
   /solicitud/radicar/{id}:
     post:
       tags:
@@ -85,13 +110,13 @@ paths:
       description: create SoporteSolicitud con múltiples documentos
       operationId: SoporteSolicitudController.Create
 definitions:
-  5303.0xc000450660.false:
+  5708.0xc0004ac930.false:
     title: "false"
     type: object
-  5369.0xc000450690.false:
+  5774.0xc0004ac960.false:
     title: "false"
     type: object
-  6236.0xc000450900.false:
+  6629.0xc0004acbd0.false:
     title: "false"
     type: object
   interface{}:
@@ -111,12 +136,12 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/5369.0xc000450690.false'
+        $ref: '#/definitions/5774.0xc0004ac960.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/5303.0xc000450660.false'
+        $ref: '#/definitions/5708.0xc0004ac930.false'
   models.SolicitudRequest:
     title: SolicitudRequest
     type: object
@@ -139,7 +164,7 @@ definitions:
     type: object
     properties:
       Solicitud:
-        $ref: '#/definitions/6236.0xc000450900.false'
+        $ref: '#/definitions/6629.0xc0004acbd0.false'
 tags:
 - name: solicitud
   description: |
