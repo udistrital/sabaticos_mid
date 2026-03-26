@@ -280,6 +280,7 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Solicitud consultada:", solicitud)
 
 	justificacion := "Radicación de solicitud"
 
@@ -287,14 +288,17 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 	if err != nil {
 		beego.Error("error registering request history:", err)
 	}
-
-	formularioActtualizado, err := clients.ActualizarFormularioSolicitud(solicitud.Id, RadicarSolicitudRequest.FormularioId, string(RadicarSolicitudRequest.Formulario))
+	fmt.Println("Historial registrado:", historialSolicitud)
+	formularioActualizado, err := clients.ActualizarFormularioSolicitud(solicitud.Id, RadicarSolicitudRequest.FormularioId, string(RadicarSolicitudRequest.Formulario))
 	if err != nil {
 		return nil, err
 	}
+	fmt.Println("Formulario actualizado:", formularioActualizado)
 
 	var soportes []*models.SoporteSolicitud
 	for _, soporteId := range RadicarSolicitudRequest.DocumentosId {
+		fmt.Println("Actualizando soporte con ID:", soporteId)
+		fmt.Println("Estado a asignar:", string(enums.SA_PENDIENTE_REVISION_SA))
 		soporte, err := clients.ActualizarSoporteSolicitud(soporteId, solicitud.Id, string(enums.SA_PENDIENTE_REVISION_SA)) // Validar que sea ese por el cambio de radicado
 		if err != nil {
 			return nil, err
@@ -305,7 +309,7 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 	response := map[string]interface{}{
 		"solicitud":  solicitud,
 		"historial":  historialSolicitud,
-		"formulario": formularioActtualizado,
+		"formulario": formularioActualizado,
 		"soportes":   soportes,
 	}
 
