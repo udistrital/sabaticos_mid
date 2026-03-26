@@ -5,7 +5,6 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/udistrital/sabaticos_mid/clients"
-	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
 	"github.com/udistrital/sabaticos_mid/service"
@@ -23,6 +22,7 @@ type SolicitudController struct {
 func (c *SolicitudController) URLMapping() {
 	c.Mapping("aprobar-rechazar", c.Aprobar_Rechazar_solicitud)
 	c.Mapping("Post", c.Post)
+	c.Mapping("GetFormulariosByDocumentoId", c.GetFormulariosByDocumentoId)
 	c.Mapping("Radicar", c.Radicar)
 }
 
@@ -64,50 +64,76 @@ func (c *SolicitudController) Post() {
 // @Param   body  body  interface{}  true  "body para aprobar o rechazar solicitud"
 // @Success 200 {object} interface{}
 // @Failure 400 the request contains incorrect syntax
-// @router /Aprobar_Rechazar_solicitud [post]
+// @router /aprobar-rechazar [post]
 func (c *SolicitudController) Aprobar_Rechazar_solicitud() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	var ValidarRequest models.SolicitudAprobarRechazarRequest
-
 	requestmanager.FillRequestWithPanic(&c.Controller, &ValidarRequest)
 
 	if ValidarRequest.TerceroId <= 0 {
-		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "El campos terceroId es necesario")
-	}
-
-	HistorialSolicitud, err := service.CambiarEstado(ValidarRequest)
-
-	if err != nil && HistorialSolicitud != nil {
-		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Recurso no encontrado: "+err.Error())
-		return
-	}
-
-	estado_nuevo, err_num := enums.ObtenerCodigoEstadoSolicitud(ValidarRequest.EstadoSolicitud)
-
-	if !err_num || estado_nuevo == "" {
 		helpers.JSONResponse(
 			&c.Controller,
 			false,
 			http.StatusBadRequest,
 			nil,
-			"EstadoSolicitud no reconocido: "+ValidarRequest.EstadoSolicitud,
+			"El campo terceroId es necesario",
 		)
 		return
 	}
 
 	estado_actualizar, err_estado := clients.ConsultarEstadoSolicitud(ValidarRequest.EstadoSolicitud)
-
 	if err_estado != nil {
-		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "Error consultando estado de solicitud: "+err_estado.Error())
+		helpers.JSONResponse(
+			&c.Controller,
+			false,
+			http.StatusInternalServerError,
+			nil,
+			"Error consultando estado de solicitud: "+err_estado.Error(),
+		)
 		return
 	}
+
+	// 2. Construir respuesta
 	respuesta := models.SolicitudAprobarRechazarResponse{
 		SolicitudId:     ValidarRequest.SolicitudId,
 		EstadoSolicitud: estado_actualizar.Id,
 	}
 
-	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
+	helpers.JSONResponse(
+		&c.Controller,
+		true,
+		http.StatusOK,
+		respuesta,
+		"Solicitud procesada exitosamente",
+	)
+}
+
+// GetFormulariosByDocumentoId ...
+// @Title GetFormulariosByDocumentoId
+// @Description Obtener formularios por documentoId
+// @Param	documentoId	path 	string	true		"Identificador del usuario en front"
+// @Param	estadoSolicitud	query 	[]string	false		"Estados de la solicitud (repetible)"
+// @Success 200 {object} interface{}
+// @Failure 400 bad request
+// @router /formularios/:documentoId [get]
+func (c *SolicitudController) GetFormulariosByDocumentoId() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	documentoId := c.GetString(":documentoId")
+	estadosSolicitud := c.Ctx.Request.URL.Query()["estadoSolicitud"]
+	if documentoId == "" {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "documentoId is required")
+		return
+	}
+
+	formularios, err := service.GetFormulariosByDocumentoId(documentoId, estadosSolicitud)
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "error getting formularios: "+err.Error())
+		return
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, formularios, "request completed successfully")
 }
 
 // Radicar ...

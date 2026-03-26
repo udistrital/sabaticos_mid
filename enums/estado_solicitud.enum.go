@@ -2,47 +2,68 @@ package enums
 
 import "strings"
 
-// EstadoSolicitud representa los estados de una solicitud.
+// EstadoSolicitud representa el código de abreviación del estado de una solicitud.
 type EstadoSolicitud string
 
+// Códigos que vienen de tu BD (S0, S1, S2, etc.)
 const (
-	// BORRADOR corresponde a una solicitud en estado borrador.
+	// BORRADOR
 	BORRADOR EstadoSolicitud = "S0"
-	// RADICADA_ENVIADA_SA corresponde a una solicitud radicada y enviada a SA.
-	RADICADA_ENVIADA_SA_RADICADA EstadoSolicitud = "S1"
-	// RECEPCIONADA_SA corresponde a una solicitud recepcionada por SA.
+
+	// Estado inicial una vez el docente radica y envía a SA
+	RADICADA_ENVIADA_SA EstadoSolicitud = "S1"
+
+	// SA recibe formalmente la solicitud
 	RECEPCIONADA_SA EstadoSolicitud = "S2"
-	// VERIFICACION_SA corresponde a una solicitud en verificación por SA.
+
+	// SA está verificando el checklist y documentos
 	VERIFICACION_SA EstadoSolicitud = "S3"
-	// SUBSANACION_SOLICITADA corresponde a una solicitud con subsanación solicitada.
+
+	// SA pide subsanaciones
 	SUBSANACION_SOLICITADA EstadoSolicitud = "S4"
-	// TRAMITE_CONSEJO_FACULTAD corresponde a una solicitud en trámite externo Consejo de Facultad.
+
+	// Solicitud en trámite externo en Consejo de Facultad
 	TRAMITE_CONSEJO_FACULTAD EstadoSolicitud = "S5"
-	// RESPUESTA_CF_REGISTRADA corresponde a una solicitud con respuesta de CF registrada.
+
+	// SA registra el acta o concepto del CF
 	RESPUESTA_CF_REGISTRADA EstadoSolicitud = "S6"
-	// ENVIADA_SG corresponde a una solicitud enviada a Secretaría General.
+
+	// Se envía expediente a Secretaría General
 	ENVIADA_SG EstadoSolicitud = "S7"
-	// RECEPCIONADA_SG corresponde a una solicitud recepcionada en Secretaría General.
+
+	// SG recibe formalmente
 	RECEPCIONADA_SG EstadoSolicitud = "S8"
-	// TRAMITE_CONSEJO_ACADEMICO corresponde a una solicitud en trámite externo Consejo Académico.
+
+	// Solicitud en trámite externo en Consejo Académico
 	TRAMITE_CONSEJO_ACADEMICO EstadoSolicitud = "S9"
-	// DECISION_CA_REGISTRADA corresponde a una solicitud con decisión de Consejo Académico registrada.
+
+	// SG registra la decisión de Consejo Académico
 	DECISION_CA_REGISTRADA EstadoSolicitud = "S10"
-	// FINALIZADA_NO_APROBADA corresponde a una solicitud finalizada no aprobada.
+
+	// Solicitud cerrada por decisión negativa
 	FINALIZADA_NO_APROBADA EstadoSolicitud = "S11A"
-	// APROBADA_PENDIENTE_RESOLUCION corresponde a una solicitud aprobada pendiente de resolución.
+
+	// Solicitud aprobada, pendiente de resolución emitida
 	APROBADA_PENDIENTE_RESOLUCION EstadoSolicitud = "S11B"
-	// FINALIZADA_APROBADA_RESOLUCION corresponde a una solicitud finalizada aprobada con resolución.
+
+	// Solicitud cerrada con resolución emitida
 	FINALIZADA_APROBADA_RESOLUCION EstadoSolicitud = "S12"
 )
 
+// Uso de switch, igual a tu estructura de `EstadoSoporteSolicitud`
 func ObtenerCodigoEstadoSolicitud(nombre string) (string, bool) {
-	name := strings.ToUpper(strings.TrimSpace(nombre))
+	name := strings.TrimSpace(nombre)
+	if name == "" {
+		return "", false
+	}
+
+	name = strings.ToUpper(name)
+
 	switch name {
 	case "BORRADOR", string(BORRADOR):
 		return string(BORRADOR), true
-	case "RADICADA_ENVIADA_SA", string(RADICADA_ENVIADA_SA_RADICADA):
-		return string(RADICADA_ENVIADA_SA_RADICADA), true
+	case "RADICADA_ENVIADA_SA", string(RADICADA_ENVIADA_SA):
+		return string(RADICADA_ENVIADA_SA), true
 	case "RECEPCIONADA_SA", string(RECEPCIONADA_SA):
 		return string(RECEPCIONADA_SA), true
 	case "VERIFICACION_SA", string(VERIFICACION_SA):

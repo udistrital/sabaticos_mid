@@ -162,6 +162,90 @@ func ConsultarEstadoSoporteSolicitud(codigo string) (*models.EstadoSoporteSolici
 	return &estadoSoporteSolicitud[0], nil
 }
 
+func ConsultarHistorialSolicitudIdEstadoId(historialId int, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
+	var historial []models.HistorialSolicitud
+
+	decodeHistorial := func(res interface{}) ([]models.HistorialSolicitud, error) {
+		var items []models.HistorialSolicitud
+		if err := helpers.ExtractDataApi(res, &items); err == nil {
+			return items, nil
+		}
+
+		var item models.HistorialSolicitud
+		if err := helpers.ExtractDataApi(res, &item); err != nil {
+			return nil, err
+		}
+
+		if item.Id == 0 {
+			return []models.HistorialSolicitud{}, nil
+		}
+
+		return []models.HistorialSolicitud{item}, nil
+	}
+
+	baseURL := beego.AppConfig.String("sabaticosService") +
+		"/historial_solicitud?query=Activo:true,Id:" + fmt.Sprint(historialId)
+
+	if len(estadosSolicitud) == 0 {
+		var historialRes interface{}
+		if err := request.GetJson(baseURL, &historialRes); err != nil {
+			return nil, err
+		}
+		return decodeHistorial(historialRes)
+	}
+
+	vistos := make(map[int]bool)
+
+	for _, estado := range estadosSolicitud {
+		codigoAbreviacion, ok := enums.ObtenerCodigoEstadoSolicitud(estado)
+		if !ok || codigoAbreviacion == "" {
+			return nil, fmt.Errorf("invalid request status code: %s", estado)
+		}
+
+		estadoSolicitud, errConsult := ConsultarEstadoSolicitud(codigoAbreviacion)
+		if errConsult != nil {
+			return nil, fmt.Errorf("error consulting request status for code %s: %w", estado, errConsult)
+		}
+
+		url := baseURL + ",EstadoSolicitudId.Id:" + fmt.Sprint(estadoSolicitud.Id)
+		var historialRes interface{}
+		if err := request.GetJson(url, &historialRes); err != nil {
+			return nil, err
+		}
+
+		items, err := decodeHistorial(historialRes)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, item := range items {
+			if !vistos[item.Id] {
+				historial = append(historial, item)
+				vistos[item.Id] = true
+			}
+		}
+	}
+
+	return historial, nil
+}
+
+func ConsultarTodosFormulariosSolicitud() ([]models.FormularioSolicitud, error) {
+	var formulariosRes interface{}
+	var formularios []models.FormularioSolicitud
+
+	url := beego.AppConfig.String("sabaticosService") + "/formulario_solicitud?query=Activo:true&sortby=FechaCreacion&order=desc&limit=0"
+
+	if err := request.GetJson(url, &formulariosRes); err != nil {
+		return nil, err
+	}
+
+	if err := helpers.ExtractDataApi(formulariosRes, &formularios); err != nil {
+		return nil, err
+	}
+
+	return formularios, nil
+}
+
 func ConsultarFormulario(id int) (*models.FormularioSolicitud, error) {
 	var formularioRes interface{}
 	var formulario models.FormularioSolicitud

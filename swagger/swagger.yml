@@ -1,7 +1,8 @@
 swagger: "2.0"
 info:
   title: beego Test API
-  description: beego has a very cool tools to autogenerate documents for your API
+  description: |
+    beego has a very cool tools to autogenerate documents for your API
   version: 1.0.0
   termsOfService: http://beego.me/
   contact:
@@ -15,7 +16,9 @@ paths:
     post:
       tags:
       - solicitud
-      description: create Solicitud
+      description: |-
+        create Solicitud
+        <br>
       operationId: SolicitudController.Create
       parameters:
       - in: body
@@ -31,11 +34,13 @@ paths:
             $ref: '#/definitions/models.Solicitud'
         "403":
           description: body is empty
-  /solicitud/Aprobar_Rechazar_solicitud:
+  /solicitud/aprobar-rechazar:
     post:
       tags:
       - solicitud
-      description: Aprueba o rechaza una solicitud creando un registro en el historial
+      description: |-
+        Aprueba o rechaza una solicitud creando un registro en el historial
+        <br>
       operationId: SolicitudController.Aprobar_Rechazar
       parameters:
       - in: body
@@ -51,11 +56,38 @@ paths:
             $ref: '#/definitions/interface{}'
         "400":
           description: the request contains incorrect syntax
+  /solicitud/formularios/{documentoId}:
+    get:
+      tags:
+      - solicitud
+      description: Obtener formularios por documentoId
+      operationId: SolicitudController.GetFormulariosByDocumentoId
+      parameters:
+      - in: path
+        name: documentoId
+        description: Identificador del usuario en front
+        required: true
+        type: string
+      - in: query
+        name: estadoSolicitud
+        description: Estados de la solicitud (repetible)
+        type: array
+        items:
+          type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/interface{}'
+        "400":
+          description: bad request
   /solicitud/radicar/{id}:
     post:
       tags:
       - solicitud
-      description: Radicar una solicitud (cambiar estado y crear registros)
+      description: |-
+        Radicar una solicitud (cambiar estado y crear registros)
+        <br>
       operationId: SolicitudController.Radicar
       parameters:
       - in: path
@@ -82,9 +114,12 @@ paths:
     post:
       tags:
       - soporte_solicitud
-      description: create SoporteSolicitud con múltiples documentos
+      description: |-
+        create SoporteSolicitud con múltiples documentos
+        <br>
       operationId: SoporteSolicitudController.Create
 definitions:
+<<<<<<< HEAD
   5253.0xc0004d6660.false:
     title: "false"
     type: object
@@ -94,6 +129,8 @@ definitions:
   6174.0xc0004d6900.false:
     title: "false"
     type: object
+=======
+>>>>>>> 8b6b6a030138835ee97de44fa057c518d2a9e1e6
   interface{}:
     title: interface{}
     type: object
@@ -111,12 +148,20 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
+<<<<<<< HEAD
         $ref: '#/definitions/5319.0xc0004d6690.false'
+=======
+        $ref: '#/definitions/models.interface'
+>>>>>>> 8b6b6a030138835ee97de44fa057c518d2a9e1e6
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
+<<<<<<< HEAD
         $ref: '#/definitions/5253.0xc0004d6660.false'
+=======
+        $ref: '#/definitions/models.interface'
+>>>>>>> 8b6b6a030138835ee97de44fa057c518d2a9e1e6
   models.SolicitudRequest:
     title: SolicitudRequest
     type: object
@@ -139,7 +184,14 @@ definitions:
     type: object
     properties:
       Solicitud:
+<<<<<<< HEAD
         $ref: '#/definitions/6174.0xc0004d6900.false'
+=======
+        $ref: '#/definitions/models.interface'
+  models.interface:
+    title: interface
+    type: object
+>>>>>>> 8b6b6a030138835ee97de44fa057c518d2a9e1e6
 tags:
 - name: solicitud
   description: |
