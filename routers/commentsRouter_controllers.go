@@ -19,7 +19,7 @@ func init() {
 	beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SolicitudController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SolicitudController"],
 		beego.ControllerComments{
 			Method:           "Aprobar_Rechazar_solicitud",
-			Router:           "/Aprobar_Rechazar_solicitud",
+			Router:           "/aprobar-rechazar",
 			AllowHTTPMethods: []string{"post"},
 			MethodParams:     param.Make(),
 			Filters:          nil,
