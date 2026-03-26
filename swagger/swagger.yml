@@ -1,8 +1,7 @@
 swagger: "2.0"
 info:
   title: beego Test API
-  description: |
-    beego has a very cool tools to autogenerate documents for your API
+  description: beego has a very cool tools to autogenerate documents for your API
   version: 1.0.0
   termsOfService: http://beego.me/
   contact:
@@ -16,9 +15,7 @@ paths:
     post:
       tags:
       - solicitud
-      description: |-
-        create Solicitud
-        <br>
+      description: create Solicitud
       operationId: SolicitudController.Create
       parameters:
       - in: body
@@ -38,9 +35,7 @@ paths:
     post:
       tags:
       - solicitud
-      description: |-
-        Aprueba o rechaza una solicitud creando un registro en el historial
-        <br>
+      description: Aprueba o rechaza una solicitud creando un registro en el historial
       operationId: SolicitudController.Aprobar_Rechazar
       parameters:
       - in: body
@@ -85,9 +80,7 @@ paths:
     post:
       tags:
       - solicitud
-      description: |-
-        Radicar una solicitud (cambiar estado y crear registros)
-        <br>
+      description: Radicar una solicitud (cambiar estado y crear registros)
       operationId: SolicitudController.Radicar
       parameters:
       - in: path
@@ -114,18 +107,16 @@ paths:
     post:
       tags:
       - soporte_solicitud
-      description: |-
-        create SoporteSolicitud con múltiples documentos
-        <br>
+      description: create SoporteSolicitud con múltiples documentos
       operationId: SoporteSolicitudController.Create
 definitions:
-  5253.0xc0004d6660.false:
+  5725.0xc0004423c0.false:
     title: "false"
     type: object
-  5319.0xc0004d6690.false:
+  5791.0xc0004423f0.false:
     title: "false"
     type: object
-  6174.0xc0004d6900.false:
+  6646.0xc000442660.false:
     title: "false"
     type: object
   interface{}:
@@ -145,12 +136,12 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/5319.0xc0004d6690.false'
+        $ref: '#/definitions/5791.0xc0004423f0.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/5253.0xc0004d6660.false'
+        $ref: '#/definitions/5725.0xc0004423c0.false'
   models.SolicitudRequest:
     title: SolicitudRequest
     type: object
@@ -173,7 +164,7 @@ definitions:
     type: object
     properties:
       Solicitud:
-        $ref: '#/definitions/6174.0xc0004d6900.false'
+        $ref: '#/definitions/6646.0xc000442660.false'
 tags:
 - name: solicitud
   description: |
