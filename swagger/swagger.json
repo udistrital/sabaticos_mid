@@ -77,6 +77,44 @@
                 }
             }
         },
+        "/solicitud/formularios/{documentoId}": {
+            "get": {
+                "tags": [
+                    "solicitud"
+                ],
+                "description": "Obtener formularios por documentoId",
+                "operationId": "SolicitudController.GetFormulariosByDocumentoId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "documentoId",
+                        "description": "Identificador del usuario en front",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "estadoSolicitud",
+                        "description": "Estados de la solicitud (repetible)",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/interface{}"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request"
+                    }
+                }
+            }
+        },
         "/solicitud/radicar/{id}": {
             "post": {
                 "tags": [
