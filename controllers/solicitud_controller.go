@@ -23,6 +23,7 @@ type SolicitudController struct {
 func (c *SolicitudController) URLMapping() {
 	c.Mapping("aprobar-rechazar", c.Aprobar_Rechazar_solicitud)
 	c.Mapping("Post", c.Post)
+	c.Mapping("GetFormulariosByDocumentoId", c.GetFormulariosByDocumentoId)
 	c.Mapping("Radicar", c.Radicar)
 }
 
@@ -108,6 +109,33 @@ func (c *SolicitudController) Aprobar_Rechazar_solicitud() {
 	}
 
 	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "Solicitud procesada exitosamente")
+}
+
+// GetFormulariosByDocumentoId ...
+// @Title GetFormulariosByDocumentoId
+// @Description Obtener formularios por documentoId
+// @Param	documentoId	path 	string	true		"Identificador del usuario en front"
+// @Param	estadoSolicitud	query 	[]string	false		"Estados de la solicitud (repetible)"
+// @Success 200 {object} interface{}
+// @Failure 400 bad request
+// @router /formularios/:documentoId [get]
+func (c *SolicitudController) GetFormulariosByDocumentoId() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	documentoId := c.GetString(":documentoId")
+	estadosSolicitud := c.Ctx.Request.URL.Query()["estadoSolicitud"]
+	if documentoId == "" {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "documentoId is required")
+		return
+	}
+
+	formularios, err := service.GetFormulariosByDocumentoId(documentoId, estadosSolicitud)
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusNotFound, nil, "error getting formularios: "+err.Error())
+		return
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, formularios, "request completed successfully")
 }
 
 // Radicar ...

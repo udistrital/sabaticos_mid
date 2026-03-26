@@ -77,6 +77,44 @@
                 }
             }
         },
+        "/solicitud/formularios/{documentoId}": {
+            "get": {
+                "tags": [
+                    "solicitud"
+                ],
+                "description": "Obtener formularios por documentoId",
+                "operationId": "SolicitudController.GetFormulariosByDocumentoId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "documentoId",
+                        "description": "Identificador del usuario en front",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "estadoSolicitud",
+                        "description": "Estados de la solicitud (repetible)",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/interface{}"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request"
+                    }
+                }
+            }
+        },
         "/solicitud/radicar/{id}": {
             "post": {
                 "tags": [
@@ -129,15 +167,15 @@
         }
     },
     "definitions": {
-        "5229.0xc0003480f0.false": {
+        "5708.0xc0004ac930.false": {
             "title": "false",
             "type": "object"
         },
-        "5295.0xc000348120.false": {
+        "5774.0xc0004ac960.false": {
             "title": "false",
             "type": "object"
         },
-        "6150.0xc000348390.false": {
+        "6629.0xc0004acbd0.false": {
             "title": "false",
             "type": "object"
         },
@@ -163,14 +201,14 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/5295.0xc000348120.false"
+                    "$ref": "#/definitions/5774.0xc0004ac960.false"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/5229.0xc0003480f0.false"
+                    "$ref": "#/definitions/5708.0xc0004ac930.false"
                 }
             }
         },
@@ -203,7 +241,7 @@
             "type": "object",
             "properties": {
                 "Solicitud": {
-                    "$ref": "#/definitions/6150.0xc000348390.false"
+                    "$ref": "#/definitions/6629.0xc0004acbd0.false"
                 }
             }
         }

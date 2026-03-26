@@ -1,7 +1,10 @@
 package service
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/udistrital/sabaticos_mid/clients"
@@ -209,6 +212,66 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 
 func Rechazar(SolicitudRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
 	return nil, nil
+}
+
+func GetFormulariosByDocumentoId(documentoId string, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
+	SecretariaAcademicaUsuario, err := clients.ConsultarSecretariaAcademicaDocumentoUserId(documentoId)
+	if err != nil {
+		return nil, err
+	}
+
+	formularios, err := clients.ConsultarTodosFormulariosSolicitud()
+	if err != nil {
+		return nil, err
+	}
+
+	dependenciaUsuario := strings.TrimSpace(SecretariaAcademicaUsuario.Dependencia)
+	if dependenciaUsuario == "" {
+		return nil, errors.New("dependencia de secretaria academica vacía")
+	}
+
+	historialSolicitud := make([]models.HistorialSolicitud, 0)
+	solicitudesProcesadas := make(map[int]bool)
+
+	for _, formulario := range formularios {
+		var contenidoJSON struct {
+			Docente struct {
+				Facultad string `json:"facultad"`
+			} `json:"docente"`
+		}
+
+		if err := json.Unmarshal([]byte(formulario.Contenido), &contenidoJSON); err != nil {
+			return nil, fmt.Errorf("invalid json in formulario %d: %w", formulario.Id, err)
+		}
+
+		facultadFormulario := strings.TrimSpace(contenidoJSON.Docente.Facultad)
+
+		if strings.EqualFold(facultadFormulario, dependenciaUsuario) {
+			solicitudId := formulario.SolicitudId.Id
+			if solicitudesProcesadas[solicitudId] {
+				continue
+			}
+
+			solicitudesProcesadas[solicitudId] = true
+
+			idsHistorial, err := clients.ConsultarIdsHistorialSolicitud(solicitudId)
+			if err != nil {
+				return nil, err
+			}
+
+			for _, idHistorial := range idsHistorial {
+				historial, err := clients.ConsultarHistorialSolicitudIdEstadoId(idHistorial, estadosSolicitud)
+				if err != nil {
+					return nil, err
+				}
+
+				historialSolicitud = append(historialSolicitud, historial...)
+			}
+
+		}
+
+	}
+	return historialSolicitud, nil
 }
 
 func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (map[string]interface{}, error) {
