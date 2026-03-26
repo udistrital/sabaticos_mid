@@ -31,7 +31,7 @@ paths:
             $ref: '#/definitions/models.Solicitud'
         "403":
           description: body is empty
-  /solicitud/Aprobar_Rechazar_solicitud:
+  /solicitud/aprobar-rechazar:
     post:
       tags:
       - solicitud
@@ -110,13 +110,13 @@ paths:
       description: create SoporteSolicitud con múltiples documentos
       operationId: SoporteSolicitudController.Create
 definitions:
-  5708.0xc0004ac930.false:
+  5725.0xc0004423c0.false:
     title: "false"
     type: object
-  5774.0xc0004ac960.false:
+  5791.0xc0004423f0.false:
     title: "false"
     type: object
-  6629.0xc0004acbd0.false:
+  6646.0xc000442660.false:
     title: "false"
     type: object
   interface{}:
@@ -136,12 +136,12 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/5774.0xc0004ac960.false'
+        $ref: '#/definitions/5791.0xc0004423f0.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/5708.0xc0004ac930.false'
+        $ref: '#/definitions/5725.0xc0004423c0.false'
   models.SolicitudRequest:
     title: SolicitudRequest
     type: object
@@ -164,7 +164,7 @@ definitions:
     type: object
     properties:
       Solicitud:
-        $ref: '#/definitions/6629.0xc0004acbd0.false'
+        $ref: '#/definitions/6646.0xc000442660.false'
 tags:
 - name: solicitud
   description: |
