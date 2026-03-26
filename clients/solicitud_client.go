@@ -268,22 +268,23 @@ func ConsultarFormulario(id int) (*models.FormularioSolicitud, error) {
 
 func ConsultarSoporteSolicitud(id int) (*models.SoporteSolicitud, error) {
 	var soporteSolicitudRes interface{}
-	var soporteSolicitud models.SoporteSolicitud
+	var soporteSolicitud []models.SoporteSolicitud
 
-	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/soporte_solicitud/"+fmt.Sprint(id), &soporteSolicitudRes); err != nil {
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"soporte_solicitud?query=DocumentoId:"+fmt.Sprint(id), &soporteSolicitudRes); err != nil {
 		return nil, err
 	}
+	fmt.Println("Respuesta de soporte_solicitud para DocumentoId", id, ":", soporteSolicitudRes)
 
 	if err := helpers.ExtractDataApi(soporteSolicitudRes, &soporteSolicitud); err != nil {
 		return nil, err
 
 	}
 
-	if soporteSolicitud.Id == 0 {
+	if soporteSolicitud[0].Id == 0 {
 		return nil, errors.New("request support not found: " + fmt.Sprint(id))
 	}
 
-	return &soporteSolicitud, nil
+	return &soporteSolicitud[0], nil
 }
 
 /*
@@ -508,6 +509,7 @@ func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEst
 
 	// Primero obtener el soporte existente
 	soporteExistente, err := ConsultarSoporteSolicitud(soporteId)
+	fmt.Println("Soporte existente:", soporteExistente)
 	if err != nil {
 		return nil, fmt.Errorf("could not query soporte_solicitud/%d: %w", soporteId, err)
 	}
@@ -527,7 +529,7 @@ func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEst
 		RolUsuario:               soporteExistente.RolUsuario,
 	}
 
-	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/soporte_solicitud/"+fmt.Sprint(soporteId), "PUT", &soporteSolicitudRes, soporteSolicitud); err != nil {
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"soporte_solicitud/"+fmt.Sprint(soporteExistente.Id), "PUT", &soporteSolicitudRes, soporteSolicitud); err != nil {
 		return nil, fmt.Errorf("update failed in sabaticosService /soporte_solicitud/%d: %w", soporteId, err)
 	}
 
