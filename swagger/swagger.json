@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "title": "beego Test API",
-        "description": "beego has a very cool tools to autogenerate documents for your API",
+        "description": "beego has a very cool tools to autogenerate documents for your API\n",
         "version": "1.0.0",
         "termsOfService": "http://beego.me/",
         "contact": {
@@ -20,7 +20,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "create Solicitud",
+                "description": "create Solicitud\n\u003cbr\u003e",
                 "operationId": "SolicitudController.Create",
                 "parameters": [
                     {
@@ -46,12 +46,12 @@
                 }
             }
         },
-        "/solicitud/Aprobar_Rechazar_solicitud": {
+        "/solicitud/aprobar-rechazar": {
             "post": {
                 "tags": [
                     "solicitud"
                 ],
-                "description": "Aprueba o rechaza una solicitud creando un registro en el historial",
+                "description": "Aprueba o rechaza una solicitud creando un registro en el historial\n\u003cbr\u003e",
                 "operationId": "SolicitudController.Aprobar_Rechazar",
                 "parameters": [
                     {
@@ -120,7 +120,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "Radicar una solicitud (cambiar estado y crear registros)",
+                "description": "Radicar una solicitud (cambiar estado y crear registros)\n\u003cbr\u003e",
                 "operationId": "SolicitudController.Radicar",
                 "parameters": [
                     {
@@ -161,24 +161,12 @@
                 "tags": [
                     "soporte_solicitud"
                 ],
-                "description": "create SoporteSolicitud con múltiples documentos",
+                "description": "create SoporteSolicitud con múltiples documentos\n\u003cbr\u003e",
                 "operationId": "SoporteSolicitudController.Create"
             }
         }
     },
     "definitions": {
-        "5708.0xc0004ac930.false": {
-            "title": "false",
-            "type": "object"
-        },
-        "5774.0xc0004ac960.false": {
-            "title": "false",
-            "type": "object"
-        },
-        "6629.0xc0004acbd0.false": {
-            "title": "false",
-            "type": "object"
-        },
         "interface{}": {
             "title": "interface{}",
             "type": "object"
@@ -201,14 +189,14 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/5774.0xc0004ac960.false"
+                    "$ref": "#/definitions/models.interface"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/5708.0xc0004ac930.false"
+                    "$ref": "#/definitions/models.interface"
                 }
             }
         },
@@ -241,9 +229,13 @@
             "type": "object",
             "properties": {
                 "Solicitud": {
-                    "$ref": "#/definitions/6629.0xc0004acbd0.false"
+                    "$ref": "#/definitions/models.interface"
                 }
             }
+        },
+        "models.interface": {
+            "title": "interface",
+            "type": "object"
         }
     },
     "tags": [
