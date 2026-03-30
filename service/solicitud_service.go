@@ -207,11 +207,7 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 		return nil, err
 	}
 
-	return HistorialSolicitudEstado, nil
-}
-
-func Rechazar(SolicitudRechazarRequest models.SolicitudAprobarRechazarRequest) (*models.HistorialSolicitud, error) {
-	return nil, nil
+	return HistorialSolicitudEstado, err
 }
 
 func GetFormulariosByDocumentoId(documentoId string, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
