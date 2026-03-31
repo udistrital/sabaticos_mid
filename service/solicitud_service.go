@@ -147,20 +147,8 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 		return nil, err
 	}
 
-	/* Se consultan los ids de la tabla historial asociados a la solicitud. */
-	idsHistorial, err := clients.ConsultarIdsHistorialSolicitud(SolicitudAprobarRechazarRequest.SolicitudId)
-	if err != nil {
+	if err := desactivarRegistrosHistorial(SolicitudAprobarRechazarRequest.SolicitudId); err != nil {
 		return nil, err
-	}
-
-	if len(idsHistorial) > 0 {
-		/* Se desactivan los historiales asociados */
-		for _, idHistorial := range idsHistorial {
-			_, err := clients.DesactivarHistorialSolicitud(idHistorial)
-			if err != nil {
-				return nil, err
-			}
-		}
 	}
 
 	/*
@@ -168,7 +156,7 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 		se aprueban todos los documentos asociados
 	*/
 
-	if SolicitudAprobarRechazarRequest.EstadoSolicitud != "" {
+	if SolicitudAprobarRechazarRequest.EstadoSoporte != "" {
 
 		// Obtener soportes asociados a la solicitud
 		soportes, err := clients.ConsultarSoportesSolicitud(SolicitudAprobarRechazarRequest.SolicitudId)
@@ -179,22 +167,23 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 
 		// Validar si hay soportes
 		if len(soportes) == 0 {
-			logs.Warn("No hay soportes asociados a la solicitud")
-		} else {
-			for _, soporte := range soportes {
+			return nil, errors.New("no soportes found for solicitud: " + fmt.Sprint(SolicitudAprobarRechazarRequest.SolicitudId))
+		}
 
-				_, err := clients.ActualizarSoporteSolicitud(
-					soporte.Id,
-					SolicitudAprobarRechazarRequest.SolicitudId,
-					SolicitudAprobarRechazarRequest.EstadoSoporte,
-				)
+		for _, soporte := range soportes {
 
-				if err != nil {
-					logs.Error("Error actualizando soporte:", soporte.Id, err)
-					continue
-				}
+			_, err := clients.ActualizarSoporteSolicitud(
+				soporte.DocumentoId,
+				SolicitudAprobarRechazarRequest.SolicitudId,
+				SolicitudAprobarRechazarRequest.EstadoSoporte,
+			)
+
+			if err != nil {
+				logs.Error("Error actualizando soporte:", soporte.Id, err)
+				continue
 			}
 		}
+
 	}
 
 	HistorialSolicitudEstado, err := clients.RegistrarHistorialSolicitudEstado(
@@ -208,6 +197,22 @@ func CambiarEstado(SolicitudAprobarRechazarRequest models.SolicitudAprobarRechaz
 	}
 
 	return HistorialSolicitudEstado, err
+}
+
+func desactivarRegistrosHistorial(solicitudId int) error {
+	idsHistorial, err := clients.ConsultarIdsHistorialSolicitud(solicitudId)
+	if err != nil {
+		return err
+	}
+
+	for _, idHistorial := range idsHistorial {
+		_, err := clients.DesactivarHistorialSolicitud(idHistorial)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func GetFormulariosByDocumentoId(documentoId string, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
@@ -276,7 +281,11 @@ func RadicarSolicitud(RadicarSolicitudRequest models.RadicarSolicitudRequest) (m
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Solicitud consultada:", solicitud)
+
+	err = desactivarRegistrosHistorial(RadicarSolicitudRequest.SolicitudId)
+	if err != nil {
+		return nil, err
+	}
 
 	justificacion := "Radicación de solicitud"
 
