@@ -94,6 +94,18 @@ func (c *SolicitudController) Aprobar_Rechazar_solicitud() {
 		return
 	}
 
+	_, err := service.CambiarEstado(ValidarRequest)
+	if err != nil {
+		helpers.JSONResponse(
+			&c.Controller,
+			false,
+			http.StatusInternalServerError,
+			nil,
+			"Error cambiando estado de solicitud: "+err.Error(),
+		)
+		return
+	}
+
 	// 2. Construir respuesta
 	respuesta := models.SolicitudAprobarRechazarResponse{
 		SolicitudId:     ValidarRequest.SolicitudId,

@@ -266,14 +266,13 @@ func ConsultarFormulario(id int) (*models.FormularioSolicitud, error) {
 	return &formulario, nil
 }
 
-func ConsultarSoporteSolicitud(id int) (*models.SoporteSolicitud, error) {
+func ConsultarSoporteSolicitud(documetoId int) (*models.SoporteSolicitud, error) {
 	var soporteSolicitudRes interface{}
 	var soporteSolicitud []models.SoporteSolicitud
 
-	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"soporte_solicitud?query=DocumentoId:"+fmt.Sprint(id), &soporteSolicitudRes); err != nil {
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"soporte_solicitud?query=DocumentoId:"+fmt.Sprint(documetoId), &soporteSolicitudRes); err != nil {
 		return nil, err
 	}
-	fmt.Println("Respuesta de soporte_solicitud para DocumentoId", id, ":", soporteSolicitudRes)
 
 	if err := helpers.ExtractDataApi(soporteSolicitudRes, &soporteSolicitud); err != nil {
 		return nil, err
@@ -281,7 +280,7 @@ func ConsultarSoporteSolicitud(id int) (*models.SoporteSolicitud, error) {
 	}
 
 	if soporteSolicitud[0].Id == 0 {
-		return nil, errors.New("request support not found: " + fmt.Sprint(id))
+		return nil, errors.New("request support not found: " + fmt.Sprint(documetoId))
 	}
 
 	return &soporteSolicitud[0], nil
@@ -509,7 +508,6 @@ func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEst
 
 	// Primero obtener el soporte existente
 	soporteExistente, err := ConsultarSoporteSolicitud(soporteId)
-	fmt.Println("Soporte existente:", soporteExistente)
 	if err != nil {
 		return nil, fmt.Errorf("could not query soporte_solicitud/%d: %w", soporteId, err)
 	}
