@@ -32,6 +32,7 @@ func (c *SoporteSolicitudController) Post() {
 	soporteSolicitudRequest.SolicitudId, _ = c.GetInt("solicitud_id")
 	soporteSolicitudRequest.RolUsuario = c.GetString("rol_usuario")
 	soporteSolicitudRequest.EstadoSoporteSolicitud = c.GetString("estado_soporte_solicitud")
+	soporteSolicitudRequest.TipoDocumentoId, _ = c.GetInt("tipo_documento_id")
 
 	// Validar campos requeridos
 	if soporteSolicitudRequest.TerceroId == 0 || soporteSolicitudRequest.SolicitudId == 0 ||
@@ -48,8 +49,7 @@ func (c *SoporteSolicitudController) Post() {
 		return
 	}
 
-	// Llamar al servicio para procesar la solicitud
-	respuesta, err := service.CrearSoporteSolicitud(soporteSolicitudRequest, files)
+	respuesta, err := service.CrearSoporteSolicitud(soporteSolicitudRequest, files[0])
 
 	if err != nil {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, err.Error())
