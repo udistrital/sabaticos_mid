@@ -110,13 +110,13 @@ paths:
       description: create SoporteSolicitud con múltiples documentos
       operationId: SoporteSolicitudController.Create
 definitions:
-  5708.0xc0004a9e90.false:
+  5708.0xc0003ddb00.false:
     title: "false"
     type: object
-  5774.0xc0004a9ec0.false:
+  5774.0xc0003ddb30.false:
     title: "false"
     type: object
-  6629.0xc0004c61e0.false:
+  6629.0xc0003dde30.false:
     title: "false"
     type: object
   interface{}:
@@ -136,12 +136,12 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/5774.0xc0004a9ec0.false'
+        $ref: '#/definitions/5774.0xc0003ddb30.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/5708.0xc0004a9e90.false'
+        $ref: '#/definitions/5708.0xc0003ddb00.false'
   models.SolicitudRequest:
     title: SolicitudRequest
     type: object
@@ -164,7 +164,7 @@ definitions:
     type: object
     properties:
       Solicitud:
-        $ref: '#/definitions/6629.0xc0004c61e0.false'
+        $ref: '#/definitions/6629.0xc0003dde30.false'
 tags:
 - name: solicitud
   description: |

@@ -434,13 +434,14 @@ func RegistrarFormularioSolicitud(solicitudId int, contenido string) (*models.Fo
 
 }
 
-func RegistrarSoporteSolicitud(documentoId int, terceroId int, solicitudId int, estadoSoporteSolicitudId int, rolUsuario string) (*models.SoporteSolicitud, error) {
+func RegistrarSoporteSolicitud(documentoId int, terceroId int, solicitudId int, estadoSoporteSolicitudId int, rolUsuario string, tipoDocumentoId int) (*models.SoporteSolicitud, error) {
 	var soporteSolicitudRes interface{}
 	var soporteSolicitudFinal *models.SoporteSolicitud
 
 	soporteSolicitud := models.SoporteSolicitudCreateRequest{
 		DocumentoId:              documentoId,
 		TerceroId:                terceroId,
+		TipoDocumentoId:          tipoDocumentoId,
 		Activo:                   true,
 		SolicitudId:              models.IdReference{Id: solicitudId},
 		EstadoSoporteSolicitudId: models.IdReference{Id: estadoSoporteSolicitudId},
