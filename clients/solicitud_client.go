@@ -12,12 +12,17 @@ import (
 	"github.com/udistrital/utils_oas/request"
 )
 
+const (
+	historialSolicitudPath  = "historial_solicitud/"
+	formularioSolicitudPath = "formulario_solicitud/"
+)
+
 // Peticiones GET
 func ConsultarSolicitud(id int) (*models.Solicitud, error) {
 	var solicitudRes interface{}
 	var solicitud models.Solicitud
 
-	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/solicitud/"+fmt.Sprint(id), &solicitudRes); err != nil {
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"solicitud/"+fmt.Sprint(id), &solicitudRes); err != nil {
 		return nil, err
 	}
 
@@ -42,7 +47,7 @@ func ConsultarIdsHistorialSolicitud(idSolicitud int) ([]int, error) {
 	var historialSolicitud []models.HistorialSolicitud
 
 	url := beego.AppConfig.String("sabaticosService") +
-		"/historial_solicitud?query=Activo:true,SolicitudId:" +
+		"historial_solicitud?query=Activo:true,SolicitudId:" +
 		fmt.Sprint(idSolicitud) +
 		"&sortby=FechaCreacion&order=desc&limit=0"
 
@@ -98,7 +103,7 @@ func ConsultarHistorialSolicitud(idHistorialSolicitud int) (*models.HistorialSol
 	var historial models.HistorialSolicitud
 
 	url := beego.AppConfig.String("sabaticosService") +
-		"/historial_solicitud/" + fmt.Sprint(idHistorialSolicitud)
+		historialSolicitudPath + fmt.Sprint(idHistorialSolicitud)
 
 	if err := request.GetJson(url, &historialRes); err != nil {
 		return nil, err
@@ -124,7 +129,7 @@ func ConsultarTipoSolicitud(codigo string) (*models.TipoSolicitud, error) {
 		return nil, errors.New("request type not valid: " + codigo)
 	}
 
-	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/tipo_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &tipoSolicitudRes); err != nil {
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"tipo_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &tipoSolicitudRes); err != nil {
 		return nil, err
 	}
 	if err := helpers.ExtractDataApi(tipoSolicitudRes, &tipoSolicitud); err != nil {
@@ -148,7 +153,7 @@ func ConsultarEstadoSoporteSolicitud(codigo string) (*models.EstadoSoporteSolici
 		return nil, errors.New("request support status not valid: " + codigo)
 	}
 
-	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/estado_soporte_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &estadoSoporteSolicitudRes); err != nil {
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"estado_soporte_solicitud?query=CodigoAbreviacion:"+codigoAbreviacion, &estadoSoporteSolicitudRes); err != nil {
 		return nil, err
 	}
 	if err := helpers.ExtractDataApi(estadoSoporteSolicitudRes, &estadoSoporteSolicitud); err != nil {
@@ -162,68 +167,82 @@ func ConsultarEstadoSoporteSolicitud(codigo string) (*models.EstadoSoporteSolici
 	return &estadoSoporteSolicitud[0], nil
 }
 
-func ConsultarHistorialSolicitudIdEstadoId(historialId int, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
-	var historial []models.HistorialSolicitud
-
-	decodeHistorial := func(res interface{}) ([]models.HistorialSolicitud, error) {
-		var items []models.HistorialSolicitud
-		if err := helpers.ExtractDataApi(res, &items); err == nil {
-			return items, nil
-		}
-
-		var item models.HistorialSolicitud
-		if err := helpers.ExtractDataApi(res, &item); err != nil {
-			return nil, err
-		}
-
-		if item.Id == 0 {
-			return []models.HistorialSolicitud{}, nil
-		}
-
-		return []models.HistorialSolicitud{item}, nil
+func decodeHistorialSolicitudResponse(res interface{}) ([]models.HistorialSolicitud, error) {
+	var items []models.HistorialSolicitud
+	if err := helpers.ExtractDataApi(res, &items); err == nil {
+		return items, nil
 	}
 
+	var item models.HistorialSolicitud
+	if err := helpers.ExtractDataApi(res, &item); err != nil {
+		return nil, err
+	}
+
+	if item.Id == 0 {
+		return []models.HistorialSolicitud{}, nil
+	}
+
+	return []models.HistorialSolicitud{item}, nil
+}
+
+func consultarHistorialSolicitudPorURL(url string) ([]models.HistorialSolicitud, error) {
+	var historialRes interface{}
+	if err := request.GetJson(url, &historialRes); err != nil {
+		return nil, err
+	}
+
+	return decodeHistorialSolicitudResponse(historialRes)
+}
+
+func obtenerEstadoSolicitudID(estado string) (int, error) {
+	codigoAbreviacion, ok := enums.ObtenerCodigoEstadoSolicitud(estado)
+	if !ok || codigoAbreviacion == "" {
+		return 0, fmt.Errorf("invalid request status code: %s", estado)
+	}
+
+	estadoSolicitud, err := ConsultarEstadoSolicitud(codigoAbreviacion)
+	if err != nil {
+		return 0, fmt.Errorf("error consulting request status for code %s: %w", estado, err)
+	}
+
+	return estadoSolicitud.Id, nil
+}
+
+func mergeHistorialUnicos(dst []models.HistorialSolicitud, src []models.HistorialSolicitud, vistos map[int]bool) []models.HistorialSolicitud {
+	for _, item := range src {
+		if !vistos[item.Id] {
+			dst = append(dst, item)
+			vistos[item.Id] = true
+		}
+	}
+
+	return dst
+}
+
+func ConsultarHistorialSolicitudIdEstadoId(historialId int, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
 	baseURL := beego.AppConfig.String("sabaticosService") +
-		"/historial_solicitud?query=Activo:true,Id:" + fmt.Sprint(historialId)
+		"historial_solicitud?query=Activo:true,Id:" + fmt.Sprint(historialId)
 
 	if len(estadosSolicitud) == 0 {
-		var historialRes interface{}
-		if err := request.GetJson(baseURL, &historialRes); err != nil {
-			return nil, err
-		}
-		return decodeHistorial(historialRes)
+		return consultarHistorialSolicitudPorURL(baseURL)
 	}
 
+	historial := make([]models.HistorialSolicitud, 0)
 	vistos := make(map[int]bool)
 
 	for _, estado := range estadosSolicitud {
-		codigoAbreviacion, ok := enums.ObtenerCodigoEstadoSolicitud(estado)
-		if !ok || codigoAbreviacion == "" {
-			return nil, fmt.Errorf("invalid request status code: %s", estado)
-		}
-
-		estadoSolicitud, errConsult := ConsultarEstadoSolicitud(codigoAbreviacion)
-		if errConsult != nil {
-			return nil, fmt.Errorf("error consulting request status for code %s: %w", estado, errConsult)
-		}
-
-		url := baseURL + ",EstadoSolicitudId.Id:" + fmt.Sprint(estadoSolicitud.Id)
-		var historialRes interface{}
-		if err := request.GetJson(url, &historialRes); err != nil {
-			return nil, err
-		}
-
-		items, err := decodeHistorial(historialRes)
+		estadoID, err := obtenerEstadoSolicitudID(estado)
 		if err != nil {
 			return nil, err
 		}
 
-		for _, item := range items {
-			if !vistos[item.Id] {
-				historial = append(historial, item)
-				vistos[item.Id] = true
-			}
+		url := baseURL + ",EstadoSolicitudId.Id:" + fmt.Sprint(estadoID)
+		items, err := consultarHistorialSolicitudPorURL(url)
+		if err != nil {
+			return nil, err
 		}
+
+		historial = mergeHistorialUnicos(historial, items, vistos)
 	}
 
 	return historial, nil
@@ -250,7 +269,7 @@ func ConsultarFormulario(id int) (*models.FormularioSolicitud, error) {
 	var formularioRes interface{}
 	var formulario models.FormularioSolicitud
 
-	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+"/formulario_solicitud/"+fmt.Sprint(id), &formularioRes); err != nil {
+	if err := request.GetJson(beego.AppConfig.String("sabaticosService")+formularioSolicitudPath+fmt.Sprint(id), &formularioRes); err != nil {
 		return nil, err
 	}
 
@@ -333,7 +352,7 @@ func RegistrarSolicitud(terceroId int, tipoSolicitudId int, sabaticoId *int) (*m
 		},
 	}
 
-	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/solicitud/", "POST", &solicitudRes, solicitud); err != nil {
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"solicitud/", "POST", &solicitudRes, solicitud); err != nil {
 		beego.Error("error registering request for third party:", err)
 		return nil, err
 	}
@@ -366,7 +385,7 @@ func RegistrarHistorialSolicitud(solicitudId int, terceroId int, justificacion s
 		},
 	}
 
-	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+historialSolicitudPath, "POST", &historicoResp, historial); err != nil {
 		beego.Error("error registering history:", err)
 	}
 
@@ -396,7 +415,7 @@ func RegistrarHistorialSolicitudEstado(solicitudId int, terceroId int, justifica
 		},
 	}
 
-	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/historial_solicitud/", "POST", &historicoResp, historial); err != nil {
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+historialSolicitudPath, "POST", &historicoResp, historial); err != nil {
 		beego.Error("Error Histórico:", err)
 	}
 
@@ -419,7 +438,7 @@ func RegistrarFormularioSolicitud(solicitudId int, contenido string) (*models.Fo
 		Activo:      true,
 	}
 
-	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/formulario_solicitud/", "POST", &formularioResp, formulario); err != nil {
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+formularioSolicitudPath, "POST", &formularioResp, formulario); err != nil {
 		beego.Error("error registering form:", err)
 	}
 
@@ -448,12 +467,12 @@ func RegistrarSoporteSolicitud(documentoId int, terceroId int, solicitudId int, 
 		RolUsuario:               rolUsuario,
 	}
 
-	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/soporte_solicitud", "POST", &soporteSolicitudRes, soporteSolicitud); err != nil {
-		return nil, fmt.Errorf("creation failed in sabaticosService /soporte_solicitud: %w", err)
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"soporte_solicitud", "POST", &soporteSolicitudRes, soporteSolicitud); err != nil {
+		return nil, fmt.Errorf("creation failed in sabaticosService soporte_solicitud: %w", err)
 	}
 
 	if err := helpers.ValidateServiceResponse(soporteSolicitudRes); err != nil {
-		return nil, fmt.Errorf("sabaticosService /soporte_solicitud returned error: %w", err)
+		return nil, fmt.Errorf("sabaticosService soporte_solicitud returned error: %w", err)
 	}
 
 	if err := helpers.ExtractDataApi(soporteSolicitudRes, &soporteSolicitudFinal); err != nil {
@@ -481,13 +500,13 @@ func ActualizarFormularioSolicitud(solicitudId int, formularioId int, contenido 
 		SolicitudId:   models.IdReference{Id: solicitudId},
 	}
 
-	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"/formulario_solicitud/"+fmt.Sprint(formularioId), "PUT", &formularioResp, formulario); err != nil {
+	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+formularioSolicitudPath+fmt.Sprint(formularioId), "PUT", &formularioResp, formulario); err != nil {
 		beego.Error("error updating form:", err)
 		return nil, err
 	}
 
 	if err := helpers.ValidateServiceResponse(formularioResp); err != nil {
-		return nil, fmt.Errorf("sabaticosService /formulario_solicitud/%d returned error: %w", formularioId, err)
+		return nil, fmt.Errorf("sabaticosService formulario_solicitud/%d returned error: %w", formularioId, err)
 	}
 
 	if err := helpers.ExtractDataApi(formularioResp, &formularioFinal); err != nil {
@@ -529,11 +548,11 @@ func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEst
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"soporte_solicitud/"+fmt.Sprint(soporteExistente.Id), "PUT", &soporteSolicitudRes, soporteSolicitud); err != nil {
-		return nil, fmt.Errorf("update failed in sabaticosService /soporte_solicitud/%d: %w", soporteId, err)
+		return nil, fmt.Errorf("update failed in sabaticosService soporte_solicitud/%d: %w", soporteId, err)
 	}
 
 	if err := helpers.ValidateServiceResponse(soporteSolicitudRes); err != nil {
-		return nil, fmt.Errorf("sabaticosService /soporte_solicitud/%d returned error: %w", soporteId, err)
+		return nil, fmt.Errorf("sabaticosService soporte_solicitud/%d returned error: %w", soporteId, err)
 	}
 
 	if err := helpers.ExtractDataApi(soporteSolicitudRes, &soporteSolicitudFinal); err != nil {
@@ -570,7 +589,7 @@ func DesactivarHistorialSolicitud(idHistorialSolicitud int) (bool, error) {
 	}
 
 	url := beego.AppConfig.String("sabaticosService") +
-		"/historial_solicitud/" + fmt.Sprint(idHistorialSolicitud)
+		historialSolicitudPath + fmt.Sprint(idHistorialSolicitud)
 
 	if err := request.SendJson(url, "PUT", &historialResp, historial); err != nil {
 		beego.Error("error updating historial_solicitud:", err)
@@ -578,7 +597,7 @@ func DesactivarHistorialSolicitud(idHistorialSolicitud int) (bool, error) {
 	}
 
 	if err := helpers.ValidateServiceResponse(historialResp); err != nil {
-		return false, fmt.Errorf("sabaticosCrudService /historial_solicitud/%d returned error: %w", idHistorialSolicitud, err)
+		return false, fmt.Errorf("sabaticosCrudService historial_solicitud/%d returned error: %w", idHistorialSolicitud, err)
 	}
 
 	if err := helpers.ExtractDataApi(historialResp, &historialFinal); err != nil {
