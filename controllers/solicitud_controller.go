@@ -20,7 +20,7 @@ type SolicitudController struct {
 
 // URLMapping ...
 func (c *SolicitudController) URLMapping() {
-	c.Mapping("aprobar-rechazar", c.Aprobar_Rechazar_solicitud)
+	c.Mapping("aprobar-rechazar", c.AprobarRechazarSolicitud)
 	c.Mapping("Post", c.Post)
 	c.Mapping("GetFormulariosByDocumentoId", c.GetFormulariosByDocumentoId)
 	c.Mapping("Radicar", c.Radicar)
@@ -65,7 +65,7 @@ func (c *SolicitudController) Post() {
 // @Success 200 {object} interface{}
 // @Failure 400 the request contains incorrect syntax
 // @router /aprobar-rechazar [post]
-func (c *SolicitudController) Aprobar_Rechazar_solicitud() {
+func (c *SolicitudController) AprobarRechazarSolicitud() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
 	var ValidarRequest models.SolicitudAprobarRechazarRequest

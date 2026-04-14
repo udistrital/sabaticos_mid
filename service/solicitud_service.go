@@ -51,7 +51,6 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 		return nil, err
 	}
 
-	// Solo retornar la solicitud si TODO fue exitoso
 	return solicitud, nil
 }
 
@@ -215,6 +214,39 @@ func desactivarRegistrosHistorial(solicitudId int) error {
 	return nil
 }
 
+func extraerFacultadFormulario(formulario models.FormularioSolicitud) (string, error) {
+	var contenidoJSON struct {
+		Docente struct {
+			Facultad string `json:"facultad"`
+		} `json:"docente"`
+	}
+
+	if err := json.Unmarshal([]byte(formulario.Contenido), &contenidoJSON); err != nil {
+		return "", fmt.Errorf("invalid json in formulario %d: %w", formulario.Id, err)
+	}
+
+	return strings.TrimSpace(contenidoJSON.Docente.Facultad), nil
+}
+
+func consultarHistorialesPorSolicitud(solicitudId int, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
+	idsHistorial, err := clients.ConsultarIdsHistorialSolicitud(solicitudId)
+	if err != nil {
+		return nil, err
+	}
+
+	historialSolicitud := make([]models.HistorialSolicitud, 0)
+	for _, idHistorial := range idsHistorial {
+		historial, err := clients.ConsultarHistorialSolicitudIdEstadoId(idHistorial, estadosSolicitud)
+		if err != nil {
+			return nil, err
+		}
+
+		historialSolicitud = append(historialSolicitud, historial...)
+	}
+
+	return historialSolicitud, nil
+}
+
 func GetFormulariosByDocumentoId(documentoId string, estadosSolicitud []string) ([]models.HistorialSolicitud, error) {
 	SecretariaAcademicaUsuario, err := clients.ConsultarSecretariaAcademicaDocumentoUserId(documentoId)
 	if err != nil {
@@ -235,43 +267,30 @@ func GetFormulariosByDocumentoId(documentoId string, estadosSolicitud []string) 
 	solicitudesProcesadas := make(map[int]bool)
 
 	for _, formulario := range formularios {
-		var contenidoJSON struct {
-			Docente struct {
-				Facultad string `json:"facultad"`
-			} `json:"docente"`
+		facultadFormulario, err := extraerFacultadFormulario(formulario)
+		if err != nil {
+			return nil, err
 		}
 
-		if err := json.Unmarshal([]byte(formulario.Contenido), &contenidoJSON); err != nil {
-			return nil, fmt.Errorf("invalid json in formulario %d: %w", formulario.Id, err)
+		if !strings.EqualFold(facultadFormulario, dependenciaUsuario) {
+			continue
 		}
 
-		facultadFormulario := strings.TrimSpace(contenidoJSON.Docente.Facultad)
-
-		if strings.EqualFold(facultadFormulario, dependenciaUsuario) {
-			solicitudId := formulario.SolicitudId.Id
-			if solicitudesProcesadas[solicitudId] {
-				continue
-			}
-
-			solicitudesProcesadas[solicitudId] = true
-
-			idsHistorial, err := clients.ConsultarIdsHistorialSolicitud(solicitudId)
-			if err != nil {
-				return nil, err
-			}
-
-			for _, idHistorial := range idsHistorial {
-				historial, err := clients.ConsultarHistorialSolicitudIdEstadoId(idHistorial, estadosSolicitud)
-				if err != nil {
-					return nil, err
-				}
-
-				historialSolicitud = append(historialSolicitud, historial...)
-			}
-
+		solicitudId := formulario.SolicitudId.Id
+		if solicitudesProcesadas[solicitudId] {
+			continue
 		}
 
+		solicitudesProcesadas[solicitudId] = true
+
+		historiales, err := consultarHistorialesPorSolicitud(solicitudId, estadosSolicitud)
+		if err != nil {
+			return nil, err
+		}
+
+		historialSolicitud = append(historialSolicitud, historiales...)
 	}
+
 	return historialSolicitud, nil
 }
 
