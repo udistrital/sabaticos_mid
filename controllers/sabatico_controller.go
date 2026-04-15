@@ -12,4 +12,5 @@ type SabaticoController struct {
 
 // URLMapping ...
 func (c *SabaticoController) URLMapping() {
+	//Se desarrollara mas adelante, por ahora solo se consulta el sabatico desde el servicio de sabaticos
 }
