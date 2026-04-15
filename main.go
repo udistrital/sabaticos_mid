@@ -23,7 +23,7 @@ func main() {
 		AllowOrigins: allowedOrigins,
 		AllowMethods: []string{"DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"},
 		AllowHeaders: []string{
-			"Origin", 
+			"Origin",
 			"x-requested-with",
 			"content-type",
 			"accept",
@@ -35,7 +35,7 @@ func main() {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
-	err :=xray.InitXRay()
+	err := xray.InitXRay()
 	if err != nil {
 		logs.Error("error configurando AWS XRay: %v", err)
 	}
