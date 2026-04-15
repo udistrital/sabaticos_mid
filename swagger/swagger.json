@@ -1,0 +1,263 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "beego Test API",
+        "description": "beego has a very cool tools to autogenerate documents for your API",
+        "version": "1.0.0",
+        "termsOfService": "http://beego.me/",
+        "contact": {
+            "email": "astaxie@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "basePath": "/v1",
+    "paths": {
+        "/solicitud/": {
+            "post": {
+                "tags": [
+                    "solicitud"
+                ],
+                "description": "create Solicitud",
+                "operationId": "SolicitudController.Create",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for Solicitud content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Solicitud"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Solicitud"
+                        }
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/solicitud/aprobar-rechazar": {
+            "post": {
+                "tags": [
+                    "solicitud"
+                ],
+                "description": "Aprueba o rechaza una solicitud creando un registro en el historial",
+                "operationId": "SolicitudController.Aprobar_Rechazar",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body para aprobar o rechazar solicitud",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/interface{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/interface{}"
+                        }
+                    },
+                    "400": {
+                        "description": "the request contains incorrect syntax"
+                    }
+                }
+            }
+        },
+        "/solicitud/formularios/{documentoId}": {
+            "get": {
+                "tags": [
+                    "solicitud"
+                ],
+                "description": "Obtener formularios por documentoId",
+                "operationId": "SolicitudController.GetFormulariosByDocumentoId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "documentoId",
+                        "description": "Identificador del usuario en front",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "query",
+                        "name": "estadoSolicitud",
+                        "description": "Estados de la solicitud (repetible)",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/interface{}"
+                        }
+                    },
+                    "400": {
+                        "description": "bad request"
+                    }
+                }
+            }
+        },
+        "/solicitud/radicar/{id}": {
+            "post": {
+                "tags": [
+                    "solicitud"
+                ],
+                "description": "Radicar una solicitud (cambiar estado y crear registros)",
+                "operationId": "SolicitudController.Radicar",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The id of the Solicitud to radicar",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body for additional data if needed",
+                        "schema": {
+                            "$ref": "#/definitions/models.SolicitudRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.SolicitudResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "404": {
+                        "description": "Solicitud not found"
+                    }
+                }
+            }
+        },
+        "/soporte_solicitud/": {
+            "post": {
+                "tags": [
+                    "soporte_solicitud"
+                ],
+                "description": "create SoporteSolicitud con múltiples documentos",
+                "operationId": "SoporteSolicitudController.Create"
+            }
+        }
+    },
+    "definitions": {
+        "5708.0xc000440360.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "5774.0xc000440390.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "6629.0xc000440690.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "interface{}": {
+            "title": "interface{}",
+            "type": "object"
+        },
+        "models.Solicitud": {
+            "title": "Solicitud",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "FechaCreacion": {
+                    "type": "string"
+                },
+                "FechaModificacion": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "SabaticoId": {
+                    "$ref": "#/definitions/5774.0xc000440390.false"
+                },
+                "TerceroId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "TipoSolicitudId": {
+                    "$ref": "#/definitions/5708.0xc000440360.false"
+                }
+            }
+        },
+        "models.SolicitudRequest": {
+            "title": "SolicitudRequest",
+            "type": "object",
+            "properties": {
+                "Formulario": {
+                    "type": "object"
+                },
+                "SabaticoId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "SolicitudId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "TerceroId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "TipoSolicitudId": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SolicitudResponse": {
+            "title": "SolicitudResponse",
+            "type": "object",
+            "properties": {
+                "Solicitud": {
+                    "$ref": "#/definitions/6629.0xc000440690.false"
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "solicitud",
+            "description": "SolicitudController operations for Solicitud\n@Tag Solicitud\n"
+        },
+        {
+            "name": "soporte_solicitud",
+            "description": "SoporteSolicitudController operations for SoporteSolicitud\n"
+        },
+        {
+            "name": "sabatico",
+            "description": "SabaticoController operations for Sabatico\n@Tag Sabatico\n"
+        }
+    ]
+}
