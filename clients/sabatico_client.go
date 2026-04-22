@@ -17,6 +17,7 @@ import (
 )
 
 func ConsultarSabatico(sabaticoId int) (*models.Sabatico, error) {
+	fmt.Println("--------------------- Entra a Consultar Sabatico ---------------------")
 	var sabatico models.Sabatico
 	var sabaticoRes interface{}
 
@@ -36,25 +37,29 @@ func ConsultarSabatico(sabaticoId int) (*models.Sabatico, error) {
 }
 
 func RegistrarSabatico(terceroId int, observaciones string, fechaInicio string, fechaFin string, estadoSabaticoId int) (*models.CrearSabaticoResult, error) {
+	fmt.Println("--------------------- Entra a Registrar Sabatico ---------------------")
 	crudURL := beego.AppConfig.String("sabaticosService") + "/sabatico"
 
 	payload := map[string]interface{}{
-		"TerceroId":         terceroId,
-		"Observaciones":     observaciones,
-		"FechaInicio":       fechaInicio,
-		"FechaFin":          fechaFin,
-		"Activo":            true,
-		"FechaCreacion":     time.Now().Format("2006-01-02 15:04:05"),
-		"FechaModificacion": time.Now().Format("2006-01-02 15:04:05"),
+		"Activo": true,
 		"EstadoSabaticoId": map[string]interface{}{
 			"Id": estadoSabaticoId,
 		},
+		"FechaCreacion":     time.Now().Format("2006-01-02 15:04:05"),
+		"FechaFin":          fechaFin,
+		"FechaInicio":       fechaInicio,
+		"FechaModificacion": time.Now().Format("2006-01-02 15:04:05"),
+		"Observaciones":     observaciones,
+		"TerceroId":         terceroId,
 	}
 
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return nil, fmt.Errorf("error serializando payload de sabático: %v", err)
 	}
+
+	logs.Info("payload registrar sabatico: %s", string(body))
+	logs.Info("url crud registrar sabatico: %s", crudURL)
 
 	req, err := http.NewRequest("POST", crudURL, bytes.NewBuffer(body))
 	if err != nil {

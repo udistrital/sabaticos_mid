@@ -10,6 +10,7 @@ import (
 
 func CrearSabatico(sabaticoReq models.CrearSabaticoRequest) (*models.CrearSabaticoResult, error) {
 	fmt.Println("---------- Entra a Service Crear Sabatico -------------")
+
 	terceroId := sabaticoReq.TerceroId
 	estadoSabaticoId := sabaticoReq.EstadoSabaticoId
 	observaciones := sabaticoReq.Observaciones
