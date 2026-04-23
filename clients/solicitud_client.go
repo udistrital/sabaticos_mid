@@ -298,6 +298,10 @@ func ConsultarSoporteSolicitud(documetoId int) (*models.SoporteSolicitud, error)
 
 	}
 
+	if len(soporteSolicitud) == 0 {
+		return nil, errors.New("request support not found: " + fmt.Sprint(documetoId))
+	}
+
 	if soporteSolicitud[0].Id == 0 {
 		return nil, errors.New("request support not found: " + fmt.Sprint(documetoId))
 	}
@@ -545,6 +549,7 @@ func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEst
 		SolicitudId:              models.IdReference{Id: solicitudId},
 		EstadoSoporteSolicitudId: models.IdReference{Id: estadoSoporteSolicitud.Id},
 		RolUsuario:               soporteExistente.RolUsuario,
+		TipoDocumentoId:          soporteExistente.TipoDocumentoId,
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"soporte_solicitud/"+fmt.Sprint(soporteExistente.Id), "PUT", &soporteSolicitudRes, soporteSolicitud); err != nil {
