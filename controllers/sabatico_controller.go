@@ -39,6 +39,7 @@ func (c *SabaticoController) PostCrearSabatico() {
 	}
 
 	result, err := service.CrearSabatico(
+		req.SolicitudId,
 		req.TerceroId,
 		req.Observaciones,
 		req.FechaInicio,

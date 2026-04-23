@@ -19,7 +19,6 @@ import (
 )
 
 func ConsultarSabatico(sabaticoId int) (*models.Sabatico, error) {
-	fmt.Println("--------------------- Entra a Consultar Sabatico ---------------------")
 	var sabatico models.Sabatico
 	var sabaticoRes interface{}
 
@@ -38,9 +37,20 @@ func ConsultarSabatico(sabaticoId int) (*models.Sabatico, error) {
 	return &sabatico, nil
 }
 
-func RegistrarSabatico(terceroId int, observaciones string, fechaInicio string, fechaFin string, estadoSabaticoId int) (*models.CrearSabaticoResult, error) {
-	fmt.Println("--------------------- Entra a Registrar Sabatico ---------------------")
-	crudURL := beego.AppConfig.String("sabaticosService") + "/sabatico"
+func RegistrarSabatico(solicitudId int, terceroId int, observaciones string, fechaInicio string, fechaFin string, estadoSabatico string) (*models.CrearSabaticoResult, error) {
+	crudURL := strings.TrimRight(beego.AppConfig.String("sabaticosService"), "/") + "/sabatico"
+
+	soportes, err := ConsultarSoportesSolicitud(solicitudId)
+	if err != nil {
+		return nil, fmt.Errorf("error consultando soportes de la solicitud %d: %v", solicitudId, err)
+	}
+
+	fmt.Printf("Soportes asociados a la solicitud %d: %+v\n", solicitudId, soportes)
+
+	estadoSabaticoId, err := ConsultarIdEstadoSabatico(estadoSabatico)
+	if err != nil {
+		return nil, fmt.Errorf("error consultando id de estado sabático: %v", err)
+	}
 
 	payload := map[string]interface{}{
 		"Activo": true,
@@ -95,12 +105,12 @@ func RegistrarSabatico(terceroId int, observaciones string, fechaInicio string, 
 }
 
 /*
-	Funciones auxiliares
+   Helper functions
 */
 
 /*
-ConsultarIdEstadoSabatico tiene como objetivo obtener el Id de un estado de sabático
-a partir del código de abreviación o del nombre del estado.
+ConsultarIdEstadoSabatico is intended to obtain the ID of a sabbatical status
+based on its abbreviation code or the status name.
 */
 func ConsultarIdEstadoSabatico(estado string) (int, error) {
 	var estadoSabaticoRes interface{}

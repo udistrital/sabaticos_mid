@@ -15,13 +15,20 @@ import (
 	"github.com/udistrital/sabaticos_mid/models"
 )
 
-func CrearSabatico(terceroId int, observaciones string, fechaInicio string, fechaFin string, estado string) (*models.CrearSabaticoResult, error) {
-	fmt.Println("--------------------- Entra a Registrar Sabatico ---------------------")
-
+func CrearSabatico(solicitudId int, terceroId int, observaciones string, fechaInicio string, fechaFin string, estado string) (*models.CrearSabaticoResult, error) {
 	estadoSabaticoId, err := clients.ConsultarIdEstadoSabatico(estado)
 	if err != nil {
 		return nil, fmt.Errorf("error consultando id de estado sabático: %v", err)
 	}
+
+	soportes, err := clients.ConsultarSoportesSolicitud(solicitudId)
+	if err != nil {
+		return nil, fmt.Errorf("error consultando soportes de la solicitud %d: %v", solicitudId, err)
+	}
+
+	fmt.Println("--------------------------")
+	fmt.Println("Soportes asociados a la solicitud", solicitudId, soportes)
+	fmt.Println("--------------------------")
 
 	crudURL := strings.TrimRight(beego.AppConfig.String("sabaticosService"), "/") + "/sabatico"
 
