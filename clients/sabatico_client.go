@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/helpers"
 	"github.com/udistrital/sabaticos_mid/models"
 
@@ -90,4 +92,55 @@ func RegistrarSabatico(terceroId int, observaciones string, fechaInicio string, 
 	}
 
 	return &result, nil
+}
+
+/*
+	Funciones auxiliares
+*/
+
+/*
+ConsultarIdEstadoSabatico tiene como objetivo obtener el Id de un estado de sabático
+a partir del código de abreviación o del nombre del estado.
+*/
+func ConsultarIdEstadoSabatico(estado string) (int, error) {
+	var estadoSabaticoRes interface{}
+	var estados []models.EstadoSabatico
+
+	codigo, ok := enums.ObtenerCodigoEstadoSabatico(estado)
+	if !ok {
+		codigo = strings.TrimSpace(estado)
+	}
+
+	baseURL := strings.TrimRight(beego.AppConfig.String("sabaticosService"), "/")
+	if baseURL == "" {
+		return 0, fmt.Errorf("la configuración 'sabaticosService' no está definida")
+	}
+
+	url := baseURL + "/estado_sabatico?query=Activo:true,CodigoAbreviacion:" + codigo + "&limit=1"
+
+	if err := request.GetJson(url, &estadoSabaticoRes); err != nil {
+		return 0, err
+	}
+
+	if err := helpers.ExtractDataApi(estadoSabaticoRes, &estados); err != nil {
+		return 0, err
+	}
+
+	if len(estados) == 0 {
+		url = baseURL + "/estado_sabatico?query=Activo:true,NombreEstado:" + strings.TrimSpace(estado) + "&limit=1"
+
+		if err := request.GetJson(url, &estadoSabaticoRes); err != nil {
+			return 0, err
+		}
+
+		if err := helpers.ExtractDataApi(estadoSabaticoRes, &estados); err != nil {
+			return 0, err
+		}
+	}
+
+	if len(estados) == 0 {
+		return 0, fmt.Errorf("no se encontró estado_sabatico para valor '%s'", estado)
+	}
+
+	return estados[0].Id, nil
 }

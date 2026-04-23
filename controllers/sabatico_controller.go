@@ -38,7 +38,14 @@ func (c *SabaticoController) PostCrearSabatico() {
 		return
 	}
 
-	result, err := service.CrearSabatico(req)
+	result, err := service.CrearSabatico(
+		req.TerceroId,
+		req.Observaciones,
+		req.FechaInicio,
+		req.FechaFin,
+		req.EstadoSabatico,
+	)
+
 	if err != nil {
 		c.Ctx.Output.SetStatus(http.StatusBadRequest)
 		c.Data["json"] = models.CrearSabaticoResponse{
