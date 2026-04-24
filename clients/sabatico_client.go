@@ -40,12 +40,6 @@ func ConsultarSabatico(sabaticoId int) (*models.Sabatico, error) {
 func RegistrarSabatico(solicitudId int, terceroId int, observaciones string, fechaInicio string, fechaFin string, estadoSabatico string) (*models.CrearSabaticoResult, error) {
 	crudURL := strings.TrimRight(beego.AppConfig.String("sabaticosService"), "/") + "/sabatico"
 
-	soportes, err := ConsultarSoportesSolicitud(solicitudId)
-
-	if err != nil && len(soportes) > 0 {
-		return nil, fmt.Errorf("error consultando soportes de la solicitud %d: %v", solicitudId, err)
-	}
-
 	estadoSabaticoId, err := ConsultarIdEstadoSabatico(estadoSabatico)
 	if err != nil {
 		return nil, fmt.Errorf("error consultando id de estado sabático: %v", err)
@@ -119,9 +113,6 @@ func RegistrarSabatico(solicitudId int, terceroId int, observaciones string, fec
 		)
 	}
 
-	/*
-		Extraer correctamente Data del response OAS
-	*/
 	var response interface{}
 	var result models.CrearSabaticoResult
 
