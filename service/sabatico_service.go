@@ -32,7 +32,7 @@ func CrearSabatico(
 		)
 	}
 
-	return clients.RegistrarSabatico(
+	sabaticoCreado, err := clients.RegistrarSabatico(
 		solicitudId,
 		terceroId,
 		observaciones,
@@ -40,4 +40,22 @@ func CrearSabatico(
 		fechaFin,
 		estado,
 	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = clients.AsociarSabaticoSolicitud(
+		solicitudId,
+		sabaticoCreado.Id,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error asociando sabático a solicitud: %v",
+			err,
+		)
+	}
+
+	return sabaticoCreado, nil
 }

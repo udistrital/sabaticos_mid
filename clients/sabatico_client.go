@@ -41,11 +41,10 @@ func RegistrarSabatico(solicitudId int, terceroId int, observaciones string, fec
 	crudURL := strings.TrimRight(beego.AppConfig.String("sabaticosService"), "/") + "/sabatico"
 
 	soportes, err := ConsultarSoportesSolicitud(solicitudId)
-	if err != nil {
+
+	if err != nil && len(soportes) > 0 {
 		return nil, fmt.Errorf("error consultando soportes de la solicitud %d: %v", solicitudId, err)
 	}
-
-	fmt.Printf("Soportes asociados a la solicitud %d: %+v\n", solicitudId, soportes)
 
 	estadoSabaticoId, err := ConsultarIdEstadoSabatico(estadoSabatico)
 	if err != nil {
@@ -70,36 +69,77 @@ func RegistrarSabatico(solicitudId int, terceroId int, observaciones string, fec
 		return nil, fmt.Errorf("error serializando payload de sabático: %v", err)
 	}
 
-	logs.Info("payload registrar sabatico: %s", string(body))
-	logs.Info("url crud registrar sabatico: %s", crudURL)
+	req, err := http.NewRequest(
+		"POST",
+		crudURL,
+		bytes.NewBuffer(body),
+	)
 
-	req, err := http.NewRequest("POST", crudURL, bytes.NewBuffer(body))
 	if err != nil {
-		return nil, fmt.Errorf("error creando request al CRUD: %v", err)
+		return nil, fmt.Errorf(
+			"error creando request al CRUD: %v",
+			err,
+		)
 	}
+
 	req.Header.Set("Content-Type", "application/json")
 
-	client := &http.Client{Timeout: 30 * time.Second}
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+
 	resp, err := client.Do(req)
 	if err != nil {
-		logs.Error("error consumiendo sabaticos_crud:", err)
-		return nil, fmt.Errorf("error consumiendo sabaticos_crud: %v", err)
+		logs.Error(
+			"error consumiendo sabaticos_crud:",
+			err,
+		)
+
+		return nil, fmt.Errorf(
+			"error consumiendo sabaticos_crud: %v",
+			err,
+		)
 	}
+
 	defer resp.Body.Close()
 
 	respBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error leyendo respuesta del CRUD: %v", err)
+		return nil, fmt.Errorf(
+			"error leyendo respuesta del CRUD: %v",
+			err,
+		)
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return nil, fmt.Errorf("sabaticos_crud respondió con estado %d: %s", resp.StatusCode, string(respBytes))
+		return nil, fmt.Errorf(
+			"sabaticos_crud respondió con estado %d: %s",
+			resp.StatusCode,
+			string(respBytes),
+		)
 	}
 
+	/*
+		Extraer correctamente Data del response OAS
+	*/
+	var response interface{}
 	var result models.CrearSabaticoResult
-	if err := json.Unmarshal(respBytes, &result); err != nil {
-		return nil, fmt.Errorf("error decodificando respuesta del CRUD: %v", err)
+
+	if err := json.Unmarshal(respBytes, &response); err != nil {
+		return nil, fmt.Errorf(
+			"error decodificando respuesta del CRUD: %v",
+			err,
+		)
 	}
+
+	if err := helpers.ExtractDataApi(response, &result); err != nil {
+		return nil, fmt.Errorf(
+			"error extrayendo data de respuesta CRUD: %v",
+			err,
+		)
+	}
+
+	fmt.Println("Sabatico creado:", result)
 
 	return &result, nil
 }
