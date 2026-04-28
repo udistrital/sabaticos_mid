@@ -15,6 +15,40 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/sabatico/": {
+            "post": {
+                "tags": [
+                    "sabatico"
+                ],
+                "description": "Crea un sabático consumiendo el CRUD",
+                "operationId": "SabaticoController.PostCrearSabatico",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Body para crear sabático",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CrearSabaticoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.CrearSabaticoResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "{object} models.CrearSabaticoResponse"
+                    },
+                    "500": {
+                        "description": "{object} models.CrearSabaticoResponse"
+                    }
+                }
+            }
+        },
         "/solicitud/": {
             "post": {
                 "tags": [
@@ -167,21 +201,70 @@
         }
     },
     "definitions": {
-        "5708.0xc000440360.false": {
+        "1666.0xc0004b8120.false": {
             "title": "false",
             "type": "object"
         },
-        "5774.0xc000440390.false": {
+        "8081.0xc0004b8e70.false": {
             "title": "false",
             "type": "object"
         },
-        "6629.0xc000440690.false": {
+        "8147.0xc0004b8ea0.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "9002.0xc0004b9110.false": {
             "title": "false",
             "type": "object"
         },
         "interface{}": {
             "title": "interface{}",
             "type": "object"
+        },
+        "models.CrearSabaticoRequest": {
+            "title": "CrearSabaticoRequest",
+            "type": "object",
+            "properties": {
+                "estado_sabatico": {
+                    "type": "string"
+                },
+                "fecha_fin": {
+                    "type": "string"
+                },
+                "fecha_inicio": {
+                    "type": "string"
+                },
+                "observaciones": {
+                    "type": "string"
+                },
+                "solicitud_id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "tercero_id": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "models.CrearSabaticoResponse": {
+            "title": "CrearSabaticoResponse",
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/1666.0xc0004b8120.false"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "success": {
+                    "type": "boolean"
+                }
+            }
         },
         "models.Solicitud": {
             "title": "Solicitud",
@@ -201,14 +284,14 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/5774.0xc000440390.false"
+                    "$ref": "#/definitions/8147.0xc0004b8ea0.false"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/5708.0xc000440360.false"
+                    "$ref": "#/definitions/8081.0xc0004b8e70.false"
                 }
             }
         },
@@ -241,7 +324,7 @@
             "type": "object",
             "properties": {
                 "Solicitud": {
-                    "$ref": "#/definitions/6629.0xc000440690.false"
+                    "$ref": "#/definitions/9002.0xc0004b9110.false"
                 }
             }
         }
@@ -254,10 +337,6 @@
         {
             "name": "soporte_solicitud",
             "description": "SoporteSolicitudController operations for SoporteSolicitud\n"
-        },
-        {
-            "name": "sabatico",
-            "description": "SabaticoController operations for Sabatico\n@Tag Sabatico\n"
         }
     ]
 }
