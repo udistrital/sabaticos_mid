@@ -21,7 +21,7 @@ type SabaticoController struct {
 // @Success 201 {object} models.CrearSabaticoResponse
 // @Failure 400 {object} models.CrearSabaticoResponse
 // @Failure 500 {object} models.CrearSabaticoResponse
-// @router /crear [post]
+// @router / [post]
 func (c *SabaticoController) PostCrearSabatico() {
 	fmt.Println("-------------- Entra al Controller ---------------")
 	var req models.CrearSabaticoRequest

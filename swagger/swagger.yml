@@ -1,8 +1,7 @@
 swagger: "2.0"
 info:
   title: beego Test API
-  description: |
-    beego has a very cool tools to autogenerate documents for your API
+  description: beego has a very cool tools to autogenerate documents for your API
   version: 1.0.0
   termsOfService: http://beego.me/
   contact:
@@ -12,13 +11,11 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
 basePath: /v1
 paths:
-  /sabatico/crear:
+  /sabatico/:
     post:
       tags:
       - sabatico
-      description: |-
-        Crea un sabático consumiendo el CRUD
-        <br>
+      description: Crea un sabático consumiendo el CRUD
       operationId: SabaticoController.PostCrearSabatico
       parameters:
       - in: body
@@ -40,9 +37,7 @@ paths:
     post:
       tags:
       - solicitud
-      description: |-
-        create Solicitud
-        <br>
+      description: create Solicitud
       operationId: SolicitudController.Create
       parameters:
       - in: body
@@ -62,9 +57,7 @@ paths:
     post:
       tags:
       - solicitud
-      description: |-
-        Aprueba o rechaza una solicitud creando un registro en el historial
-        <br>
+      description: Aprueba o rechaza una solicitud creando un registro en el historial
       operationId: SolicitudController.Aprobar_Rechazar
       parameters:
       - in: body
@@ -84,9 +77,7 @@ paths:
     get:
       tags:
       - solicitud
-      description: |-
-        Obtener formularios por documentoId
-        <br>
+      description: Obtener formularios por documentoId
       operationId: SolicitudController.GetFormulariosByDocumentoId
       parameters:
       - in: path
@@ -111,9 +102,7 @@ paths:
     post:
       tags:
       - solicitud
-      description: |-
-        Radicar una solicitud (cambiar estado y crear registros)
-        <br>
+      description: Radicar una solicitud (cambiar estado y crear registros)
       operationId: SolicitudController.Radicar
       parameters:
       - in: path
@@ -140,11 +129,21 @@ paths:
     post:
       tags:
       - soporte_solicitud
-      description: |-
-        create SoporteSolicitud con múltiples documentos
-        <br>
+      description: create SoporteSolicitud con múltiples documentos
       operationId: SoporteSolicitudController.Create
 definitions:
+  1666.0xc0004b8120.false:
+    title: "false"
+    type: object
+  8081.0xc0004b8e70.false:
+    title: "false"
+    type: object
+  8147.0xc0004b8ea0.false:
+    title: "false"
+    type: object
+  9002.0xc0004b9110.false:
+    title: "false"
+    type: object
   interface{}:
     title: interface{}
     type: object
@@ -171,7 +170,7 @@ definitions:
     type: object
     properties:
       data:
-        $ref: '#/definitions/models.interface'
+        $ref: '#/definitions/1666.0xc0004b8120.false'
       message:
         type: string
       status:
@@ -193,12 +192,12 @@ definitions:
         type: integer
         format: int64
       SabaticoId:
-        $ref: '#/definitions/models.interface'
+        $ref: '#/definitions/8147.0xc0004b8ea0.false'
       TerceroId:
         type: integer
         format: int64
       TipoSolicitudId:
-        $ref: '#/definitions/models.interface'
+        $ref: '#/definitions/8081.0xc0004b8e70.false'
   models.SolicitudRequest:
     title: SolicitudRequest
     type: object
@@ -221,10 +220,7 @@ definitions:
     type: object
     properties:
       Solicitud:
-        $ref: '#/definitions/models.interface'
-  models.interface:
-    title: interface
-    type: object
+        $ref: '#/definitions/9002.0xc0004b9110.false'
 tags:
 - name: solicitud
   description: |

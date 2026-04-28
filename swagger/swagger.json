@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "title": "beego Test API",
-        "description": "beego has a very cool tools to autogenerate documents for your API\n",
+        "description": "beego has a very cool tools to autogenerate documents for your API",
         "version": "1.0.0",
         "termsOfService": "http://beego.me/",
         "contact": {
@@ -15,12 +15,12 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/sabatico/crear": {
+        "/sabatico/": {
             "post": {
                 "tags": [
                     "sabatico"
                 ],
-                "description": "Crea un sabático consumiendo el CRUD\n\u003cbr\u003e",
+                "description": "Crea un sabático consumiendo el CRUD",
                 "operationId": "SabaticoController.PostCrearSabatico",
                 "parameters": [
                     {
@@ -54,7 +54,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "create Solicitud\n\u003cbr\u003e",
+                "description": "create Solicitud",
                 "operationId": "SolicitudController.Create",
                 "parameters": [
                     {
@@ -85,7 +85,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "Aprueba o rechaza una solicitud creando un registro en el historial\n\u003cbr\u003e",
+                "description": "Aprueba o rechaza una solicitud creando un registro en el historial",
                 "operationId": "SolicitudController.Aprobar_Rechazar",
                 "parameters": [
                     {
@@ -116,7 +116,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "Obtener formularios por documentoId\n\u003cbr\u003e",
+                "description": "Obtener formularios por documentoId",
                 "operationId": "SolicitudController.GetFormulariosByDocumentoId",
                 "parameters": [
                     {
@@ -154,7 +154,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "Radicar una solicitud (cambiar estado y crear registros)\n\u003cbr\u003e",
+                "description": "Radicar una solicitud (cambiar estado y crear registros)",
                 "operationId": "SolicitudController.Radicar",
                 "parameters": [
                     {
@@ -195,12 +195,28 @@
                 "tags": [
                     "soporte_solicitud"
                 ],
-                "description": "create SoporteSolicitud con múltiples documentos\n\u003cbr\u003e",
+                "description": "create SoporteSolicitud con múltiples documentos",
                 "operationId": "SoporteSolicitudController.Create"
             }
         }
     },
     "definitions": {
+        "1666.0xc0004b8120.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "8081.0xc0004b8e70.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "8147.0xc0004b8ea0.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "9002.0xc0004b9110.false": {
+            "title": "false",
+            "type": "object"
+        },
         "interface{}": {
             "title": "interface{}",
             "type": "object"
@@ -236,7 +252,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/models.interface"
+                    "$ref": "#/definitions/1666.0xc0004b8120.false"
                 },
                 "message": {
                     "type": "string"
@@ -268,14 +284,14 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/models.interface"
+                    "$ref": "#/definitions/8147.0xc0004b8ea0.false"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/models.interface"
+                    "$ref": "#/definitions/8081.0xc0004b8e70.false"
                 }
             }
         },
@@ -308,13 +324,9 @@
             "type": "object",
             "properties": {
                 "Solicitud": {
-                    "$ref": "#/definitions/models.interface"
+                    "$ref": "#/definitions/9002.0xc0004b9110.false"
                 }
             }
-        },
-        "models.interface": {
-            "title": "interface",
-            "type": "object"
         }
     },
     "tags": [
