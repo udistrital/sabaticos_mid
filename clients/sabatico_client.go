@@ -37,30 +37,46 @@ func ConsultarSabatico(sabaticoId int) (*models.Sabatico, error) {
 	return &sabatico, nil
 }
 
-func RegistrarSabatico(solicitudId int, terceroId int, observaciones string, fechaInicio string, fechaFin string, estadoSabatico string) (*models.CrearSabaticoResult, error) {
-	crudURL := strings.TrimRight(beego.AppConfig.String("sabaticosService"), "/") + "/sabatico"
+func RegistrarSabatico(
+	solicitudId int,
+	terceroId int,
+	observaciones string,
+	fechaInicio string,
+	fechaFin string,
+	estadoSabatico string,
+) (*models.CrearSabaticoResult, error) {
 
-	estadoSabaticoId, err := ConsultarIdEstadoSabatico(estadoSabatico)
-	if err != nil {
-		return nil, fmt.Errorf("error consultando id de estado sabático: %v", err)
-	}
+	crudURL := strings.TrimRight(
+		beego.AppConfig.String("sabaticosService"),
+		"/",
+	) + "/sabatico"
 
 	payload := map[string]interface{}{
 		"Activo": true,
-		"EstadoSabaticoId": map[string]interface{}{
-			"Id": estadoSabaticoId,
-		},
-		"FechaCreacion":     time.Now().Format("2006-01-02 15:04:05"),
-		"FechaFin":          fechaFin,
-		"FechaInicio":       fechaInicio,
-		"FechaModificacion": time.Now().Format("2006-01-02 15:04:05"),
-		"Observaciones":     observaciones,
-		"TerceroId":         terceroId,
+
+		"FechaCreacion": time.Now().Format(
+			"2006-01-02 15:04:05",
+		),
+
+		"FechaFin": fechaFin,
+
+		"FechaInicio": fechaInicio,
+
+		"FechaModificacion": time.Now().Format(
+			"2006-01-02 15:04:05",
+		),
+
+		"Observaciones": observaciones,
+
+		"TerceroId": terceroId,
 	}
 
 	body, err := json.Marshal(payload)
 	if err != nil {
-		return nil, fmt.Errorf("error serializando payload de sabático: %v", err)
+		return nil, fmt.Errorf(
+			"error serializando payload de sabático: %v",
+			err,
+		)
 	}
 
 	req, err := http.NewRequest(
@@ -84,10 +100,6 @@ func RegistrarSabatico(solicitudId int, terceroId int, observaciones string, fec
 
 	resp, err := client.Do(req)
 	if err != nil {
-		logs.Error(
-			"error consumiendo sabaticos_crud:",
-			err,
-		)
 
 		return nil, fmt.Errorf(
 			"error consumiendo sabaticos_crud: %v",
@@ -116,23 +128,126 @@ func RegistrarSabatico(solicitudId int, terceroId int, observaciones string, fec
 	var response interface{}
 	var result models.CrearSabaticoResult
 
-	if err := json.Unmarshal(respBytes, &response); err != nil {
+	if err := json.Unmarshal(
+		respBytes,
+		&response,
+	); err != nil {
+
 		return nil, fmt.Errorf(
-			"error decodificando respuesta del CRUD: %v",
+			"error decodificando respuesta CRUD: %v",
 			err,
 		)
 	}
 
-	if err := helpers.ExtractDataApi(response, &result); err != nil {
+	if err := helpers.ExtractDataApi(
+		response,
+		&result,
+	); err != nil {
+
 		return nil, fmt.Errorf(
-			"error extrayendo data de respuesta CRUD: %v",
+			"error extrayendo data CRUD: %v",
 			err,
 		)
 	}
 
-	fmt.Println("Sabatico creado:", result)
+	/*
+		Crear historial estado sabático
+	*/
+
+	estadoSabaticoId, err := ConsultarIdEstadoSabatico(
+		estadoSabatico,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error consultando id estado sabático: %v",
+			err,
+		)
+	}
+
+	_, err = CrearHistorialEstadoSabatico(
+		terceroId,
+		"Creación inicial del sabático",
+		estadoSabaticoId,
+		result.Id,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error creando historial estado sabático: %v",
+			err,
+		)
+	}
 
 	return &result, nil
+}
+
+func CrearHistorialEstadoSabatico(
+	terceroId int,
+	justificacion string,
+	estadoSabaticoId int,
+	sabaticoId int,
+) (*models.HistorialEstadoSabatico, error) {
+
+	var response interface{}
+	var historial models.HistorialEstadoSabatico
+
+	url := strings.TrimRight(
+		beego.AppConfig.String("sabaticosService"),
+		"/",
+	) + "/historial_estado_sabatico"
+
+	payload := map[string]interface{}{
+		"TerceroId":         terceroId,
+		"Justificacion":     justificacion,
+		"Activo":            true,
+		"FechaCreacion":     time.Now().Format("2006-01-02 15:04:05"),
+		"FechaModificacion": time.Now().Format("2006-01-02 15:04:05"),
+		"EstadoSabaticoId": map[string]interface{}{
+			"Id": estadoSabaticoId,
+		},
+		"SabaticoId": map[string]interface{}{
+			"Id": sabaticoId,
+		},
+	}
+
+	logs.Info(
+		"payload crear historial estado sabatico: %+v",
+		payload,
+	)
+
+	if err := request.SendJson(
+		url,
+		"POST",
+		&response,
+		payload,
+	); err != nil {
+
+		return nil, fmt.Errorf(
+			"error consumiendo historial_estado_sabatico: %v",
+			err,
+		)
+	}
+
+	if err := helpers.ValidateServiceResponse(response); err != nil {
+		return nil, fmt.Errorf(
+			"sabaticosService historial_estado_sabatico returned error: %w",
+			err,
+		)
+	}
+
+	if err := helpers.ExtractDataApi(
+		response,
+		&historial,
+	); err != nil {
+
+		return nil, fmt.Errorf(
+			"error extrayendo historial estado sabatico: %v",
+			err,
+		)
+	}
+
+	return &historial, nil
 }
 
 /*
