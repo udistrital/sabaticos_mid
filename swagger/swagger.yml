@@ -152,15 +152,17 @@ definitions:
     title: CrearSabaticoRequest
     type: object
     properties:
-      estado_sabatico_id:
-        type: integer
-        format: int64
+      estado_sabatico:
+        type: string
       fecha_fin:
         type: string
       fecha_inicio:
         type: string
       observaciones:
         type: string
+      solicitud_id:
+        type: integer
+        format: int64
       tercero_id:
         type: integer
         format: int64

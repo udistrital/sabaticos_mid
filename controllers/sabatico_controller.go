@@ -44,7 +44,6 @@ func (c *SabaticoController) PostCrearSabatico() {
 		req.Observaciones,
 		req.FechaInicio,
 		req.FechaFin,
-		req.EstadoSabatico,
 	)
 
 	if err != nil {

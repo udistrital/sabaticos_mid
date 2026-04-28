@@ -13,7 +13,6 @@ func CrearSabatico(
 	observaciones string,
 	fechaInicio string,
 	fechaFin string,
-	estado string,
 ) (*models.CrearSabaticoResult, error) {
 
 	estadoRequest := models.SolicitudAprobarRechazarRequest{
@@ -38,7 +37,7 @@ func CrearSabatico(
 		observaciones,
 		fechaInicio,
 		fechaFin,
-		estado,
+		"ES0",
 	)
 
 	if err != nil {
