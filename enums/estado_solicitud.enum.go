@@ -19,11 +19,11 @@ const (
 	// SA está verificando el checklist y documentos
 	VERIFICACION_SA EstadoSolicitud = "S3"
 
-	// SA pide subsanaciones
-	SUBSANACION_SOLICITADA EstadoSolicitud = "S4"
+	// Se pide subsanaciones por parte de la secretaría académica
+	SUBSANACION_SOLICITADA_SA EstadoSolicitud = "S4"
 
-	// Solicitud en trámite externo en Consejo de Facultad
-	TRAMITE_CONSEJO_FACULTAD EstadoSolicitud = "S5"
+	// Se pide subsanaciones por parte de la secretaría general
+	SUBSANACION_SOLICITADA_SG EstadoSolicitud = "S5"
 
 	// SA registra el acta o concepto del CF
 	RESPUESTA_CF_REGISTRADA EstadoSolicitud = "S6"
@@ -68,10 +68,10 @@ func ObtenerCodigoEstadoSolicitud(nombre string) (string, bool) {
 		return string(RECEPCIONADA_SA), true
 	case "VERIFICACION_SA", string(VERIFICACION_SA):
 		return string(VERIFICACION_SA), true
-	case "SUBSANACION_SOLICITADA", string(SUBSANACION_SOLICITADA):
-		return string(SUBSANACION_SOLICITADA), true
-	case "TRAMITE_CONSEJO_FACULTAD", string(TRAMITE_CONSEJO_FACULTAD):
-		return string(TRAMITE_CONSEJO_FACULTAD), true
+	case "SUBSANACION_SOLICITADA_SA", string(SUBSANACION_SOLICITADA_SA):
+		return string(SUBSANACION_SOLICITADA_SA), true
+	case "SUBSANACION_SOLICITADA_SG", string(SUBSANACION_SOLICITADA_SG):
+		return string(SUBSANACION_SOLICITADA_SG), true
 	case "RESPUESTA_CF_REGISTRADA", string(RESPUESTA_CF_REGISTRADA):
 		return string(RESPUESTA_CF_REGISTRADA), true
 	case "ENVIADA_SG", string(ENVIADA_SG):
