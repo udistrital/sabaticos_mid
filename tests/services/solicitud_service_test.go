@@ -143,3 +143,60 @@ func TestCambiarEstado_Error_SinSoportes(t *testing.T) {
     	t.Fatal("se esperaba error por falta de soportes")
 	}
 }
+
+// TestCambiarEstado_Error_ConsultarIdsHistorial verifica que retorne error
+// cuando falla la consulta de IDs del historial asociado a la solicitud.
+func TestCambiarEstado_Error_ConsultarIdsHistorial(t *testing.T) {
+	request := models.SolicitudAprobarRechazarRequest{
+		SolicitudId:     10,
+		EstadoSolicitud: "APROBADA",
+		EstadoSoporte:   "",
+	}
+	estadoMock := &models.EstadoSolicitud{Id: 5}
+	monkey.Patch(clients.ConsultarEstadoSolicitud, func(codigo string) (*models.EstadoSolicitud, error) {
+		return estadoMock, nil
+	})
+	defer monkey.Unpatch(clients.ConsultarEstadoSolicitud)
+	monkey.Patch(clients.ConsultarIdsHistorialSolicitud, func(solicitudId int) ([]int, error) {
+		return nil, errors.New("error consultando historiales")
+	})
+	defer monkey.Unpatch(clients.ConsultarIdsHistorialSolicitud)
+	_, err := service.CambiarEstado(request)
+	if err == nil {
+		t.Fatal("se esperaba error pero se obtuvo nil")
+	}
+}
+// TestCambiarEstado_Error_DesactivarHistorial verifica que retorne error
+// cuando falla la desactivación de un registro del historial existente.
+func TestCambiarEstado_Error_DesactivarHistorial(t *testing.T) {
+	request := models.SolicitudAprobarRechazarRequest{
+		SolicitudId:     10,
+		EstadoSolicitud: "APROBADA",
+		EstadoSoporte:   "",
+	}
+	estadoMock := &models.EstadoSolicitud{Id: 5}
+	monkey.Patch(clients.ConsultarEstadoSolicitud, func(codigo string) (*models.EstadoSolicitud, error) {
+		return estadoMock, nil
+	})
+	defer monkey.Unpatch(clients.ConsultarEstadoSolicitud)
+	monkey.Patch(clients.ConsultarIdsHistorialSolicitud, func(solicitudId int) ([]int, error) {
+		return []int{1, 2}, nil
+	})
+	defer monkey.Unpatch(clients.ConsultarIdsHistorialSolicitud)
+	desactivaciones := 0
+	monkey.Patch(clients.DesactivarHistorialSolicitud, func(idHistorial int) (bool, error) {
+		desactivaciones++
+		if desactivaciones == 2 {
+			return false, errors.New("error desactivando historial")
+		}
+		return true, nil
+	})
+	defer monkey.Unpatch(clients.DesactivarHistorialSolicitud)
+	_, err := service.CambiarEstado(request)
+	if err == nil {
+		t.Fatal("se esperaba error pero se obtuvo nil")
+	}
+	if desactivaciones != 2 {
+		t.Fatalf("se esperaban 2 intentos de desactivación, hubo %d", desactivaciones)
+	}
+}
