@@ -3,6 +3,7 @@ module github.com/udistrital/sabaticos_mid
 go 1.25.0
 
 require (
+	bou.ke/monkey v1.0.2
 	github.com/astaxie/beego v1.12.3
 	github.com/udistrital/utils_oas v0.4.3
 )
