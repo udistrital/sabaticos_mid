@@ -7,6 +7,7 @@ type TipoDocumento string
 
 const (
 	SOLCITUD_SABATICO TipoDocumento = "SOL_SAB"
+	PLAN_TRABAJO      TipoDocumento = "DOC_PT_SAB"
 )
 
 func ObtenerCodigoTipoDocumento(nombre string) (string, bool) {
