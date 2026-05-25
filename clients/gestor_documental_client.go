@@ -52,6 +52,7 @@ func ConsultarTipoDocumento(codigoAbreviacion string) (*models.TipoDocumento, er
 	if err := request.GetJson(beego.AppConfig.String("documentosService")+"tipo_documento?query=CodigoAbreviacion:"+codigoAbreviacion, &tipoDocumentoRes); err != nil {
 		return nil, err
 	}
+
 	if err := helpers.ExtractDataApi(tipoDocumentoRes, &tipoDocumento); err != nil {
 		return nil, err
 	}

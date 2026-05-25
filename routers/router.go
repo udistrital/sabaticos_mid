@@ -25,6 +25,11 @@ func init() {
 				&controllers.SoporteSolicitudController{},
 			),
 		),
+		beego.NSNamespace("/soporte_sabatico",
+			beego.NSInclude(
+				&controllers.SoporteSabaticoController{},
+			),
+		),
 		beego.NSNamespace("/sabatico",
 			beego.NSInclude(
 				&controllers.SabaticoController{},
