@@ -8,6 +8,7 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/udistrital/sabaticos_mid/clients"
+	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/models"
 	"github.com/udistrital/sabaticos_mid/service"
 )
@@ -402,7 +403,9 @@ func TestCrearSolicitud(t *testing.T) {
 			return &models.FormularioSolicitud{}, nil
 		})
 		defer monkey.Unpatch(clients.RegistrarFormularioSolicitud)
+		historialEstados := make([]string, 0, 1)
 		monkey.Patch(clients.RegistrarHistorialSolicitud, func(solicitudId int, terceroId int, justificacion string, codigoEstadoSolicitud string) (*models.HistorialSolicitud, error) {
+			historialEstados = append(historialEstados, codigoEstadoSolicitud)
 			return &models.HistorialSolicitud{}, nil
 		})
 		defer monkey.Unpatch(clients.RegistrarHistorialSolicitud)
@@ -414,8 +417,11 @@ func TestCrearSolicitud(t *testing.T) {
 		if resultado.Id != solicitudMock.Id {
 			t.Errorf("se esperaba ID %d, llegó %d", solicitudMock.Id, resultado.Id)
 		}
-		if formularioCount != 0 {
-			t.Errorf("no se esperaba creación de formulario para SUSPENSION, hubo %d", formularioCount)
+		if formularioCount != 1 {
+			t.Errorf("se esperaba creación de formulario para SUSPENSION, hubo %d", formularioCount)
+		}
+		if len(historialEstados) != 1 || historialEstados[0] != string(enums.RADICADA_ENVIADA_SA) {
+			t.Errorf("se esperaba historial con estado %s, llegó %v", enums.RADICADA_ENVIADA_SA, historialEstados)
 		}
 	})
 
@@ -473,6 +479,116 @@ func TestCrearSolicitud(t *testing.T) {
 
 		_, err := service.CrearSolicitud(req)
 		if err == nil || err.Error() != "a SUSPENSION request cannot be created after 3 months from the Sabbatical creation date" {
+			t.Fatalf("se esperaba error por ventana de 3 meses excedida, llegó: %v", err)
+		}
+	})
+
+	t.Run("Ok_SolicitudModificacionConSabaticoValido", func(t *testing.T) {
+		idSabatico := 70
+		req := models.SolicitudRequest{
+			TerceroId:       1,
+			TipoSolicitudId: "MS",
+			SabaticoId:      &idSabatico,
+			Formulario:      json.RawMessage("{}"),
+		}
+		fechaReciente := time.Now().AddDate(0, -1, 0).Format("2006-01-02 15:04:05 -0700 -0700")
+		sabaticoMock := &models.Sabatico{Id: idSabatico, FechaCreacion: fechaReciente}
+		solicitudMock := &models.Solicitud{Id: 300}
+
+		monkey.Patch(clients.ConsultarTipoSolicitud, func(codigo string) (*models.TipoSolicitud, error) {
+			return &models.TipoSolicitud{Id: 3, CodigoAbreviacion: "MS"}, nil
+		})
+		defer monkey.Unpatch(clients.ConsultarTipoSolicitud)
+		monkey.Patch(clients.ConsultarSabatico, func(id int) (*models.Sabatico, error) {
+			return sabaticoMock, nil
+		})
+		defer monkey.Unpatch(clients.ConsultarSabatico)
+		monkey.Patch(clients.RegistrarSolicitud, func(terceroId int, tipoSolicitudId int, sabaticoId *int) (*models.Solicitud, error) {
+			return solicitudMock, nil
+		})
+		defer monkey.Unpatch(clients.RegistrarSolicitud)
+		formularioCount := 0
+		monkey.Patch(clients.RegistrarFormularioSolicitud, func(solicitudId int, contenido string) (*models.FormularioSolicitud, error) {
+			formularioCount++
+			return &models.FormularioSolicitud{}, nil
+		})
+		defer monkey.Unpatch(clients.RegistrarFormularioSolicitud)
+		historialEstados := make([]string, 0, 1)
+		monkey.Patch(clients.RegistrarHistorialSolicitud, func(solicitudId int, terceroId int, justificacion string, codigoEstadoSolicitud string) (*models.HistorialSolicitud, error) {
+			historialEstados = append(historialEstados, codigoEstadoSolicitud)
+			return &models.HistorialSolicitud{}, nil
+		})
+		defer monkey.Unpatch(clients.RegistrarHistorialSolicitud)
+
+		resultado, err := service.CrearSolicitud(req)
+		if err != nil {
+			t.Fatalf("no se esperaba error, llegó: %v", err)
+		}
+		if resultado.Id != solicitudMock.Id {
+			t.Errorf("se esperaba ID %d, llegó %d", solicitudMock.Id, resultado.Id)
+		}
+		if formularioCount != 1 {
+			t.Errorf("se esperaba creación de formulario para MODIFICACION, hubo %d", formularioCount)
+		}
+		if len(historialEstados) != 1 || historialEstados[0] != string(enums.RADICADA_ENVIADA_SA) {
+			t.Errorf("se esperaba historial con estado %s, llegó %v", enums.RADICADA_ENVIADA_SA, historialEstados)
+		}
+	})
+
+	t.Run("Error_ModificacionSinSabatico", func(t *testing.T) {
+		req := models.SolicitudRequest{
+			TipoSolicitudId: "MS",
+		}
+		monkey.Patch(clients.ConsultarTipoSolicitud, func(codigo string) (*models.TipoSolicitud, error) {
+			return &models.TipoSolicitud{CodigoAbreviacion: "MS"}, nil
+		})
+		defer monkey.Unpatch(clients.ConsultarTipoSolicitud)
+
+		_, err := service.CrearSolicitud(req)
+		if err == nil || err.Error() != "a MODIFICATION request must have an associated Sabbatical" {
+			t.Fatalf("se esperaba error de validación de sabático para MODIFICACION, llegó: %v", err)
+		}
+	})
+
+	t.Run("Error_ModificacionFechaInvalida", func(t *testing.T) {
+		idSabatico := 70
+		req := models.SolicitudRequest{
+			TipoSolicitudId: "MS",
+			SabaticoId:      &idSabatico,
+		}
+		monkey.Patch(clients.ConsultarTipoSolicitud, func(codigo string) (*models.TipoSolicitud, error) {
+			return &models.TipoSolicitud{CodigoAbreviacion: "MS"}, nil
+		})
+		defer monkey.Unpatch(clients.ConsultarTipoSolicitud)
+		monkey.Patch(clients.ConsultarSabatico, func(id int) (*models.Sabatico, error) {
+			return &models.Sabatico{FechaCreacion: "fecha-mal-formada"}, nil
+		})
+		defer monkey.Unpatch(clients.ConsultarSabatico)
+
+		_, err := service.CrearSolicitud(req)
+		if err == nil || err.Error() != "invalid FechaCreacion format for the Sabbatical" {
+			t.Fatalf("se esperaba error por formato de fecha inválido, llegó: %v", err)
+		}
+	})
+
+	t.Run("Error_ModificacionFueraDeVentana", func(t *testing.T) {
+		idSabatico := 70
+		req := models.SolicitudRequest{
+			TipoSolicitudId: "MS",
+			SabaticoId:      &idSabatico,
+		}
+		fechaVieja := time.Now().AddDate(0, -6, 0).Format("2006-01-02 15:04:05 -0700 -0700")
+		monkey.Patch(clients.ConsultarTipoSolicitud, func(codigo string) (*models.TipoSolicitud, error) {
+			return &models.TipoSolicitud{CodigoAbreviacion: "MS"}, nil
+		})
+		defer monkey.Unpatch(clients.ConsultarTipoSolicitud)
+		monkey.Patch(clients.ConsultarSabatico, func(id int) (*models.Sabatico, error) {
+			return &models.Sabatico{FechaCreacion: fechaVieja}, nil
+		})
+		defer monkey.Unpatch(clients.ConsultarSabatico)
+
+		_, err := service.CrearSolicitud(req)
+		if err == nil || err.Error() != "a MODIFICATION request cannot be created after 3 months from the Sabbatical creation date" {
 			t.Fatalf("se esperaba error por ventana de 3 meses excedida, llegó: %v", err)
 		}
 	})

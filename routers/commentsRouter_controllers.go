@@ -16,6 +16,24 @@ func init() {
 			Filters:          nil,
 			Params:           nil})
 
+	beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SabaticoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SabaticoController"],
+		beego.ControllerComments{
+			Method:           "PostGuardarPlanTrabajoSabatico",
+			Router:           "/plan_trabajo",
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SabaticoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SabaticoController"],
+		beego.ControllerComments{
+			Method:           "CambiarEstadoPlanTrabajoSabatico",
+			Router:           "/plan_trabajo/estado",
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
 	beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SolicitudController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SolicitudController"],
 		beego.ControllerComments{
 			Method:           "Post",
@@ -48,6 +66,24 @@ func init() {
 			Method:           "Radicar",
 			Router:           "/radicar/:id",
 			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SoporteSabaticoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SoporteSabaticoController"],
+		beego.ControllerComments{
+			Method:           "Post",
+			Router:           "/",
+			AllowHTTPMethods: []string{"post"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SoporteSabaticoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SoporteSabaticoController"],
+		beego.ControllerComments{
+			Method:           "Get",
+			Router:           "/:sabaticoId",
+			AllowHTTPMethods: []string{"get"},
 			MethodParams:     param.Make(),
 			Filters:          nil,
 			Params:           nil})

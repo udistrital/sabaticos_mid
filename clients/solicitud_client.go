@@ -358,6 +358,10 @@ func RegistrarSolicitud(terceroId int, tipoSolicitudId int, sabaticoId *int) (*m
 		},
 	}
 
+	if sabaticoId != nil {
+		solicitud.SabaticoId = &models.IdReference{Id: *sabaticoId}
+	}
+
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"solicitud/", "POST", &solicitudRes, solicitud); err != nil {
 		beego.Error("error registering request for third party:", err)
 		return nil, err
