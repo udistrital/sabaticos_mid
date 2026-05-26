@@ -42,11 +42,22 @@ func CrearSolicitud(solicitudReq models.SolicitudRequest) (*models.Solicitud, er
 		return nil, err
 	}
 
-	// Determinar si debe crear formulario según el tipo de solicitud
-	debeCrearFormulario := tipoSolicitud.CodigoAbreviacion == string(enums.NUEVA)
+	// Determinar si debe crear formulario según el tipo de solicitud.
+	// NUEVA, SUSPENSION y MODIFICACION requieren formulario asociado.
+	debeCrearFormulario := tipoSolicitud.CodigoAbreviacion == string(enums.NUEVA) ||
+		tipoSolicitud.CodigoAbreviacion == string(enums.SUSPENSION) ||
+		tipoSolicitud.CodigoAbreviacion == string(enums.MODIFICACION)
 
-	// Crear historial y formulario en paralelo
-	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, string(formulario), string(enums.BORRADOR), debeCrearFormulario)
+	// Determinar el estado inicial según el tipo de solicitud:
+	// NUEVA nace en BORRADOR; SUSPENSION y MODIFICACION se radican
+	// automáticamente y nacen en RADICADA_ENVIADA_SA.
+	estadoInicial := enums.BORRADOR
+	if tipoSolicitud.CodigoAbreviacion == string(enums.SUSPENSION) ||
+		tipoSolicitud.CodigoAbreviacion == string(enums.MODIFICACION) {
+		estadoInicial = enums.RADICADA_ENVIADA_SA
+	}
+
+	_, _, err = registrarHistorialYFormulario(solicitud.Id, terceroId, string(formulario), string(estadoInicial), debeCrearFormulario)
 	if err != nil {
 		return nil, err
 	}
@@ -62,15 +73,25 @@ func validarSolicitudPorTipo(CodigoAbreviacion string, sabaticoId *int) error {
 		return nil
 	}
 
-	if CodigoAbreviacion != string(enums.SUSPENSION) {
+	switch CodigoAbreviacion {
+	case string(enums.SUSPENSION):
+		return validarSolicitudConSabatico(sabaticoId, "SUSPENSION")
+	case string(enums.MODIFICACION):
+		return validarSolicitudConSabatico(sabaticoId, "MODIFICATION")
+	default:
 		return nil
 	}
+}
 
+// validarSolicitudConSabatico aplica las reglas comunes a tipos de solicitud
+// que requieren un sabático asociado existente y dentro de los 3 meses desde
+// su creación (actualmente SUSPENSION y MODIFICACION). El argumento tipoLabel
+// se usa únicamente para construir mensajes de error claros para el cliente.
+func validarSolicitudConSabatico(sabaticoId *int, tipoLabel string) error {
 	if sabaticoId == nil {
-		return errors.New("a SUSPENSION request must have an associated Sabbatical")
+		return fmt.Errorf("a %s request must have an associated Sabbatical", tipoLabel)
 	}
 
-	// Consultar si el sabático existe
 	sabatico, err := clients.ConsultarSabatico(*sabaticoId)
 	if err != nil {
 		return err
@@ -84,7 +105,7 @@ func validarSolicitudPorTipo(CodigoAbreviacion string, sabaticoId *int) error {
 
 	fechaLimite := fechaCreacion.AddDate(0, 3, 0)
 	if time.Now().After(fechaLimite) {
-		return errors.New("a SUSPENSION request cannot be created after 3 months from the Sabbatical creation date")
+		return fmt.Errorf("a %s request cannot be created after 3 months from the Sabbatical creation date", tipoLabel)
 	}
 
 	return nil
