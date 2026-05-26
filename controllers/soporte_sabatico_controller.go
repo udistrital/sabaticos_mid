@@ -17,6 +17,7 @@ type SoporteSabaticoController struct {
 
 // URLMapping ...
 func (c *SoporteSabaticoController) URLMapping() {
+	c.Mapping("Get", c.Get)
 	c.Mapping("Post", c.Post)
 }
 
@@ -31,10 +32,11 @@ func (c *SoporteSabaticoController) Post() {
 	soporteSolicitudRequest.SabaticoId, _ = c.GetInt("SabaticoId")
 	soporteSolicitudRequest.RolUsuario = c.GetString("rol_usuario")
 	soporteSolicitudRequest.EstadoSoporteSabatico = c.GetString("estado_soporte_sabatico")
+	soporteSolicitudRequest.NombreArchivo = c.GetString("nombre_archivo")
 
 	// Validar campos requeridos
 	if soporteSolicitudRequest.SabaticoId == 0 ||
-		soporteSolicitudRequest.RolUsuario == "" || soporteSolicitudRequest.EstadoSoporteSabatico == "" {
+		soporteSolicitudRequest.RolUsuario == "" || soporteSolicitudRequest.EstadoSoporteSabatico == "" || soporteSolicitudRequest.NombreArchivo == "" {
 		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "fields terceroId, SabaticoId, estadoSoporteSolicitud and rolUsuario are required")
 		return
 	}
@@ -55,4 +57,24 @@ func (c *SoporteSabaticoController) Post() {
 	}
 
 	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "")
+}
+
+// Get ...
+// @Title GetBySabatico
+// @Description get SoporteSabatico records by SabaticoId
+// @router /:sabaticoId [get]
+func (c *SoporteSabaticoController) Get() {
+	sabaticoId, err := c.GetInt(":sabaticoId")
+	if err != nil || sabaticoId <= 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "sabaticoId is required and must be a positive integer")
+		return
+	}
+
+	soportes, err := service.ConsultarSoportesSabaticos(sabaticoId)
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, soportes, "")
 }

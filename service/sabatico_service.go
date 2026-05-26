@@ -177,8 +177,6 @@ func CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest models.Apr
 
 	for _, soporte := range soportesSabatico {
 		soporte.EstadoSoporteSabaticoId = models.IdReference{Id: estadoSoporteSabatico.Id}
-		fmt.Println("hello")
-		fmt.Println(soporte)
 		_, err := clients.ActualizarSoporteSabatico(soporte)
 		if err != nil {
 			return nil, err
@@ -197,6 +195,34 @@ func CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest models.Apr
 	}
 
 	return historialEstadoSabatico, nil
+}
+
+func ConsultarSoportesSabaticos(sabaticoId int) ([]map[string]interface{}, error) {
+	var response []map[string]interface{}
+	if sabaticoId <= 0 {
+		return nil, fmt.Errorf("sabaticoId is required and must be a positive integer")
+	}
+
+	SoportesSabaticos, err := clients.ConsultarSoportesSabaticos(sabaticoId)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range SoportesSabaticos {
+		gestorDocumental, err := clients.ConsultarGestorDocumental(SoportesSabaticos[i].DocumentoId)
+		if err != nil {
+			return nil, fmt.Errorf("error consulting gestor documental for support %d: %w", SoportesSabaticos[i].Id, err)
+		}
+		response = append(response, map[string]interface{}{
+			"Id":                    SoportesSabaticos[i].Id,
+			"SabaticoId":            SoportesSabaticos[i].SabaticoId,
+			"EstadoSoporteSabatico": SoportesSabaticos[i].EstadoSoporteSabaticoId,
+			"RolUsuario":            SoportesSabaticos[i].RolUsuario,
+			"Documento":             gestorDocumental,
+		})
+	}
+
+	return response, nil
 }
 
 func CrearSoporteSabatico(soporteSabaticoReq models.SoporteSabatcioRequest, file *multipart.FileHeader) (*models.SoporteSolicitudResponse, error) {
@@ -233,7 +259,7 @@ func CrearSoporteSabatico(soporteSabaticoReq models.SoporteSabatcioRequest, file
 
 	gestorGuardado, err := clients.RegistrarGestorDocumental(
 		tipoDocumento.Id,
-		archivo.Nombre,
+		soporteSabaticoReq.NombreArchivo,
 		descripcion,
 		metadatosGestor,
 		archivo.Contenido,
