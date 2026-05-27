@@ -3,6 +3,8 @@ package clients
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/udistrital/sabaticos_mid/enums"
 	"github.com/udistrital/sabaticos_mid/helpers"
@@ -298,6 +300,10 @@ func ConsultarSoporteSolicitud(documetoId int) (*models.SoporteSolicitud, error)
 
 	}
 
+	if len(soporteSolicitud) == 0 {
+		return nil, errors.New("request support not found: " + fmt.Sprint(documetoId))
+	}
+
 	if soporteSolicitud[0].Id == 0 {
 		return nil, errors.New("request support not found: " + fmt.Sprint(documetoId))
 	}
@@ -350,6 +356,10 @@ func RegistrarSolicitud(terceroId int, tipoSolicitudId int, sabaticoId *int) (*m
 		TipoSolicitudId: models.IdReference{
 			Id: tipoSolicitudId,
 		},
+	}
+
+	if sabaticoId != nil {
+		solicitud.SabaticoId = &models.IdReference{Id: *sabaticoId}
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"solicitud/", "POST", &solicitudRes, solicitud); err != nil {
@@ -545,6 +555,7 @@ func ActualizarSoporteSolicitud(soporteId int, solicitudId int, ObtenerCodigoEst
 		SolicitudId:              models.IdReference{Id: solicitudId},
 		EstadoSoporteSolicitudId: models.IdReference{Id: estadoSoporteSolicitud.Id},
 		RolUsuario:               soporteExistente.RolUsuario,
+		TipoDocumentoId:          soporteExistente.TipoDocumentoId,
 	}
 
 	if err := request.SendJson(beego.AppConfig.String("sabaticosService")+"soporte_solicitud/"+fmt.Sprint(soporteExistente.Id), "PUT", &soporteSolicitudRes, soporteSolicitud); err != nil {
@@ -610,4 +621,86 @@ func DesactivarHistorialSolicitud(idHistorialSolicitud int) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func AsociarSabaticoSolicitud(
+	solicitudId int,
+	sabaticoId int,
+) error {
+
+	var solicitudResp interface{}
+
+	/*
+		Consultar solicitud actual
+	*/
+	solicitudExistente, err := ConsultarSolicitud(solicitudId)
+	if err != nil {
+		return fmt.Errorf(
+			"error consultando solicitud %d: %v",
+			solicitudId,
+			err,
+		)
+	}
+
+	/*
+		Construir payload completo
+	*/
+	payload := map[string]interface{}{
+		"Id": solicitudExistente.Id,
+
+		"TerceroId": solicitudExistente.TerceroId,
+
+		"Activo": solicitudExistente.Activo,
+
+		"FechaCreacion": solicitudExistente.FechaCreacion,
+
+		"FechaModificacion": time.Now().Format(
+			"2006-01-02 15:04:05",
+		),
+
+		"TipoSolicitudId": map[string]interface{}{
+			"Id": solicitudExistente.TipoSolicitudId.(map[string]interface{})["Id"],
+		},
+
+		"SabaticoId": map[string]interface{}{
+			"Id": sabaticoId,
+		},
+	}
+
+	url := strings.TrimRight(
+		beego.AppConfig.String("sabaticosService"),
+		"/",
+	) + "/solicitud/" + fmt.Sprint(solicitudId)
+
+	/*
+		PUT
+	*/
+	if err := request.SendJson(
+		url,
+		"PUT",
+		&solicitudResp,
+		payload,
+	); err != nil {
+
+		return fmt.Errorf(
+			"error actualizando solicitud: %v",
+			err,
+		)
+	}
+
+	/*
+		Validar respuesta OAS
+	*/
+	if err := helpers.ValidateServiceResponse(
+		solicitudResp,
+	); err != nil {
+
+		return fmt.Errorf(
+			"sabaticosService solicitud/%d returned error: %w",
+			solicitudId,
+			err,
+		)
+	}
+
+	return nil
 }

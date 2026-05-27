@@ -11,4 +11,5 @@ type SoporteSolicitud struct {
 	SolicitudId              interface{} `json:"SolicitudId,omitempty"`
 	EstadoSoporteSolicitudId interface{} `json:"EstadoSoporteSolicitudId,omitempty"`
 	RolUsuario               string      `json:"RolUsuario,omitempty"`
+	TipoDocumentoId          int         `json:"TipoDocumentoId,omitempty"`
 }

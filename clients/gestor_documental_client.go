@@ -52,6 +52,7 @@ func ConsultarTipoDocumento(codigoAbreviacion string) (*models.TipoDocumento, er
 	if err := request.GetJson(beego.AppConfig.String("documentosService")+"tipo_documento?query=CodigoAbreviacion:"+codigoAbreviacion, &tipoDocumentoRes); err != nil {
 		return nil, err
 	}
+
 	if err := helpers.ExtractDataApi(tipoDocumentoRes, &tipoDocumento); err != nil {
 		return nil, err
 	}
@@ -62,4 +63,25 @@ func ConsultarTipoDocumento(codigoAbreviacion string) (*models.TipoDocumento, er
 
 	return &tipoDocumento[0], nil
 
+}
+
+func ConsultarGestorDocumental(documentoId int) (*models.GestorDocumental, error) {
+	var gestorDocumentalRes interface{}
+	var gestorDocumentales []models.GestorDocumental
+
+	fmt.Println(beego.AppConfig.String("documentosService") + "documento?query=Id:" + fmt.Sprint(documentoId))
+
+	if err := request.GetJson(beego.AppConfig.String("documentosService")+"documento?query=Id:"+fmt.Sprint(documentoId), &gestorDocumentalRes); err != nil {
+		return nil, fmt.Errorf("error consulting gestor documental: %w", err)
+	}
+
+	if err := helpers.ExtractDataApi(gestorDocumentalRes, &gestorDocumentales); err != nil {
+		return nil, fmt.Errorf("error extracting gestor documental data: %w", err)
+	}
+
+	if len(gestorDocumentales) == 0 {
+		return nil, fmt.Errorf("gestor documental not found for documento id: %d", documentoId)
+	}
+
+	return &gestorDocumentales[0], nil
 }

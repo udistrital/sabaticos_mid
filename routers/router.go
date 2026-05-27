@@ -20,10 +20,14 @@ func init() {
 				&controllers.SolicitudController{},
 			),
 		),
-
 		beego.NSNamespace("/soporte_solicitud",
 			beego.NSInclude(
 				&controllers.SoporteSolicitudController{},
+			),
+		),
+		beego.NSNamespace("/soporte_sabatico",
+			beego.NSInclude(
+				&controllers.SoporteSabaticoController{},
 			),
 		),
 		beego.NSNamespace("/sabatico",
