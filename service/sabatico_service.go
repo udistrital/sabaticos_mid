@@ -1,6 +1,7 @@
 package service
 
 import (
+	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"strconv"
@@ -78,20 +79,7 @@ func GuardarPlanTrabajoSabatico(
 
 	// Buscar si existe ES1
 	for _, historial := range historiales {
-
-		estado, ok :=
-			historial.EstadoSabaticoId.(map[string]interface{})
-		if !ok {
-			continue
-		}
-
-		codigo, ok :=
-			estado["CodigoAbreviacion"].(string)
-		if !ok {
-			continue
-		}
-
-		if codigo == "ES1" {
+		if historial.EstadoSabaticoId.CodigoAbreviacion == "ES1" {
 			historialCopy := historial
 			planTrabajoExistente = &historialCopy
 			break
@@ -176,15 +164,21 @@ func CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest models.Apr
 	}
 
 	for _, soporte := range soportesSabatico {
-		soporte.EstadoSoporteSabaticoId = models.IdReference{Id: estadoSoporteSabatico.Id}
+		soporte.EstadoSoporteSabaticoId = models.EstadoSabatico{Id: estadoSoporteSabatico.Id}
 		_, err := clients.ActualizarSoporteSabatico(soporte)
 		if err != nil {
 			return nil, err
 		}
 	}
 
+	if len(historialesEstadoSabatico) == 0 {
+		return nil, fmt.Errorf("no historial available to obtain terceroId for sabatico %d", cambiarEstadoPlanTrabajoRequest.SabaticoId)
+	}
+
+	terceroIdFromHistorial := historialesEstadoSabatico[0].TerceroId
+
 	historialEstadoSabatico, err := clients.CrearHistorialEstadoSabatico(
-		cambiarEstadoPlanTrabajoRequest.TerceroId,
+		terceroIdFromHistorial,
 		cambiarEstadoPlanTrabajoRequest.Justificacion,
 		estadoSabatico,
 		cambiarEstadoPlanTrabajoRequest.SabaticoId,
@@ -291,4 +285,92 @@ func CrearSoporteSabatico(soporteSabaticoReq models.SoporteSabatcioRequest, file
 
 	return respuesta, nil
 
+}
+
+func ConsultarSoportesSabaticosPorDocumentoSecretaria(documento string) ([]models.HistorialEstadoSabatico, error) {
+	response := []models.HistorialEstadoSabatico{}
+	sabaticosId := []int{}
+
+	persona, err := clients.ConsultarSecretariaAcademicaDocumentoUserId(documento)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error consulting secretaria academica for documento %s: %w",
+			documento,
+			err,
+		)
+	}
+
+	formularios, err := clients.ConsultarFormularioTipoSolicitudSabatico(enums.NUEVA)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"error consulting forms for new sabatico request: %w",
+			err,
+		)
+	}
+
+	for _, formulario := range *formularios {
+		var contenidoJSON map[string]interface{}
+
+		if err := json.Unmarshal(
+			[]byte(formulario.Contenido),
+			&contenidoJSON,
+		); err != nil {
+			return nil, fmt.Errorf(
+				"formulario %d: error parsing json content: %w",
+				formulario.Id,
+				err,
+			)
+		}
+
+		// Extraer plan_trabajo_ano_sabatico
+		planTrabajo, ok := contenidoJSON["plan_trabajo_ano_sabatico"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf(
+				"formulario %d: missing or invalid plan_trabajo_ano_sabatico structure",
+				formulario.Id,
+			)
+		}
+
+		// Extraer identificacion_docente
+		identificacionDocente, ok := planTrabajo["identificacion_docente"].(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf(
+				"formulario %d: missing or invalid identificacion_docente structure",
+				formulario.Id,
+			)
+		}
+
+		// Extraer facultad
+		facultadFormulario, ok := identificacionDocente["facultad"].(string)
+		if !ok {
+			return nil, fmt.Errorf(
+				"formulario %d: missing or invalid facultad field",
+				formulario.Id,
+			)
+		}
+
+		// Comparar facultad
+		if facultadFormulario == persona.Dependencia {
+			sabaticosId = append(
+				sabaticosId,
+				formulario.SolicitudId.SabaticoId.Id,
+			)
+		}
+	}
+
+	// Consultar soportes
+	for _, sabaticoId := range sabaticosId {
+		historial, err := clients.ConsultarporEstadoHistorialEstadoSabatico(sabaticoId, enums.EstadoSabatico(enums.REVISION_SA))
+		if err != nil {
+			return nil, fmt.Errorf(
+				"error consulting sabatico %d: %w",
+				sabaticoId,
+				err,
+			)
+		}
+
+		response = append(response, historial...)
+	}
+
+	return response, nil
 }
