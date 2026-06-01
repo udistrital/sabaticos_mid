@@ -20,6 +20,29 @@ const (
 )
 
 // Peticiones GET
+
+func ConsultarFormularioTipoSolicitudSabatico(TipoSolicitud enums.TipoSolicitud) (*[]models.FormularioSolicitud, error) {
+	var formularioRes interface{}
+	var formulario []models.FormularioSolicitud
+
+	url := beego.AppConfig.String("sabaticosService") +
+		"formulario_solicitud?query=SolicitudId.TipoSolicitudId.CodigoAbreviacion:" + string(TipoSolicitud) + ",SolicitudId.SabaticoId.Id__gt:0"
+
+	if err := request.GetJson(url, &formularioRes); err != nil {
+		return nil, err
+	}
+
+	if err := helpers.ExtractDataApi(formularioRes, &formulario); err != nil {
+		return nil, err
+	}
+
+	if len(formulario) == 0 {
+		return nil, errors.New("request form not found for tipoFormulario: " + string(TipoSolicitud))
+	}
+
+	return &formulario, nil
+}
+
 func ConsultarSolicitud(id int) (*models.Solicitud, error) {
 	var solicitudRes interface{}
 	var solicitud models.Solicitud
