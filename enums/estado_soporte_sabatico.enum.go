@@ -12,6 +12,12 @@ const (
 
 	//REVISION
 	RECIBIDO_SA EstadoSoporteSabatico = "S1"
+
+	//Aprobado
+	APROBADO_SA EstadoSoporteSabatico = "S2"
+
+	//Rechazado
+	RECHAZADO_SA EstadoSoporteSabatico = "S3"
 )
 
 func ObtenerCodigoEstadoSoporteSabatico(nombre string) (string, bool) {
@@ -26,6 +32,10 @@ func ObtenerCodigoEstadoSoporteSabatico(nombre string) (string, bool) {
 		return string(PENDIENTE_REVISION_SOPORTE), true
 	case "REVISION", string(RECIBIDO_SA):
 		return string(RECIBIDO_SA), true
+	case "APROBADO", string(APROBADO_SA):
+		return string(APROBADO_SA), true
+	case "RECHAZADO", string(RECHAZADO_SA):
+		return string(RECHAZADO_SA), true
 	default:
 		return "", false
 	}

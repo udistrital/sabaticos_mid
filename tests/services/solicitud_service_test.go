@@ -636,12 +636,12 @@ func TestGetFormulariosByDocumentoId(t *testing.T) {
 			{
 				Id:          1,
 				Contenido:   `{"docente":{"facultad":"FACULTAD_INGENIERIA"}}`,
-				SolicitudId: models.IdReference{Id: 10},
+				SolicitudId: models.SolicitudMinima{Id: 10},
 			},
 			{
 				Id:          2,
 				Contenido:   `{"docente":{"facultad":"OTRA_FACULTAD"}}`,
-				SolicitudId: models.IdReference{Id: 11},
+				SolicitudId: models.SolicitudMinima{Id: 11},
 			},
 		}
 
@@ -742,7 +742,7 @@ func TestGetFormulariosByDocumentoId(t *testing.T) {
 		defer monkey.Unpatch(clients.ConsultarSecretariaAcademicaDocumentoUserId)
 		monkey.Patch(clients.ConsultarTodosFormulariosSolicitud, func() ([]models.FormularioSolicitud, error) {
 			return []models.FormularioSolicitud{
-				{Id: 1, Contenido: `{"docente":{"facultad":"OTRA"}}`, SolicitudId: models.IdReference{Id: 10}},
+				{Id: 1, Contenido: `{"docente":{"facultad":"OTRA"}}`, SolicitudId: models.SolicitudMinima{Id: 10}},
 			}, nil
 		})
 		defer monkey.Unpatch(clients.ConsultarTodosFormulariosSolicitud)
@@ -763,8 +763,8 @@ func TestGetFormulariosByDocumentoId(t *testing.T) {
 		defer monkey.Unpatch(clients.ConsultarSecretariaAcademicaDocumentoUserId)
 		monkey.Patch(clients.ConsultarTodosFormulariosSolicitud, func() ([]models.FormularioSolicitud, error) {
 			return []models.FormularioSolicitud{
-				{Id: 1, Contenido: `{"docente":{"facultad":"INGENIERIA"}}`, SolicitudId: models.IdReference{Id: 10}},
-				{Id: 2, Contenido: `{"docente":{"facultad":"INGENIERIA"}}`, SolicitudId: models.IdReference{Id: 10}},
+				{Id: 1, Contenido: `{"docente":{"facultad":"INGENIERIA"}}`, SolicitudId: models.SolicitudMinima{Id: 10}},
+				{Id: 2, Contenido: `{"docente":{"facultad":"INGENIERIA"}}`, SolicitudId: models.SolicitudMinima{Id: 10}},
 			}, nil
 		})
 		defer monkey.Unpatch(clients.ConsultarTodosFormulariosSolicitud)
