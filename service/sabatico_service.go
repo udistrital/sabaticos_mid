@@ -3,8 +3,10 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"strconv"
+	"time"
 
 	"github.com/udistrital/sabaticos_mid/clients"
 	"github.com/udistrital/sabaticos_mid/enums"
@@ -68,7 +70,7 @@ func GuardarPlanTrabajoSabatico(
 	request models.PlanTrabajoSabaticoRequest,
 ) (*models.HistorialEstadoSabatico, error) {
 
-	historiales, err := clients.ConsultarHistorialEstadoSabatico(
+	historiales, err := clients.ConsultarTodosHistorialEstadoSabatico(
 		request.SabaticoId,
 	)
 	if err != nil {
@@ -79,7 +81,7 @@ func GuardarPlanTrabajoSabatico(
 
 	// Buscar si existe ES1
 	for _, historial := range historiales {
-		if historial.EstadoSabaticoId.CodigoAbreviacion == "ES1" {
+		if historial.EstadoSabaticoId.CodigoAbreviacion == string(enums.CARGUE_PLAN_TRABAJO) {
 			historialCopy := historial
 			planTrabajoExistente = &historialCopy
 			break
@@ -114,14 +116,16 @@ func GuardarPlanTrabajoSabatico(
 
 	// Crear nuevo ES1
 	estadoSabaticoId, err :=
-		clients.ConsultarIdEstadoSabatico("ES1")
+		clients.ConsultarIdEstadoSabatico(string(enums.CARGUE_PLAN_TRABAJO))
 	if err != nil {
 		return nil, err
 	}
 
+	terceroIdFromHistorial := historiales[0].TerceroId
+
 	planTrabajo, err :=
 		clients.CrearHistorialEstadoSabatico(
-			request.TerceroId,
+			terceroIdFromHistorial,
 			request.Justificacion,
 			estadoSabaticoId,
 			request.SabaticoId,
@@ -287,8 +291,9 @@ func CrearSoporteSabatico(soporteSabaticoReq models.SoporteSabatcioRequest, file
 
 }
 
-func ConsultarSoportesSabaticosPorDocumentoSecretaria(documento string) ([]models.HistorialEstadoSabatico, error) {
-	response := []models.HistorialEstadoSabatico{}
+func ConsultarSoportesSabaticosPorDocumentoSecretaria(documento string) ([]map[string]interface{}, error) {
+	response := []map[string]interface{}{}
+	historiales := []models.HistorialEstadoSabatico{}
 	sabaticosId := []int{}
 
 	persona, err := clients.ConsultarSecretariaAcademicaDocumentoUserId(documento)
@@ -360,7 +365,7 @@ func ConsultarSoportesSabaticosPorDocumentoSecretaria(documento string) ([]model
 
 	// Consultar soportes
 	for _, sabaticoId := range sabaticosId {
-		historial, err := clients.ConsultarporEstadoHistorialEstadoSabatico(sabaticoId, enums.EstadoSabatico(enums.REVISION_SA))
+		historialRevision, err := clients.ConsultarporEstadoHistorialEstadoSabatico(sabaticoId, enums.EstadoSabatico(enums.REVISION_SA))
 		if err != nil {
 			return nil, fmt.Errorf(
 				"error consulting sabatico %d: %w",
@@ -369,7 +374,72 @@ func ConsultarSoportesSabaticosPorDocumentoSecretaria(documento string) ([]model
 			)
 		}
 
-		response = append(response, historial...)
+		historialSocializacion, err := clients.ConsultarporEstadoHistorialEstadoSabatico(sabaticoId, enums.EstadoSabatico(enums.SOCIALIZACION_PENDIENTE))
+		if err != nil {
+			return nil, fmt.Errorf(
+				"error consulting sabatico %d: %w",
+				sabaticoId,
+				err,
+			)
+		}
+
+		historialEnEjecucion, err := clients.ConsultarporEstadoHistorialEstadoSabatico(sabaticoId, enums.EstadoSabatico(enums.EN_EJECUCION))
+		if err != nil {
+			return nil, fmt.Errorf(
+				"error consulting sabatico %d: %w",
+				sabaticoId,
+				err,
+			)
+		}
+
+		historiales = append(historiales, historialRevision...)
+		historiales = append(historiales, historialSocializacion...)
+		now := time.Now()
+		layout := "2006-01-02 15:04:05 -0700 -0700"
+
+		for _, historial := range historialEnEjecucion {
+			fechaFin, err := time.Parse(layout, historial.SabaticoId.FechaFin)
+			if err != nil {
+				log.Printf("Error parsing FechaFin %s: %v", historial.SabaticoId.FechaFin, err)
+				continue
+			}
+
+			if fechaFin.Before(now) {
+				historiales = append(historiales, historial)
+			}
+		}
+	}
+
+	tercerosCache := make(map[int]interface{})
+
+	for _, historial := range historiales {
+		tercero, exists := tercerosCache[historial.TerceroId]
+
+		if !exists {
+			var err error
+
+			tercero, err = clients.ConsultarTercero(historial.TerceroId)
+			if err != nil {
+				return nil, fmt.Errorf(
+					"error consulting tercero %d: %w",
+					historial.TerceroId,
+					err,
+				)
+			}
+
+			tercerosCache[historial.TerceroId] = tercero
+		}
+
+		response = append(response, map[string]interface{}{
+			"Id":                historial.Id,
+			"Justificacion":     historial.Justificacion,
+			"Activo":            historial.Activo,
+			"FechaCreacion":     historial.FechaCreacion,
+			"FechaModificacion": historial.FechaModificacion,
+			"EstadoSabaticoId":  historial.EstadoSabaticoId,
+			"SabaticoId":        historial.SabaticoId,
+			"Tercero":           tercero,
+		})
 	}
 
 	return response, nil

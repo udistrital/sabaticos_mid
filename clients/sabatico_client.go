@@ -98,6 +98,38 @@ func ConsultarporEstadoHistorialEstadoSabatico(sabaticoId int, estadoSabatico en
 	return historial, nil
 }
 
+func ConsultarTodosHistorialEstadoSabatico(sabaticoId int) ([]models.HistorialEstadoSabatico, error) {
+	var response interface{}
+	var historial []models.HistorialEstadoSabatico
+
+	url := strings.TrimRight(
+		beego.AppConfig.String("sabaticosService"),
+		"/",
+	) + fmt.Sprintf("/historial_estado_sabatico?query=SabaticoId.Id:%d", sabaticoId)
+
+	if err := request.GetJson(
+		url,
+		&response,
+	); err != nil {
+		return nil, fmt.Errorf(
+			"error consumiendo historial_estado_sabatico: %v",
+			err,
+		)
+	}
+
+	if err := helpers.ExtractDataApi(
+		response,
+		&historial,
+	); err != nil {
+		return nil, fmt.Errorf(
+			"error extrayendo historial estado sabatico: %v",
+			err,
+		)
+	}
+
+	return historial, nil
+}
+
 func ConsultarHistorialEstadoSabatico(sabaticoId int) ([]models.HistorialEstadoSabatico, error) {
 	var response interface{}
 	var historial []models.HistorialEstadoSabatico
