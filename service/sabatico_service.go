@@ -327,17 +327,8 @@ func ConsultarSoportesSabaticosPorDocumentoSecretaria(documento string) ([]map[s
 			)
 		}
 
-		// Extraer plan_trabajo_ano_sabatico
-		planTrabajo, ok := contenidoJSON["plan_trabajo_ano_sabatico"].(map[string]interface{})
-		if !ok {
-			return nil, fmt.Errorf(
-				"formulario %d: missing or invalid plan_trabajo_ano_sabatico structure",
-				formulario.Id,
-			)
-		}
-
 		// Extraer identificacion_docente
-		identificacionDocente, ok := planTrabajo["identificacion_docente"].(map[string]interface{})
+		docente, ok := contenidoJSON["docente"].(map[string]interface{})
 		if !ok {
 			return nil, fmt.Errorf(
 				"formulario %d: missing or invalid identificacion_docente structure",
@@ -346,7 +337,7 @@ func ConsultarSoportesSabaticosPorDocumentoSecretaria(documento string) ([]map[s
 		}
 
 		// Extraer facultad
-		facultadFormulario, ok := identificacionDocente["facultad"].(string)
+		facultadFormulario, ok := docente["facultad"].(string)
 		if !ok {
 			return nil, fmt.Errorf(
 				"formulario %d: missing or invalid facultad field",
