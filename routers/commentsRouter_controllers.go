@@ -106,4 +106,13 @@ func init() {
 			Filters:          nil,
 			Params:           nil})
 
+	beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SoporteSolicitudController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sabaticos_mid/controllers:SoporteSolicitudController"],
+		beego.ControllerComments{
+			Method:           "Get",
+			Router:           "/:solicitudId",
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
 }
