@@ -38,6 +38,12 @@ func CrearSoporteSolicitud(soporteSolicitudReq models.SoporteSolicitudRequest, f
 
 	archivo := archivosBase64[0]
 
+	// Si no se envía NombreArchivo, se usa el nombre del archivo subido
+	nombreArchivo := soporteSolicitudReq.NombreArchivo
+	if nombreArchivo == "" {
+		nombreArchivo = archivo.Nombre
+	}
+
 	// Construir metadatos específicos para el gestor documental
 	metadatosGestor := map[string]interface{}{
 		"NombreArchivo": archivo.Nombre,
@@ -48,7 +54,7 @@ func CrearSoporteSolicitud(soporteSolicitudReq models.SoporteSolicitudRequest, f
 
 	gestorGuardado, err := clients.RegistrarGestorDocumental(
 		tipoDocumento.Id,
-		archivo.Nombre,
+		nombreArchivo,
 		descripcion,
 		metadatosGestor,
 		archivo.Contenido,
@@ -79,4 +85,34 @@ func CrearSoporteSolicitud(soporteSolicitudReq models.SoporteSolicitudRequest, f
 	}
 
 	return respuesta, nil
+}
+
+func ConsultarSoportesSolicitud(solicitudId int) ([]map[string]interface{}, error) {
+	var response []map[string]interface{}
+	if solicitudId <= 0 {
+		return nil, fmt.Errorf("solicitudId is required and must be a positive integer")
+	}
+
+	soportes, err := clients.ConsultarSoportesSolicitud(solicitudId)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range soportes {
+		gestorDocumental, err := clients.ConsultarGestorDocumental(soportes[i].DocumentoId)
+		if err != nil {
+			return nil, fmt.Errorf("error consulting gestor documental for support %d: %w", soportes[i].Id, err)
+		}
+		response = append(response, map[string]interface{}{
+			"Id":                     soportes[i].Id,
+			"SolicitudId":            soportes[i].SolicitudId,
+			"EstadoSoporteSolicitud": soportes[i].EstadoSoporteSolicitudId,
+			"RolUsuario":             soportes[i].RolUsuario,
+			"TerceroId":              soportes[i].TerceroId,
+			"TipoDocumentoId":        soportes[i].TipoDocumentoId,
+			"Documento":              gestorDocumental,
+		})
+	}
+
+	return response, nil
 }

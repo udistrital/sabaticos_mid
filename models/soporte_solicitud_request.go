@@ -7,5 +7,6 @@ type SoporteSolicitudRequest struct {
 	EstadoSoporteSolicitud string   `json:"estado_soporte_solicitud_id"`
 	SolicitudId            int      `json:"solicitud_id"`
 	RolUsuario             string   `json:"rol_tercero"`
+	NombreArchivo          string   `json:"nombre_archivo"`
 	Documentos             []string `json:"documentos"` // Base64 o rutas de archivos
 }
