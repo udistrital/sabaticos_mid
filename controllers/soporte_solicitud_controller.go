@@ -18,6 +18,7 @@ type SoporteSolicitudController struct {
 // URLMapping ...
 func (c *SoporteSolicitudController) URLMapping() {
 	c.Mapping("Post", c.Post)
+	c.Mapping("Get", c.Get)
 }
 
 // Post ...
@@ -33,6 +34,7 @@ func (c *SoporteSolicitudController) Post() {
 	soporteSolicitudRequest.RolUsuario = c.GetString("rol_usuario")
 	soporteSolicitudRequest.EstadoSoporteSolicitud = c.GetString("estado_soporte_solicitud")
 	soporteSolicitudRequest.TipoDocumentoId, _ = c.GetInt("tipo_documento_id")
+	soporteSolicitudRequest.NombreArchivo = c.GetString("nombre_archivo")
 
 	// Validar campos requeridos
 	if soporteSolicitudRequest.TerceroId == 0 || soporteSolicitudRequest.SolicitudId == 0 ||
@@ -57,4 +59,24 @@ func (c *SoporteSolicitudController) Post() {
 	}
 
 	helpers.JSONResponse(&c.Controller, true, http.StatusOK, respuesta, "")
+}
+
+// Get ...
+// @Title GetBySolicitud
+// @Description get SoporteSolicitud records by SolicitudId
+// @router /:solicitudId [get]
+func (c *SoporteSolicitudController) Get() {
+	solicitudId, err := c.GetInt(":solicitudId")
+	if err != nil || solicitudId <= 0 {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "solicitudId is required and must be a positive integer")
+		return
+	}
+
+	soportes, err := service.ConsultarSoportesSolicitud(solicitudId)
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, soportes, "")
 }
