@@ -66,6 +66,70 @@ func ConsultarSoportesSabaticos(sabaticoId int) ([]models.SoporteSabatico, error
 	return SoportesSabatico, nil
 }
 
+func ConsultarporEstadoHistorialEstadoSabatico(sabaticoId int, estadoSabatico enums.EstadoSabatico) ([]models.HistorialEstadoSabatico, error) {
+	var response interface{}
+	var historial []models.HistorialEstadoSabatico
+
+	url := strings.TrimRight(
+		beego.AppConfig.String("sabaticosService"),
+		"/",
+	) + fmt.Sprintf("/historial_estado_sabatico?query=SabaticoId.Id:%d,Activo:true,EstadoSabaticoId.CodigoAbreviacion:%s", sabaticoId, string(estadoSabatico))
+
+	if err := request.GetJson(
+		url,
+		&response,
+	); err != nil {
+		return nil, fmt.Errorf(
+			"error consumiendo historial_estado_sabatico: %v",
+			err,
+		)
+	}
+
+	if err := helpers.ExtractDataApi(
+		response,
+		&historial,
+	); err != nil {
+		return nil, fmt.Errorf(
+			"error extrayendo historial estado sabatico: %v",
+			err,
+		)
+	}
+
+	return historial, nil
+}
+
+func ConsultarTodosHistorialEstadoSabatico(sabaticoId int) ([]models.HistorialEstadoSabatico, error) {
+	var response interface{}
+	var historial []models.HistorialEstadoSabatico
+
+	url := strings.TrimRight(
+		beego.AppConfig.String("sabaticosService"),
+		"/",
+	) + fmt.Sprintf("/historial_estado_sabatico?query=SabaticoId.Id:%d", sabaticoId)
+
+	if err := request.GetJson(
+		url,
+		&response,
+	); err != nil {
+		return nil, fmt.Errorf(
+			"error consumiendo historial_estado_sabatico: %v",
+			err,
+		)
+	}
+
+	if err := helpers.ExtractDataApi(
+		response,
+		&historial,
+	); err != nil {
+		return nil, fmt.Errorf(
+			"error extrayendo historial estado sabatico: %v",
+			err,
+		)
+	}
+
+	return historial, nil
+}
+
 func ConsultarHistorialEstadoSabatico(sabaticoId int) ([]models.HistorialEstadoSabatico, error) {
 	var response interface{}
 	var historial []models.HistorialEstadoSabatico
@@ -429,6 +493,10 @@ func ConsultarIdEstadoSabatico(estado string) (int, error) {
 	}
 
 	url := baseURL + "/estado_sabatico?query=Activo:true,CodigoAbreviacion:" + codigo + "&limit=1"
+
+	fmt.Println("-------")
+	fmt.Println(url)
+	fmt.Println("-------")
 
 	if err := request.GetJson(url, &estadoSabaticoRes); err != nil {
 		return 0, err

@@ -10,22 +10,22 @@ const (
 	EN_EJECUCION EstadoSabatico = "ES0"
 
 	// El sabático entra en trámite de modificación del plan de trabajo
-	EN_SUBSANACION_PRODUCTO EstadoSabatico = "ES1"
+	CARGUE_PLAN_TRABAJO EstadoSabatico = "ES1"
 
-	// El sabático entra en trámite de modificación del plan de trabajo
-	MODIFICADO EstadoSabatico = "ES2"
+	// El sabático entra en revision de los secretarios
+	REVISION_SA EstadoSabatico = "ES2"
 
-	// El producto académico está siendo evaluado/revisado
-	PRODUCTO_EN_REVISION EstadoSabatico = "ES3"
+	//Socializacion Pendiente
+	SOCIALIZACION_PENDIENTE EstadoSabatico = "ES3"
 
-	// El producto ya fue aprobado para pasar a socialización
-	PENDIENTE_SOCIALIZACION EstadoSabatico = "ES4"
+	//SUBSANACION
+	SUBSANACION EstadoSabatico = "ES4"
 
-	// El sabático queda suspendido
-	SUSPENDIDO EstadoSabatico = "ES5"
+	//FINALIZADO
+	FINALIZADO EstadoSabatico = "ES5"
 
-	// El proceso de seguimiento del sabático terminó
-	FINALIZADO EstadoSabatico = "ES6"
+	//INCUMPLIMIENTO
+	INCUMPLIMIENTO EstadoSabatico = "ES6"
 )
 
 func ObtenerCodigoEstadoSabatico(nombre string) (string, bool) {
@@ -39,18 +39,16 @@ func ObtenerCodigoEstadoSabatico(nombre string) (string, bool) {
 	switch name {
 	case "EN_EJECUCION", string(EN_EJECUCION):
 		return string(EN_EJECUCION), true
-	case "EN_SUBSANACION_PRODUCTO", string(EN_SUBSANACION_PRODUCTO):
-		return string(EN_SUBSANACION_PRODUCTO), true
-	case "MODIFICADO", string(MODIFICADO):
-		return string(MODIFICADO), true
-	case "PRODUCTO_EN_REVISION", string(PRODUCTO_EN_REVISION):
-		return string(PRODUCTO_EN_REVISION), true
-	case "PENDIENTE_SOCIALIZACION", string(PENDIENTE_SOCIALIZACION):
-		return string(PENDIENTE_SOCIALIZACION), true
-	case "SUSPENDIDO", string(SUSPENDIDO):
-		return string(SUSPENDIDO), true
-	case "FINALIZADO", string(FINALIZADO):
-		return string(FINALIZADO), true
+	case "CARGUE_PLAN_TRABAJO", string(CARGUE_PLAN_TRABAJO):
+		return string(CARGUE_PLAN_TRABAJO), true
+	case "REVISION_SA", string(REVISION_SA):
+		return string(REVISION_SA), true
+	case "SOCIALIZACION_PENDIENTE", string(SOCIALIZACION_PENDIENTE):
+		return string(SOCIALIZACION_PENDIENTE), true
+	case "SUBSANACION", string(SUBSANACION):
+		return string(SUBSANACION), true
+	case "INCUMPLIMIENTO", string(INCUMPLIMIENTO):
+		return string(INCUMPLIMIENTO), true
 	default:
 		return "", false
 	}

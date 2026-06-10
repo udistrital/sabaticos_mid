@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "title": "beego Test API",
-        "description": "beego has a very cool tools to autogenerate documents for your API\n",
+        "description": "beego has a very cool tools to autogenerate documents for your API",
         "version": "1.0.0",
         "termsOfService": "http://beego.me/",
         "contact": {
@@ -20,7 +20,7 @@
                 "tags": [
                     "sabatico"
                 ],
-                "description": "Crea un sabático consumiendo el CRUD\n\u003cbr\u003e",
+                "description": "Crea un sabático consumiendo el CRUD",
                 "operationId": "SabaticoController.PostCrearSabatico",
                 "parameters": [
                     {
@@ -49,12 +49,89 @@
                 }
             }
         },
+        "/sabatico/plan_trabajo": {
+            "post": {
+                "tags": [
+                    "sabatico"
+                ],
+                "description": "Actualiza el plan de trabajo sabático desactivando el historial actual y creando un nuevo registro con la información actualizada",
+                "operationId": "SabaticoController.PostGuardarPlanTrabajoSabatico",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Body para actualizar el plan de trabajo sabático (descripcion e historial_estado_sabatico_id)",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.PlanTrabajoSabaticoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.HistorialEstadoSabatico"
+                        }
+                    },
+                    "400": {
+                        "description": "{object} map[string]interface{}"
+                    },
+                    "500": {
+                        "description": "{object} map[string]interface{}"
+                    }
+                }
+            }
+        },
+        "/sabatico/plan_trabajo/estado": {
+            "post": {
+                "tags": [
+                    "sabatico"
+                ],
+                "description": "Cambia el estado del plan de trabajo sabático y actualiza el estado del soporte asociado",
+                "operationId": "SabaticoController.CambiarEstadoPlanTrabajoSabatico",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "Body para cambiar el estado del plan de trabajo sabático",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.AprobarRechazarPlanTRabajoSabaticoequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/map[string]interface{}"
+                        }
+                    },
+                    "400": {
+                        "description": "{object} map[string]interface{}"
+                    },
+                    "500": {
+                        "description": "{object} map[string]interface{}"
+                    }
+                }
+            }
+        },
+        "/sabatico/sabaticos_secretaria/{documentoSecretaria}": {
+            "get": {
+                "tags": [
+                    "sabatico"
+                ],
+                "description": "get SoporteSabatico records by documentoSecretaria",
+                "operationId": "SabaticoController.GetByDocumentoSecretaria"
+            }
+        },
         "/solicitud/": {
             "post": {
                 "tags": [
                     "solicitud"
                 ],
-                "description": "create Solicitud\n\u003cbr\u003e",
+                "description": "create Solicitud",
                 "operationId": "SolicitudController.Create",
                 "parameters": [
                     {
@@ -85,7 +162,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "Aprueba o rechaza una solicitud creando un registro en el historial\n\u003cbr\u003e",
+                "description": "Aprueba o rechaza una solicitud creando un registro en el historial",
                 "operationId": "SolicitudController.Aprobar_Rechazar",
                 "parameters": [
                     {
@@ -116,7 +193,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "Obtener formularios por documentoId\n\u003cbr\u003e",
+                "description": "Obtener formularios por documentoId",
                 "operationId": "SolicitudController.GetFormulariosByDocumentoId",
                 "parameters": [
                     {
@@ -154,7 +231,7 @@
                 "tags": [
                     "solicitud"
                 ],
-                "description": "Radicar una solicitud (cambiar estado y crear registros)\n\u003cbr\u003e",
+                "description": "Radicar una solicitud (cambiar estado y crear registros)",
                 "operationId": "SolicitudController.Radicar",
                 "parameters": [
                     {
@@ -190,20 +267,85 @@
                 }
             }
         },
+        "/soporte_sabatico/": {
+            "post": {
+                "tags": [
+                    "soporte_sabatico"
+                ],
+                "description": "create SoporteSabatico con múltiples documentos",
+                "operationId": "SoporteSabaticoController.Create"
+            }
+        },
+        "/soporte_sabatico/{sabaticoId}": {
+            "get": {
+                "tags": [
+                    "soporte_sabatico"
+                ],
+                "description": "get SoporteSabatico records by SabaticoId",
+                "operationId": "SoporteSabaticoController.GetBySabatico"
+            }
+        },
         "/soporte_solicitud/": {
             "post": {
                 "tags": [
                     "soporte_solicitud"
                 ],
-                "description": "create SoporteSolicitud con múltiples documentos\n\u003cbr\u003e",
+                "description": "create SoporteSolicitud con múltiples documentos",
                 "operationId": "SoporteSolicitudController.Create"
             }
         }
     },
     "definitions": {
+        "10458.0xc00048fb00.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "1670.0xc00048e8a0.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "8284.0xc00048f650.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "9465.0xc00048f860.false": {
+            "title": "false",
+            "type": "object"
+        },
+        "9531.0xc00048f890.false": {
+            "title": "false",
+            "type": "object"
+        },
         "interface{}": {
             "title": "interface{}",
             "type": "object"
+        },
+        "map[string]interface{}": {
+            "title": "map[string]interface{}",
+            "type": "object"
+        },
+        "models.AprobarRechazarPlanTRabajoSabaticoequest": {
+            "title": "AprobarRechazarPlanTRabajoSabaticoequest",
+            "type": "object",
+            "properties": {
+                "EstadoSabatico": {
+                    "type": "string"
+                },
+                "EstadoSoporteSabatico": {
+                    "type": "string"
+                },
+                "Justificacion": {
+                    "type": "string"
+                },
+                "SabaticoId": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "TerceroId": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
         },
         "models.CrearSabaticoRequest": {
             "title": "CrearSabaticoRequest",
@@ -236,7 +378,7 @@
             "type": "object",
             "properties": {
                 "data": {
-                    "$ref": "#/definitions/models.interface"
+                    "$ref": "#/definitions/1670.0xc00048e8a0.false"
                 },
                 "message": {
                     "type": "string"
@@ -247,6 +389,105 @@
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "models.EstadoSabatico": {
+            "title": "EstadoSabatico",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "CodigoAbreviacion": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "NombreEstado": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.HistorialEstadoSabatico": {
+            "title": "HistorialEstadoSabatico",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "EstadoSabaticoId": {
+                    "$ref": "#/definitions/models.EstadoSabatico"
+                },
+                "FechaCreacion": {
+                    "type": "string"
+                },
+                "FechaModificacion": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Justificacion": {
+                    "type": "string"
+                },
+                "SabaticoId": {
+                    "$ref": "#/definitions/models.Sabatico"
+                },
+                "TerceroId": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "models.PlanTrabajoSabaticoRequest": {
+            "title": "PlanTrabajoSabaticoRequest",
+            "type": "object",
+            "properties": {
+                "Justificacion": {
+                    "type": "string"
+                },
+                "SabaticoId": {
+                    "type": "integer",
+                    "format": "int64"
+                }
+            }
+        },
+        "models.Sabatico": {
+            "title": "Sabatico",
+            "type": "object",
+            "properties": {
+                "Activo": {
+                    "type": "boolean"
+                },
+                "EstadoSabaticoId": {
+                    "$ref": "#/definitions/8284.0xc00048f650.false"
+                },
+                "FechaCreacion": {
+                    "type": "string"
+                },
+                "FechaFin": {
+                    "type": "string"
+                },
+                "FechaInicio": {
+                    "type": "string"
+                },
+                "FechaModificacion": {
+                    "type": "string"
+                },
+                "Id": {
+                    "type": "integer",
+                    "format": "int64"
+                },
+                "Observaciones": {
+                    "type": "string"
+                },
+                "TerceroId": {
+                    "type": "integer",
+                    "format": "int64"
                 }
             }
         },
@@ -268,14 +509,14 @@
                     "format": "int64"
                 },
                 "SabaticoId": {
-                    "$ref": "#/definitions/models.interface"
+                    "$ref": "#/definitions/9531.0xc00048f890.false"
                 },
                 "TerceroId": {
                     "type": "integer",
                     "format": "int64"
                 },
                 "TipoSolicitudId": {
-                    "$ref": "#/definitions/models.interface"
+                    "$ref": "#/definitions/9465.0xc00048f860.false"
                 }
             }
         },
@@ -308,13 +549,9 @@
             "type": "object",
             "properties": {
                 "Solicitud": {
-                    "$ref": "#/definitions/models.interface"
+                    "$ref": "#/definitions/10458.0xc00048fb00.false"
                 }
             }
-        },
-        "models.interface": {
-            "title": "interface",
-            "type": "object"
         }
     },
     "tags": [
@@ -324,6 +561,10 @@
         },
         {
             "name": "soporte_solicitud",
+            "description": "SoporteSolicitudController operations for SoporteSolicitud\n"
+        },
+        {
+            "name": "soporte_sabatico",
             "description": "SoporteSolicitudController operations for SoporteSolicitud\n"
         }
     ]

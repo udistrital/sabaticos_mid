@@ -136,17 +136,6 @@ func (c *SabaticoController) CambiarEstadoPlanTrabajoSabatico() {
 		return
 	}
 
-	if cambiarEstadoPlanTrabajoRequest.EstadoSoporteSabatico == "" {
-		helpers.JSONResponse(
-			&c.Controller,
-			false,
-			http.StatusBadRequest,
-			nil,
-			"The SabbaticalSupportState field is required",
-		)
-		return
-	}
-
 	result, err := service.CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest)
 	if err != nil {
 		helpers.JSONResponse(
@@ -166,4 +155,24 @@ func (c *SabaticoController) CambiarEstadoPlanTrabajoSabatico() {
 		result,
 		"Application processed successfully",
 	)
+}
+
+// Get
+// @Title GetByDocumentoSecretaria
+// @Description get SoporteSabatico records by documentoSecretaria
+// @router /sabaticos_secretaria/:documentoSecretaria [get]
+func (c *SabaticoController) GetByDSabaticosForSecretaria() {
+	documentoSecretaria := c.GetString(":documentoSecretaria")
+	if documentoSecretaria == "" {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, "documentoSecretaria is required")
+		return
+	}
+
+	formularios, err := service.ConsultarSoportesSabaticosPorDocumentoSecretaria(documentoSecretaria)
+	if err != nil {
+		helpers.JSONResponse(&c.Controller, false, http.StatusBadRequest, nil, err.Error())
+		return
+	}
+
+	helpers.JSONResponse(&c.Controller, true, http.StatusOK, formularios, "")
 }
