@@ -140,16 +140,6 @@ func GuardarPlanTrabajoSabatico(
 
 func CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest models.AprobarRechazarPlanTRabajoSabaticoequest) (*models.HistorialEstadoSabatico, error) {
 
-	estadoSoporteSabatico, err := clients.ConsultarEstadoSoporteSabatico(cambiarEstadoPlanTrabajoRequest.EstadoSoporteSabatico)
-	if err != nil {
-		return nil, err
-	}
-
-	soportesSabatico, err := clients.ConsultarSoportesSabaticos(cambiarEstadoPlanTrabajoRequest.SabaticoId)
-	if err != nil {
-		return nil, err
-	}
-
 	historialesEstadoSabatico, err := clients.ConsultarHistorialEstadoSabatico(cambiarEstadoPlanTrabajoRequest.SabaticoId)
 	if err != nil {
 		return nil, err
@@ -167,11 +157,23 @@ func CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest models.Apr
 		}
 	}
 
-	for _, soporte := range soportesSabatico {
-		soporte.EstadoSoporteSabaticoId = models.EstadoSabatico{Id: estadoSoporteSabatico.Id}
-		_, err := clients.ActualizarSoporteSabatico(soporte)
+	if cambiarEstadoPlanTrabajoRequest.EstadoSoporteSabatico != "" {
+		estadoSoporteSabatico, err := clients.ConsultarEstadoSoporteSabatico(cambiarEstadoPlanTrabajoRequest.EstadoSoporteSabatico)
 		if err != nil {
 			return nil, err
+		}
+
+		soportesSabatico, err := clients.ConsultarSoportesSabaticos(cambiarEstadoPlanTrabajoRequest.SabaticoId)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, soporte := range soportesSabatico {
+			soporte.EstadoSoporteSabaticoId = models.EstadoSabatico{Id: estadoSoporteSabatico.Id}
+			_, err := clients.ActualizarSoporteSabatico(soporte)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -320,37 +322,62 @@ func ConsultarSoportesSabaticosPorDocumentoSecretaria(documento string) ([]map[s
 			[]byte(formulario.Contenido),
 			&contenidoJSON,
 		); err != nil {
-			return nil, fmt.Errorf(
-				"formulario %d: error parsing json content: %w",
+			log.Printf(
+				"formulario %d: error parsing json content: %v",
 				formulario.Id,
 				err,
 			)
+			continue
 		}
 
-		// Extraer identificacion_docente
+		// Validar existencia de docente
 		docente, ok := contenidoJSON["docente"].(map[string]interface{})
 		if !ok {
-			return nil, fmt.Errorf(
-				"formulario %d: missing or invalid identificacion_docente structure",
+			log.Printf(
+				"formulario %d: docente no encontrado o estructura inválida",
 				formulario.Id,
 			)
+			continue
 		}
 
-		// Extraer facultad
-		facultadFormulario, ok := docente["facultad"].(string)
-		if !ok {
-			return nil, fmt.Errorf(
-				"formulario %d: missing or invalid facultad field",
+		// Extraer facultad de forma tolerante
+		var facultadFormulario string
+
+		switch facultad := docente["facultad"].(type) {
+		case string:
+			facultadFormulario = facultad
+
+		case map[string]interface{}:
+			if nombre, ok := facultad["Nombre"].(string); ok {
+				facultadFormulario = nombre
+			} else if nombre, ok := facultad["nombre"].(string); ok {
+				facultadFormulario = nombre
+			}
+
+		default:
+			log.Printf(
+				"formulario %d: facultad no encontrada o formato inválido",
 				formulario.Id,
 			)
+			continue
+		}
+
+		if facultadFormulario == "" {
+			log.Printf(
+				"formulario %d: facultad vacía",
+				formulario.Id,
+			)
+			continue
 		}
 
 		// Comparar facultad
 		if facultadFormulario == persona.Dependencia {
-			sabaticosId = append(
-				sabaticosId,
-				formulario.SolicitudId.SabaticoId.Id,
-			)
+			if formulario.SolicitudId.SabaticoId.Id > 0 {
+				sabaticosId = append(
+					sabaticosId,
+					formulario.SolicitudId.SabaticoId.Id,
+				)
+			}
 		}
 	}
 
