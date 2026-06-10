@@ -140,16 +140,6 @@ func GuardarPlanTrabajoSabatico(
 
 func CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest models.AprobarRechazarPlanTRabajoSabaticoequest) (*models.HistorialEstadoSabatico, error) {
 
-	estadoSoporteSabatico, err := clients.ConsultarEstadoSoporteSabatico(cambiarEstadoPlanTrabajoRequest.EstadoSoporteSabatico)
-	if err != nil {
-		return nil, err
-	}
-
-	soportesSabatico, err := clients.ConsultarSoportesSabaticos(cambiarEstadoPlanTrabajoRequest.SabaticoId)
-	if err != nil {
-		return nil, err
-	}
-
 	historialesEstadoSabatico, err := clients.ConsultarHistorialEstadoSabatico(cambiarEstadoPlanTrabajoRequest.SabaticoId)
 	if err != nil {
 		return nil, err
@@ -167,11 +157,23 @@ func CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest models.Apr
 		}
 	}
 
-	for _, soporte := range soportesSabatico {
-		soporte.EstadoSoporteSabaticoId = models.EstadoSabatico{Id: estadoSoporteSabatico.Id}
-		_, err := clients.ActualizarSoporteSabatico(soporte)
+	if cambiarEstadoPlanTrabajoRequest.EstadoSoporteSabatico != "" {
+		estadoSoporteSabatico, err := clients.ConsultarEstadoSoporteSabatico(cambiarEstadoPlanTrabajoRequest.EstadoSoporteSabatico)
 		if err != nil {
 			return nil, err
+		}
+
+		soportesSabatico, err := clients.ConsultarSoportesSabaticos(cambiarEstadoPlanTrabajoRequest.SabaticoId)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, soporte := range soportesSabatico {
+			soporte.EstadoSoporteSabaticoId = models.EstadoSabatico{Id: estadoSoporteSabatico.Id}
+			_, err := clients.ActualizarSoporteSabatico(soporte)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 

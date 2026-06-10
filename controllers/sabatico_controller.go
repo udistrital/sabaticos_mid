@@ -136,17 +136,6 @@ func (c *SabaticoController) CambiarEstadoPlanTrabajoSabatico() {
 		return
 	}
 
-	if cambiarEstadoPlanTrabajoRequest.EstadoSoporteSabatico == "" {
-		helpers.JSONResponse(
-			&c.Controller,
-			false,
-			http.StatusBadRequest,
-			nil,
-			"The SabbaticalSupportState field is required",
-		)
-		return
-	}
-
 	result, err := service.CambiarEstadoPlanTrabajoSabatico(cambiarEstadoPlanTrabajoRequest)
 	if err != nil {
 		helpers.JSONResponse(
