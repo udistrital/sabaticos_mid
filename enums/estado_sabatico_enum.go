@@ -26,6 +26,9 @@ const (
 
 	//INCUMPLIMIENTO
 	INCUMPLIMIENTO EstadoSabatico = "ES6"
+
+	//SUSPENDIDO
+	SUSPENDIDO EstadoSabatico = "ES7"
 )
 
 func ObtenerCodigoEstadoSabatico(nombre string) (string, bool) {
@@ -47,8 +50,12 @@ func ObtenerCodigoEstadoSabatico(nombre string) (string, bool) {
 		return string(SOCIALIZACION_PENDIENTE), true
 	case "SUBSANACION", string(SUBSANACION):
 		return string(SUBSANACION), true
+	case "FINALIZADO", string(FINALIZADO):
+		return string(FINALIZADO), true
 	case "INCUMPLIMIENTO", string(INCUMPLIMIENTO):
 		return string(INCUMPLIMIENTO), true
+	case "SUSPENDIDO", string(SUSPENDIDO):
+		return string(SUSPENDIDO), true
 	default:
 		return "", false
 	}
