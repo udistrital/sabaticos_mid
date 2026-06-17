@@ -73,7 +73,7 @@ func ConsultarporEstadoHistorialEstadoSabatico(sabaticoId int, estadoSabatico en
 	url := strings.TrimRight(
 		beego.AppConfig.String("sabaticosService"),
 		"/",
-	) + fmt.Sprintf("/historial_estado_sabatico?query=SabaticoId.Id:%d,Activo:true,EstadoSabaticoId.CodigoAbreviacion:%s", sabaticoId, string(estadoSabatico))
+	) + fmt.Sprintf("/historial_estado_sabatico?query=SabaticoId.Id:%d,Activo:true,EstadoSabaticoId.CodigoAbreviacion:%s&limit=-1", sabaticoId, string(estadoSabatico))
 
 	if err := request.GetJson(
 		url,
