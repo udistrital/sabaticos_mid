@@ -193,6 +193,12 @@ paths:
       - soporte_solicitud
       description: create SoporteSolicitud con múltiples documentos
       operationId: SoporteSolicitudController.Create
+  /soporte_solicitud/{solicitudId}:
+    get:
+      tags:
+      - soporte_solicitud
+      description: get SoporteSolicitud records by SolicitudId
+      operationId: SoporteSolicitudController.GetBySolicitud
 definitions:
   1670.0xc00048e8a0.false:
     title: "false"
