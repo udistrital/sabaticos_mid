@@ -222,3 +222,466 @@ func TestCrearSabatico(t *testing.T) {
 		}
 	})
 }
+
+func TestGuardarPlanTrabajoSabatico(t *testing.T) {
+
+	t.Run("Ok_ActualizarPlanTrabajoExistente", func(t *testing.T) {
+
+		historial := models.HistorialEstadoSabatico{
+			Id: 1,
+			EstadoSabaticoId: models.EstadoSabatico{
+				CodigoAbreviacion: "ES1",
+			},
+			Justificacion: "Anterior",
+		}
+
+		monkey.Patch(
+			clients.ConsultarTodosHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return []models.HistorialEstadoSabatico{historial}, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarTodosHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.ActualizarHistorialEstadoSabatico,
+			func(historial models.HistorialEstadoSabatico) error {
+				return nil
+			},
+		)
+		defer monkey.Unpatch(clients.ActualizarHistorialEstadoSabatico)
+
+		resp, err := service.GuardarPlanTrabajoSabatico(
+			models.PlanTrabajoSabaticoRequest{
+				SabaticoId:    1,
+				Justificacion: "Nueva Justificación",
+			},
+		)
+
+		if err != nil {
+			t.Fatalf("no se esperaba error: %v", err)
+		}
+
+		if resp.Justificacion != "Nueva Justificación" {
+			t.Fatalf("se esperaba justificación actualizada")
+		}
+	})
+
+	t.Run("Error_ActualizarHistorial", func(t *testing.T) {
+
+		historial := models.HistorialEstadoSabatico{
+			Id: 1,
+			EstadoSabaticoId: models.EstadoSabatico{
+				CodigoAbreviacion: "ES1",
+			},
+		}
+
+		monkey.Patch(
+			clients.ConsultarTodosHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return []models.HistorialEstadoSabatico{historial}, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarTodosHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.ActualizarHistorialEstadoSabatico,
+			func(historial models.HistorialEstadoSabatico) error {
+				return errors.New("error actualizando historial")
+			},
+		)
+		defer monkey.Unpatch(clients.ActualizarHistorialEstadoSabatico)
+
+		_, err := service.GuardarPlanTrabajoSabatico(
+			models.PlanTrabajoSabaticoRequest{
+				SabaticoId: 1,
+			},
+		)
+
+		if err == nil {
+			t.Fatal("se esperaba error")
+		}
+	})
+
+	t.Run("Ok_CrearNuevoPlanTrabajo", func(t *testing.T) {
+
+		historiales := []models.HistorialEstadoSabatico{
+			{
+				Id:        1,
+				TerceroId: 100,
+				Activo:    true,
+				EstadoSabaticoId: models.EstadoSabatico{
+					Id:                1,
+					CodigoAbreviacion: "ES0",
+				},
+			},
+		}
+
+		monkey.Patch(
+			clients.ConsultarTodosHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return historiales, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarTodosHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.DesactivarHistorialEstadoSabatico,
+			func(historial models.HistorialEstadoSabatico) error {
+				return nil
+			},
+		)
+		defer monkey.Unpatch(clients.DesactivarHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.ConsultarIdEstadoSabatico,
+			func(codigo string) (int, error) {
+				if codigo != "ES1" {
+					t.Fatalf("se esperaba ES1 y llegó %s", codigo)
+				}
+				return 5, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarIdEstadoSabatico)
+
+		monkey.Patch(
+			clients.CrearHistorialEstadoSabatico,
+			func(
+				terceroId int,
+				justificacion string,
+				estadoId int,
+				sabaticoId int,
+			) (*models.HistorialEstadoSabatico, error) {
+
+				if terceroId != 100 {
+					t.Fatalf("se esperaba terceroId 100 y llegó %d", terceroId)
+				}
+
+				if estadoId != 5 {
+					t.Fatalf("se esperaba estadoId 5 y llegó %d", estadoId)
+				}
+
+				if sabaticoId != 1 {
+					t.Fatalf("se esperaba sabaticoId 1 y llegó %d", sabaticoId)
+				}
+
+				return &models.HistorialEstadoSabatico{
+					Id:            99,
+					TerceroId:     terceroId,
+					Justificacion: justificacion,
+				}, nil
+			},
+		)
+		defer monkey.Unpatch(clients.CrearHistorialEstadoSabatico)
+
+		resp, err := service.GuardarPlanTrabajoSabatico(
+			models.PlanTrabajoSabaticoRequest{
+				SabaticoId:    1,
+				Justificacion: "Plan nuevo",
+			},
+		)
+
+		if err != nil {
+			t.Fatalf("no se esperaba error: %v", err)
+		}
+
+		if resp == nil {
+			t.Fatal("respuesta nil")
+		}
+
+		if resp.Id != 99 {
+			t.Fatalf("se esperaba id 99 y llegó %d", resp.Id)
+		}
+	})
+
+	t.Run("Error_ConsultarHistoriales", func(t *testing.T) {
+
+		monkey.Patch(
+			clients.ConsultarTodosHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return nil, errors.New("error")
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarTodosHistorialEstadoSabatico)
+
+		_, err := service.GuardarPlanTrabajoSabatico(
+			models.PlanTrabajoSabaticoRequest{
+				SabaticoId: 1,
+			},
+		)
+
+		if err == nil {
+			t.Fatal("se esperaba error")
+		}
+	})
+
+	t.Run("Error_DesactivarHistorial", func(t *testing.T) {
+
+		historiales := []models.HistorialEstadoSabatico{
+			{
+				Id:        1,
+				TerceroId: 100,
+				EstadoSabaticoId: models.EstadoSabatico{
+					CodigoAbreviacion: "ES0",
+				},
+			},
+		}
+
+		monkey.Patch(
+			clients.ConsultarTodosHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return historiales, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarTodosHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.DesactivarHistorialEstadoSabatico,
+			func(historial models.HistorialEstadoSabatico) error {
+				return errors.New("error")
+			},
+		)
+		defer monkey.Unpatch(clients.DesactivarHistorialEstadoSabatico)
+
+		_, err := service.GuardarPlanTrabajoSabatico(
+			models.PlanTrabajoSabaticoRequest{
+				SabaticoId: 1,
+			},
+		)
+
+		if err == nil {
+			t.Fatal("se esperaba error")
+		}
+	})
+}
+
+func TestCambiarEstadoPlanTrabajoSabatico(t *testing.T) {
+
+	t.Run("Ok_CambiarEstadoSinSoportes", func(t *testing.T) {
+
+		historiales := []models.HistorialEstadoSabatico{
+			{
+				Id:        1,
+				TerceroId: 123,
+			},
+		}
+
+		monkey.Patch(
+			clients.ConsultarHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return historiales, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.ConsultarIdEstadoSabatico,
+			func(codigo string) (int, error) {
+				return 5, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarIdEstadoSabatico)
+
+		monkey.Patch(
+			clients.DesactivarHistorialEstadoSabatico,
+			func(historial models.HistorialEstadoSabatico) error {
+				return nil
+			},
+		)
+		defer monkey.Unpatch(clients.DesactivarHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.CrearHistorialEstadoSabatico,
+			func(terceroId int, justificacion string, estadoId int, sabaticoId int) (*models.HistorialEstadoSabatico, error) {
+				return &models.HistorialEstadoSabatico{
+					Id: 10,
+				}, nil
+			},
+		)
+		defer monkey.Unpatch(clients.CrearHistorialEstadoSabatico)
+
+		resp, err := service.CambiarEstadoPlanTrabajoSabatico(
+			models.AprobarRechazarPlanTRabajoSabaticoequest{
+				SabaticoId:     1,
+				EstadoSabatico: "ES2",
+				Justificacion:  "Aprobado",
+			},
+		)
+
+		if err != nil {
+			t.Fatalf("no se esperaba error: %v", err)
+		}
+
+		if resp.Id != 10 {
+			t.Fatalf("resultado incorrecto")
+		}
+	})
+
+	t.Run("Error_SinHistoriales", func(t *testing.T) {
+
+		monkey.Patch(
+			clients.ConsultarHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return []models.HistorialEstadoSabatico{}, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.ConsultarIdEstadoSabatico,
+			func(codigo string) (int, error) {
+				return 5, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarIdEstadoSabatico)
+
+		_, err := service.CambiarEstadoPlanTrabajoSabatico(
+			models.AprobarRechazarPlanTRabajoSabaticoequest{
+				SabaticoId:     1,
+				EstadoSabatico: "ES2",
+			},
+		)
+
+		if err == nil {
+			t.Fatal("se esperaba error")
+		}
+	})
+
+	t.Run("Ok_CambiarEstadoConActualizacionSoportes", func(t *testing.T) {
+
+		historiales := []models.HistorialEstadoSabatico{
+			{
+				Id:        1,
+				TerceroId: 123,
+			},
+		}
+
+		soportes := []models.SoporteSabatico{
+			{
+				Id: 1,
+			},
+		}
+
+		monkey.Patch(clients.ConsultarHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return historiales, nil
+			})
+		defer monkey.Unpatch(clients.ConsultarHistorialEstadoSabatico)
+
+		monkey.Patch(clients.ConsultarIdEstadoSabatico,
+			func(codigo string) (int, error) {
+				return 5, nil
+			})
+		defer monkey.Unpatch(clients.ConsultarIdEstadoSabatico)
+
+		monkey.Patch(clients.DesactivarHistorialEstadoSabatico,
+			func(historial models.HistorialEstadoSabatico) error {
+				return nil
+			})
+		defer monkey.Unpatch(clients.DesactivarHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.ConsultarEstadoSoporteSabatico,
+			func(codigo string) (*models.EstadoSoporteSabatico, error) {
+				return &models.EstadoSoporteSabatico{
+					Id: 2,
+				}, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarEstadoSoporteSabatico)
+
+		monkey.Patch(clients.ConsultarSoportesSabaticos,
+			func(id int) ([]models.SoporteSabatico, error) {
+				return soportes, nil
+			})
+		defer monkey.Unpatch(clients.ConsultarSoportesSabaticos)
+
+		monkey.Patch(clients.ActualizarSoporteSabatico,
+			func(soporte models.SoporteSabatico) (*models.SoporteSabatico, error) {
+				return &soporte, nil
+			})
+		defer monkey.Unpatch(clients.ActualizarSoporteSabatico)
+
+		monkey.Patch(clients.CrearHistorialEstadoSabatico,
+			func(terceroId int, justificacion string, estadoId int, sabaticoId int) (*models.HistorialEstadoSabatico, error) {
+				return &models.HistorialEstadoSabatico{
+					Id: 20,
+				}, nil
+			})
+		defer monkey.Unpatch(clients.CrearHistorialEstadoSabatico)
+
+		_, err := service.CambiarEstadoPlanTrabajoSabatico(
+			models.AprobarRechazarPlanTRabajoSabaticoequest{
+				SabaticoId:            1,
+				EstadoSabatico:        "ES2",
+				EstadoSoporteSabatico: "SSA",
+			},
+		)
+
+		if err != nil {
+			t.Fatalf("no se esperaba error: %v", err)
+		}
+	})
+
+	t.Run("Error_ActualizarSoporteSabatico", func(t *testing.T) {
+
+		historiales := []models.HistorialEstadoSabatico{
+			{
+				Id:        1,
+				TerceroId: 123,
+			},
+		}
+
+		monkey.Patch(clients.ConsultarHistorialEstadoSabatico,
+			func(id int) ([]models.HistorialEstadoSabatico, error) {
+				return historiales, nil
+			})
+		defer monkey.Unpatch(clients.ConsultarHistorialEstadoSabatico)
+
+		monkey.Patch(clients.ConsultarIdEstadoSabatico,
+			func(codigo string) (int, error) {
+				return 5, nil
+			})
+		defer monkey.Unpatch(clients.ConsultarIdEstadoSabatico)
+
+		monkey.Patch(clients.DesactivarHistorialEstadoSabatico,
+			func(historial models.HistorialEstadoSabatico) error {
+				return nil
+			})
+		defer monkey.Unpatch(clients.DesactivarHistorialEstadoSabatico)
+
+		monkey.Patch(
+			clients.ConsultarEstadoSoporteSabatico,
+			func(codigo string) (*models.EstadoSoporteSabatico, error) {
+				return &models.EstadoSoporteSabatico{
+					Id: 2,
+				}, nil
+			},
+		)
+		defer monkey.Unpatch(clients.ConsultarEstadoSoporteSabatico)
+
+		monkey.Patch(clients.ConsultarSoportesSabaticos,
+			func(id int) ([]models.SoporteSabatico, error) {
+				return []models.SoporteSabatico{{Id: 1}}, nil
+			})
+		defer monkey.Unpatch(clients.ConsultarSoportesSabaticos)
+
+		monkey.Patch(clients.ActualizarSoporteSabatico,
+			func(soporte models.SoporteSabatico) (*models.SoporteSabatico, error) {
+				return nil, errors.New("error")
+			})
+		defer monkey.Unpatch(clients.ActualizarSoporteSabatico)
+
+		_, err := service.CambiarEstadoPlanTrabajoSabatico(
+			models.AprobarRechazarPlanTRabajoSabaticoequest{
+				SabaticoId:            1,
+				EstadoSabatico:        "ES2",
+				EstadoSoporteSabatico: "SSA",
+			},
+		)
+
+		if err == nil {
+			t.Fatal("se esperaba error")
+		}
+	})
+}
