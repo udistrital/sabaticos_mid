@@ -26,7 +26,7 @@ func ConsultarFormularioTipoSolicitudSabatico(TipoSolicitud enums.TipoSolicitud)
 	var formulario []models.FormularioSolicitud
 
 	url := beego.AppConfig.String("sabaticosService") +
-		"formulario_solicitud?query=SolicitudId.TipoSolicitudId.CodigoAbreviacion:" + string(TipoSolicitud) + ",SolicitudId.SabaticoId.Id__gt:0"
+		"formulario_solicitud?query=SolicitudId.TipoSolicitudId.CodigoAbreviacion:" + string(TipoSolicitud) + ",SolicitudId.SabaticoId.Id__gt:0&limit=-1"
 
 	if err := request.GetJson(url, &formularioRes); err != nil {
 		return nil, err

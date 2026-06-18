@@ -68,10 +68,8 @@ func ConsultaTerceroTipoTercero(terceroId int, tipoTerceroId int) (*models.Terce
 func ConsultarTercero(terceroId int) (*models.Tercero, error) {
 	var tercero models.Tercero
 
-	fmt.Println("Tercerooooo")
-	fmt.Println(beego.AppConfig.String("terceroCrudService") + fmt.Sprintf("tercero/%d", terceroId))
 	if err := request.GetJson(
-		beego.AppConfig.String("terceroCrudService")+fmt.Sprintf("tercero/%d", terceroId),
+		beego.AppConfig.String("terceroService")+fmt.Sprintf("tercero/%d", terceroId),
 		&tercero,
 	); err != nil {
 		beego.Error("Error GET tercero:", err)
